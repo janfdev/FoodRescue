@@ -72,6 +72,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phone: text("phone").notNull(),
   role: userRoleEnum("role").notNull().default("buyer"),
+  status: text("status").notNull().default("ACTIVE"), // "ACTIVE" | "SUSPENDED"
   avatarUrl: text("avatar_url"),
   storeId: text("store_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -134,6 +135,7 @@ export const surpriseBags = pgTable(
     title: text("title").notNull(),
     category: storeCategoryEnum("category").notNull(),
     description: text("description").notNull(),
+    imageUrl: text("image_url"),
     originalPrice: integer("original_price").notNull(),
     discountedPrice: integer("discounted_price").notNull(),
     quotaToday: integer("quota_today").notNull().default(10),
@@ -172,8 +174,10 @@ export const orders = pgTable(
     bagTitle: text("bag_title").notNull(),
     quantity: integer("quantity").notNull().default(1),
     unitPrice: integer("unit_price").notNull(),
+    subtotalPrice: integer("subtotal_price"),
+    adminFee: integer("admin_fee").notNull().default(1000), // Biaya layanan aplikasi Rp 1.000
     totalPrice: integer("total_price").notNull(),
-    platformFee: integer("platform_fee").notNull(),   // 12% take-rate
+    platformFee: integer("platform_fee").notNull(),   // 12% take-rate toko
     sellerEarning: integer("seller_earning").notNull(), // 88%
     status: orderStatusEnum("status").notNull().default("PENDING_PAYMENT"),
     paymentMethod: text("payment_method").notNull().default("QRIS"),
