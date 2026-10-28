@@ -878,7 +878,7 @@ export function SellerAppView() {
                         </Badge>
                         <CardTitle className="text-sm font-extrabold">{pkg.name}</CardTitle>
                         <CardDescription className="text-xs">
-                          Wadah ramah lingkungan berlogo SisaRasa & segel higienitas
+                          Wadah ramah lingkungan berlogo Rerasa & segel higienitas
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="p-4 pt-1 flex items-center justify-between">

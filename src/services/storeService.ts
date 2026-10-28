@@ -234,8 +234,11 @@ class StoreService {
     const randomPin = Math.floor(1000 + Math.random() * 9000).toString();
     const orderId = `RB-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const platformFee = Math.round(bag.discountedPrice * 0.12); // 12% take-rate
-    const sellerEarning = bag.discountedPrice - platformFee;
+    const subtotalPrice = bag.discountedPrice;
+    const adminFee = 1000; // Biaya layanan aplikasi Rp 1.000
+    const totalPrice = subtotalPrice + adminFee;
+    const platformFee = Math.round(subtotalPrice * 0.12); // 12% take-rate toko
+    const sellerEarning = subtotalPrice - platformFee;
 
     const buyerName = guestDetails?.name || this.state.currentUser.name;
     const buyerPhone = guestDetails?.phone || this.state.currentUser.phone;
@@ -251,7 +254,9 @@ class StoreService {
       bagTitle: bag.title,
       quantity: 1,
       unitPrice: bag.discountedPrice,
-      totalPrice: bag.discountedPrice,
+      subtotalPrice,
+      adminFee,
+      totalPrice,
       platformFee,
       sellerEarning,
       status: "PAID", // Simulation: instant mock payment

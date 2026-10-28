@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Store, Order, RescueBoxOrder, WithdrawalRequest, Review } from "@/types/domain";
+import { Store, Order, RescueBoxOrder, WithdrawalRequest, Review, User } from "@/types/domain";
 import { storeService } from "@/services/storeService";
+import { SEED_USERS } from "@/services/seedData";
 import { ChatModal } from "@/components/shared/ChatModal";
 import {
   Shield,
@@ -24,12 +25,21 @@ import {
   Building2,
   Check,
   X,
-  FileCheck
+  FileCheck,
+  Users,
+  Search,
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  UserCheck,
+  UserX
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -50,7 +60,7 @@ import {
   Area,
 } from "recharts";
 
-type AdminTab = "beranda" | "mitra" | "transaksi" | "keuangan" | "pengaturan";
+type AdminTab = "beranda" | "mitra" | "transaksi" | "keuangan" | "users" | "pengaturan";
 
 export function SuperAdminAppView() {
   const [activeTab, setActiveTab] = useState<AdminTab>("mitra");
@@ -61,6 +71,42 @@ export function SuperAdminAppView() {
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [metrics, setMetrics] = useState(storeService.getImpactMetrics());
+
+  // User Management State with Pagination
+  const [users, setUsers] = useState<User[]>(SEED_USERS);
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState<string>("all");
+  const [userPage, setUserPage] = useState(1);
+  const userPageSize = 5;
+
+  const handleToggleUserStatus = (userId: string) => {
+    setUsers((prev) =>
+      prev.map((u) => {
+        if (u.id === userId) {
+          const nextStatus = u.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+          return { ...u, status: nextStatus };
+        }
+        return u;
+      })
+    );
+  };
+
+  // Filtered and Paginated Users
+  const filteredUsers = users.filter((u) => {
+    const matchSearch =
+      !userSearch.trim() ||
+      u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.phone.includes(userSearch);
+    const matchRole = userRoleFilter === "all" || u.role === userRoleFilter;
+    return matchSearch && matchRole;
+  });
+
+  const totalUserPages = Math.ceil(filteredUsers.length / userPageSize) || 1;
+  const paginatedUsers = filteredUsers.slice(
+    (userPage - 1) * userPageSize,
+    userPage * userPageSize
+  );
 
   // Modal inspection states
   const [selectedKycStore, setSelectedKycStore] = useState<Store | null>(null);
@@ -200,6 +246,25 @@ export function SuperAdminAppView() {
 
             <button
               type="button"
+              onClick={() => {
+                setActiveTab("users");
+                setUserPage(1);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "users"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Users className="size-4" />
+                <span>Manajemen User</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">{users.length}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab("pengaturan")}
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
                 activeTab === "pengaturan"
@@ -213,6 +278,19 @@ export function SuperAdminAppView() {
               </div>
             </button>
           </nav>
+
+          <Separator />
+
+          {/* Clean Quick Link ke Beranda */}
+          <div className="px-1">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground p-2 rounded-xl hover:bg-muted/50 transition-colors"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Kembali ke Beranda</span>
+            </Link>
+          </div>
         </div>
 
         {/* User Card */}
@@ -397,7 +475,7 @@ export function SuperAdminAppView() {
                 Ikhtisar Platform & Dampak Sosial
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Konsolidasi perputaran pangan dan kesehatan ekosistem SisaRasa Cirebon Raya
+                Konsolidasi perputaran pangan dan kesehatan ekosistem Rerasa Cirebon Raya
               </p>
             </div>
 
@@ -538,7 +616,7 @@ export function SuperAdminAppView() {
                         Kepatuhan Box Mitra Toko
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        Rasio kepatuhan wadah resmi SisaRasa (%)
+                        Rasio kepatuhan wadah resmi Rerasa (%)
                       </CardDescription>
                     </div>
                     <Badge variant="outline" className="text-[10px] font-mono border-purple-500/40 text-purple-700">
@@ -773,7 +851,202 @@ export function SuperAdminAppView() {
           </div>
         )}
 
-        {/* 5. TAB PENGATURAN & AUDIT SENGKETA */}
+        {/* 5. TAB MANAJEMEN USER DENGAN PAGINATION (SESUAI REQUEST) */}
+        {activeTab === "users" && (
+          <div className="space-y-6 max-w-5xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-black text-foreground tracking-tight">
+                  Manajemen Pengguna Terdaftar
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Daftar akun Super Admin, Mitra Toko, dan Pelanggan Rerasa Cirebon Raya
+                </p>
+              </div>
+
+              {/* Search User */}
+              <div className="w-full sm:w-64 relative">
+                <Search className="size-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Cari nama, email, hp..."
+                  value={userSearch}
+                  onChange={(e) => {
+                    setUserSearch(e.target.value);
+                    setUserPage(1);
+                  }}
+                  className="pl-9 text-xs h-8"
+                />
+              </div>
+            </div>
+
+            {/* Filter Role Buttons */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-xs">
+              <span className="font-bold text-muted-foreground mr-1 text-[11px]">Filter Peran:</span>
+              {[
+                { id: "all", label: "Semua Akun" },
+                { id: "super_admin", label: "Super Admin" },
+                { id: "seller", label: "Mitra Toko" },
+                { id: "buyer", label: "Pelanggan" },
+              ].map((role) => (
+                <Button
+                  key={role.id}
+                  type="button"
+                  size="sm"
+                  variant={userRoleFilter === role.id ? "default" : "outline"}
+                  onClick={() => {
+                    setUserRoleFilter(role.id);
+                    setUserPage(1);
+                  }}
+                  className={`text-xs h-7 px-3 rounded-full font-semibold ${
+                    userRoleFilter === role.id
+                      ? "bg-purple-700 hover:bg-purple-800 text-white"
+                      : "text-muted-foreground border-border"
+                  }`}
+                >
+                  {role.label}
+                </Button>
+              ))}
+            </div>
+
+            {/* User Data Table */}
+            <Card className="border-border shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
+                    <tr>
+                      <th className="p-3.5 px-4">Nama & Email</th>
+                      <th className="p-3.5">Peran (Role)</th>
+                      <th className="p-3.5">No. Telepon / WA</th>
+                      <th className="p-3.5">Toko / Afiliasi</th>
+                      <th className="p-3.5">Status Akun</th>
+                      <th className="p-3.5 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {paginatedUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-8 text-center text-xs text-muted-foreground">
+                          Tidak ada pengguna yang sesuai kriteria pencarian.
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedUsers.map((u) => {
+                        const associatedStore = stores.find((s) => s.id === u.storeId);
+                        const isActive = u.status !== "SUSPENDED";
+                        return (
+                          <tr key={u.id} className="hover:bg-muted/20">
+                            <td className="p-3.5 px-4">
+                              <span className="font-extrabold text-foreground block text-sm">
+                                {u.name}
+                              </span>
+                              <span className="text-[11px] text-muted-foreground font-mono block mt-0.5">
+                                {u.email}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <Badge
+                                variant={
+                                  u.role === "super_admin"
+                                    ? "default"
+                                    : u.role === "seller"
+                                    ? "secondary"
+                                    : "outline"
+                                }
+                                className={`text-[10px] font-bold ${
+                                  u.role === "super_admin"
+                                    ? "bg-purple-700 text-white"
+                                    : u.role === "seller"
+                                    ? "bg-orange-500 text-white"
+                                    : "border-emerald-600 text-emerald-700"
+                                }`}
+                              >
+                                {u.role === "super_admin"
+                                  ? "Super Admin"
+                                  : u.role === "seller"
+                                  ? "Mitra Toko"
+                                  : "Pelanggan"}
+                              </Badge>
+                            </td>
+                            <td className="p-3.5 font-mono text-muted-foreground">
+                              {u.phone || "-"}
+                            </td>
+                            <td className="p-3.5">
+                              {associatedStore ? (
+                                <span className="font-semibold text-foreground">
+                                  {associatedStore.name}
+                                </span>
+                              ) : (
+                                <span className="text-muted-foreground text-[11px]">Personal</span>
+                              )}
+                            </td>
+                            <td className="p-3.5">
+                              <Badge
+                                variant={isActive ? "default" : "destructive"}
+                                className={`text-[10px] font-bold ${
+                                  isActive ? "bg-emerald-600 text-white" : ""
+                                }`}
+                              >
+                                {isActive ? "Aktif" : "Dibekukan"}
+                              </Badge>
+                            </td>
+                            <td className="p-3.5 text-right">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleToggleUserStatus(u.id)}
+                                className={`text-xs font-bold h-7 px-2.5 ${
+                                  isActive
+                                    ? "text-red-600 border-red-200 hover:bg-red-50"
+                                    : "text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+                                }`}
+                              >
+                                {isActive ? "Bekukan" : "Aktifkan"}
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Pagination Footer Sesuai Request */}
+              <div className="p-3.5 px-4 bg-muted/30 border-t border-border flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">
+                  Menampilkan <strong>{paginatedUsers.length}</strong> dari <strong>{filteredUsers.length}</strong> akun
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={userPage <= 1}
+                    onClick={() => setUserPage((p) => Math.max(1, p - 1))}
+                    className="size-7 p-0"
+                  >
+                    <ChevronLeft className="size-3.5" />
+                  </Button>
+                  <span className="px-2 text-xs font-semibold text-foreground font-mono">
+                    Halaman {userPage} / {totalUserPages}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={userPage >= totalUserPages}
+                    onClick={() => setUserPage((p) => Math.min(totalUserPages, p + 1))}
+                    className="size-7 p-0"
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* 6. TAB PENGATURAN & AUDIT SENGKETA */}
         {activeTab === "pengaturan" && (
           <div className="space-y-6 max-w-5xl">
             <div>

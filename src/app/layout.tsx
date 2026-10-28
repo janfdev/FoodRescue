@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SisaRasa - Food Rescue Cirebon Raya",
+  title: "Rerasa - Penyelamatan Pangan Surplus Cirebon Raya",
   description: "Platform penyelamatan makanan surplus lezat hemat s/d 70% di Cirebon Raya",
 };
 

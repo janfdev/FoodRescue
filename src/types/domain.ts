@@ -30,6 +30,8 @@ export interface User {
   phone: string;
   avatarUrl?: string;
   storeId?: string; // if role === 'seller'
+  status?: "ACTIVE" | "SUSPENDED";
+  createdAt?: string;
 }
 
 export interface Store {
@@ -70,6 +72,7 @@ export interface SurpriseBag {
   title: string;
   category: StoreCategory;
   description: string;
+  imageUrl?: string;
   originalPrice: number;
   discountedPrice: number;
   quotaToday: number;
@@ -91,8 +94,10 @@ export interface Order {
   bagTitle: string;
   quantity: number;
   unitPrice: number;
+  subtotalPrice?: number;
+  adminFee?: number; // Biaya layanan aplikasi (Rp 1.000)
   totalPrice: number;
-  platformFee: number; // 12% take-rate
+  platformFee: number; // 12% take-rate toko
   sellerEarning: number; // 88%
   status: OrderStatus;
   paymentMethod: "QRIS" | "GoPay" | "ShopeePay" | "BCA_VA";
