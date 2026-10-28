@@ -13,20 +13,35 @@ import {
   MessageSquare,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   Clock,
-  Sparkles,
-  Truck,
-  Leaf
+  Leaf,
+  LayoutDashboard,
+  Receipt,
+  Wallet,
+  Settings,
+  Image as ImageIcon,
+  Eye,
+  Building2,
+  Check,
+  X,
+  FileCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+
+type AdminTab = "beranda" | "mitra" | "transaksi" | "keuangan" | "pengaturan";
 
 export function SuperAdminAppView() {
-  const [activeTab, setActiveTab] = useState<"overview" | "stores" | "boxes" | "withdrawals" | "audit">("overview");
+  const [activeTab, setActiveTab] = useState<AdminTab>("mitra");
 
   const [stores, setStores] = useState<Store[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -35,7 +50,8 @@ export function SuperAdminAppView() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [metrics, setMetrics] = useState(storeService.getImpactMetrics());
 
-  // Chat inspection modal for dispute resolution
+  // Modal inspection states
+  const [selectedKycStore, setSelectedKycStore] = useState<Store | null>(null);
   const [inspectedChatOrder, setInspectedChatOrder] = useState<Order | null>(null);
 
   const syncData = () => {
@@ -56,11 +72,13 @@ export function SuperAdminAppView() {
 
   const handleApproveStore = (storeId: string) => {
     storeService.updateStoreStatus(storeId, "ACTIVE");
+    setSelectedKycStore(null);
     syncData();
   };
 
-  const handleSuspendStore = (storeId: string) => {
+  const handleRejectOrSuspendStore = (storeId: string) => {
     storeService.updateStoreStatus(storeId, "SUSPENDED");
+    setSelectedKycStore(null);
     syncData();
   };
 
@@ -69,461 +87,678 @@ export function SuperAdminAppView() {
     syncData();
   };
 
+  const pendingStores = stores.filter((s) => s.status === "PENDING_APPROVAL");
+  const pendingStoresCount = pendingStores.length;
+  const pendingWdCount = withdrawals.filter((w) => w.status === "PENDING").length;
+
   return (
-    <div className="w-full max-w-6xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Admin Title & Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Shield className="size-6 text-purple-600" />
-            <h1 className="font-black text-xl text-foreground tracking-tight">
-              Pusat Kendali Super Admin SisaRasa
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Wilayah Operasional: Cirebon Raya (Kota & Kabupaten)
-          </p>
-        </div>
-
-        {/* Tab Switcher with shadcn Tabs */}
-        <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border overflow-x-auto">
-          <Button
-            type="button"
-            variant={activeTab === "overview" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("overview")}
-            className="text-xs font-bold"
-          >
-            Ikhtisar & Dampak
-          </Button>
-          <Button
-            type="button"
-            variant={activeTab === "stores" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("stores")}
-            className="text-xs font-bold gap-1.5"
-          >
-            <span>Mitra Toko</span>
-            {stores.filter((s) => s.status === "PENDING_APPROVAL").length > 0 && (
-              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                {stores.filter((s) => s.status === "PENDING_APPROVAL").length}
-              </Badge>
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant={activeTab === "boxes" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("boxes")}
-            className="text-xs font-bold"
-          >
-            Logistik Rescue Box
-          </Button>
-          <Button
-            type="button"
-            variant={activeTab === "withdrawals" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("withdrawals")}
-            className="text-xs font-bold gap-1.5"
-          >
-            <span>Pencairan Dana</span>
-            {withdrawals.filter((w) => w.status === "PENDING").length > 0 && (
-              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                {withdrawals.filter((w) => w.status === "PENDING").length}
-              </Badge>
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant={activeTab === "audit" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveTab("audit")}
-            className="text-xs font-bold"
-          >
-            Audit Kepatuhan & Sengketa
-          </Button>
-        </div>
-      </div>
-
-      {/* Tab: Overview & Impact Metrics */}
-      {activeTab === "overview" && (
+    <div className="w-full min-h-[calc(100vh-45px)] bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row">
+      {/* ─── SIDEBAR KIRI (DESAIN SESUAI PRD & DOKUMEN UI) ────────────────────────── */}
+      <aside className="w-full md:w-64 bg-card border-r border-border shrink-0 p-4 flex flex-col justify-between">
         <div className="space-y-6">
-          {/* 4 Key Metric Cards with shadcn Card */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="border-border shadow-xs">
-              <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Makanan Diselamatkan
-                  </span>
-                  <Leaf className="size-4 text-emerald-600" />
-                </div>
-                <p className="text-2xl font-black text-foreground tabular-nums">
-                  {metrics.totalMealsSaved} Porsi
-                </p>
-                <p className="text-[11px] text-emerald-600 font-medium">
-                  ±{metrics.estimatedKgSaved} kg limbah organik dicegah
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border shadow-xs">
-              <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    GMV Transaksi Makanan
-                  </span>
-                  <TrendingUp className="size-4 text-blue-600" />
-                </div>
-                <p className="text-2xl font-black text-foreground tabular-nums">
-                  Rp {metrics.gmv.toLocaleString("id-ID")}
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Perputaran nilai surplus resto
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border shadow-xs">
-              <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Take-Rate Platform (12%)
-                  </span>
-                  <CreditCard className="size-4 text-purple-600" />
-                </div>
-                <p className="text-2xl font-black text-purple-600 tabular-nums">
-                  Rp {metrics.platformRevenue.toLocaleString("id-ID")}
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Komisi transaksi diselesaikan
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="border-border shadow-xs">
-              <CardContent className="p-4 space-y-1">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-xs font-bold uppercase tracking-wider">
-                    Rescue Box B2B Terjual
-                  </span>
-                  <Box className="size-4 text-orange-600" />
-                </div>
-                <p className="text-2xl font-black text-orange-600 tabular-nums">
-                  {metrics.totalBoxesSold} Pcs
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Kemasan resmi berlogo tersalurkan
-                </p>
-              </CardContent>
-            </Card>
+          {/* Logo & Operational Zone */}
+          <div className="flex items-center gap-3 px-2">
+            <div className="size-9 rounded-xl bg-purple-700 text-white flex items-center justify-center font-black text-base shadow-xs">
+              <Shield className="size-5" />
+            </div>
+            <div>
+              <span className="font-extrabold text-sm text-foreground block tracking-tight">
+                Super Admin
+              </span>
+              <span className="text-[10px] font-mono text-muted-foreground uppercase block -mt-0.5">
+                Cirebon Command
+              </span>
+            </div>
           </div>
 
-          {/* Quick Summary of Active vs Pending Stores */}
-          <div className="bg-card border border-border rounded-2xl p-5 space-y-4">
-            <h3 className="font-extrabold text-sm text-foreground">
-              Status Mitra Kuliner Cirebon Raya
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {stores.map((s) => (
-                <div
-                  key={s.id}
-                  className="bg-muted/30 border border-border/80 rounded-xl p-3.5 space-y-2 text-xs"
-                >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-foreground">{s.name}</h4>
-                      <p className="text-[11px] text-muted-foreground">{s.area}</p>
-                    </div>
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                        s.status === "ACTIVE"
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                          : s.status === "PENDING_APPROVAL"
-                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                          : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                      }`}
-                    >
-                      {s.status}
-                    </span>
-                  </div>
+          <Separator />
 
-                  <div className="flex justify-between text-[11px] pt-1 border-t border-border/40">
-                    <span className="text-muted-foreground">Kepatuhan Box Resmi:</span>
-                    <strong className="text-emerald-600 tabular-nums">{s.boxComplianceRate}%</strong>
-                  </div>
-                </div>
-              ))}
+          {/* 5 Menu Utama Sesuai Dokumen Desain */}
+          <nav className="space-y-1">
+            <button
+              type="button"
+              onClick={() => setActiveTab("beranda")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "beranda"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <LayoutDashboard className="size-4" />
+                <span>Beranda</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("mitra")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "mitra"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <StoreIcon className="size-4" />
+                <span>Mitra Menunggu</span>
+              </div>
+              {pendingStoresCount > 0 && (
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
+                  {pendingStoresCount}
+                </Badge>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("transaksi")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "transaksi"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Receipt className="size-4" />
+                <span>Daftar Transaksi</span>
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">{orders.length}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("keuangan")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "keuangan"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Wallet className="size-4" />
+                <span>Keuangan & Payout</span>
+              </div>
+              {pendingWdCount > 0 && (
+                <Badge variant="destructive" className="text-[10px] px-1.5 py-0 font-mono">
+                  {pendingWdCount}
+                </Badge>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("pengaturan")}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                activeTab === "pengaturan"
+                  ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                  : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Settings className="size-4" />
+                <span>Pengaturan & Sengketa</span>
+              </div>
+            </button>
+          </nav>
+        </div>
+
+        {/* User Card */}
+        <div className="pt-4 border-t border-border/80">
+          <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-xl">
+            <div className="size-8 rounded-full bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
+              A
+            </div>
+            <div className="min-w-0 flex-1">
+              <span className="text-xs font-bold text-foreground block truncate">Ahmad Fauzi</span>
+              <span className="text-[10px] text-muted-foreground block truncate">Head of Ops Cirebon</span>
             </div>
           </div>
         </div>
-      )}
+      </aside>
 
-      {/* Tab: Mitra Store Approval & Moderation */}
-      {activeTab === "stores" && (
-        <div className="space-y-4">
-          <h3 className="font-extrabold text-sm text-foreground">
-            Verifikasi & Moderasi Mitra Kuliner
-          </h3>
-
-          <div className="space-y-3">
-            {stores.map((st) => (
-              <div
-                key={st.id}
-                className="bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-extrabold text-sm text-foreground">{st.name}</span>
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        st.status === "ACTIVE"
-                          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                          : st.status === "PENDING_APPROVAL"
-                          ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                          : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                      }`}
-                    >
-                      {st.status}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {st.address} • Pemilik: {st.kycDetails?.ownerName || "Mitra Terdaftar"}
-                  </p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Jam Pickup: {st.pickupStartTime} - {st.pickupEndTime} WIB • Stok Kemasan:{" "}
-                    <strong className="text-foreground tabular-nums">{st.currentBoxStock} pcs</strong>
+      {/* ─── KONTEN UTAMA ─────────────────────────────────────────────────────────── */}
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+        {/* 1. TAB MITRA MENUNGGU (KYC APPROVAL) SESUAI SPESIFIKASI DOKUMEN DESAIN */}
+        {activeTab === "mitra" && (
+          <div className="space-y-6 max-w-5xl">
+            <div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-foreground tracking-tight">
+                    Mitra Menunggu Persetujuan (KYC)
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Tabel verifikasi pendaftar baru usaha kuliner Cirebon Raya lengkap dengan bukti foto fisik
                   </p>
                 </div>
+                {pendingStoresCount > 0 && (
+                  <Badge variant="outline" className="bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 font-bold text-xs">
+                    {pendingStoresCount} Pendaftar Baru Menunggu
+                  </Badge>
+                )}
+              </div>
+            </div>
 
-                <div className="flex items-center gap-2">
-                  {st.status === "PENDING_APPROVAL" && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleApproveStore(st.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs gap-1"
-                    >
-                      <CheckCircle2 className="size-3.5" />
-                      <span>Setujui Kemitraan (Approve)</span>
-                    </Button>
-                  )}
+            {/* TABEL MITRA MENUNGGU (SESUAI DOKUMEN DESAIN) */}
+            <Card className="border-border shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
+                    <tr>
+                      <th className="p-4">Nama Toko & Kategori</th>
+                      <th className="p-4">Alamat Usaha</th>
+                      <th className="p-4">Foto Bukti Usaha</th>
+                      <th className="p-4">Status</th>
+                      <th className="p-4 text-right">Aksi Verifikasi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {stores.map((st) => {
+                      const isPending = st.status === "PENDING_APPROVAL";
+                      return (
+                        <tr
+                          key={st.id}
+                          className={`hover:bg-muted/20 transition-colors ${
+                            isPending ? "bg-amber-500/5 font-medium" : ""
+                          }`}
+                        >
+                          {/* Nama Toko */}
+                          <td className="p-4">
+                            <span className="font-extrabold text-foreground block text-sm">
+                              {st.name}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground block mt-0.5">
+                              {st.category} • Pemilik: {st.kycDetails?.ownerName || "Mitra Cirebon"}
+                            </span>
+                          </td>
 
-                  {st.status === "ACTIVE" && (
+                          {/* Alamat */}
+                          <td className="p-4 max-w-[220px]">
+                            <span className="text-foreground font-medium block truncate">
+                              {st.address}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground block mt-0.5 font-mono">
+                              Kawasan: {st.area}
+                            </span>
+                          </td>
+
+                          {/* Foto Bukti Usaha (Thumbnail + Dialog Trigger) */}
+                          <td className="p-4">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedKycStore(st)}
+                              className="flex items-center gap-2 p-1.5 px-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold shadow-2xs transition-colors"
+                              title="Klik untuk membuka bukti foto KTP dan Toko"
+                            >
+                              <ImageIcon className="size-3.5 text-purple-600 shrink-0" />
+                              <span>Lihat Bukti Foto</span>
+                              <Eye className="size-3 text-muted-foreground ml-1" />
+                            </button>
+                          </td>
+
+                          {/* Status */}
+                          <td className="p-4">
+                            <Badge
+                              variant={
+                                st.status === "ACTIVE"
+                                  ? "default"
+                                  : st.status === "PENDING_APPROVAL"
+                                  ? "secondary"
+                                  : "destructive"
+                              }
+                              className={`text-[10px] font-bold ${
+                                st.status === "ACTIVE"
+                                  ? "bg-emerald-600 text-white"
+                                  : st.status === "PENDING_APPROVAL"
+                                  ? "bg-amber-500 text-white"
+                                  : ""
+                              }`}
+                            >
+                              {st.status === "PENDING_APPROVAL"
+                                ? "Menunggu Approval"
+                                : st.status === "ACTIVE"
+                                ? "Aktif Beroperasi"
+                                : "Dibekukan"}
+                            </Badge>
+                          </td>
+
+                          {/* Aksi Sesuai Dokumen Desain: Tombol "Approve" (Hijau) & "Reject/Suspend" (Merah) */}
+                          <td className="p-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {st.status === "PENDING_APPROVAL" ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleApproveStore(st.id)}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs gap-1 h-8"
+                                  >
+                                    <Check className="size-3.5" />
+                                    <span>Approve</span>
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleRejectOrSuspendStore(st.id)}
+                                    className="text-xs font-bold shadow-xs gap-1 h-8"
+                                  >
+                                    <X className="size-3.5" />
+                                    <span>Reject</span>
+                                  </Button>
+                                </>
+                              ) : st.status === "ACTIVE" ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleRejectOrSuspendStore(st.id)}
+                                  className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold h-8"
+                                >
+                                  Bekukan Toko
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleApproveStore(st.id)}
+                                  className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 text-xs font-bold h-8"
+                                >
+                                  Pulihkan Mitra
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* 2. TAB BERANDA (OVERVIEW & METRIK DAMPAK) */}
+        {activeTab === "beranda" && (
+          <div className="space-y-6 max-w-5xl">
+            <div>
+              <h2 className="text-xl font-black text-foreground tracking-tight">
+                Ikhtisar Platform & Dampak Sosial
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Konsolidasi perputaran pangan dan kesehatan ekosistem SisaRasa Cirebon Raya
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card className="border-border shadow-xs">
+                <CardContent className="p-4 space-y-1">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-bold uppercase tracking-wider">Makanan Diselamatkan</span>
+                    <Leaf className="size-4 text-emerald-600" />
+                  </div>
+                  <p className="text-2xl font-black text-foreground tabular-nums">
+                    {metrics.totalMealsSaved} Porsi
+                  </p>
+                  <p className="text-[11px] text-emerald-600 font-medium">
+                    ±{metrics.estimatedKgSaved} kg limbah organik dicegah
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border shadow-xs">
+                <CardContent className="p-4 space-y-1">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-bold uppercase tracking-wider">GMV Transaksi</span>
+                    <TrendingUp className="size-4 text-blue-600" />
+                  </div>
+                  <p className="text-2xl font-black text-foreground tabular-nums">
+                    Rp {metrics.gmv.toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Nilai perputaran surplus resto</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border shadow-xs">
+                <CardContent className="p-4 space-y-1">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-bold uppercase tracking-wider">Komisi Platform (12%)</span>
+                    <CreditCard className="size-4 text-purple-600" />
+                  </div>
+                  <p className="text-2xl font-black text-purple-600 tabular-nums">
+                    Rp {metrics.platformRevenue.toLocaleString("id-ID")}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Take-rate transaksi diselesaikan</p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border shadow-xs">
+                <CardContent className="p-4 space-y-1">
+                  <div className="flex items-center justify-between text-muted-foreground">
+                    <span className="text-xs font-bold uppercase tracking-wider">Rescue Box B2B</span>
+                    <Box className="size-4 text-amber-600" />
+                  </div>
+                  <p className="text-2xl font-black text-amber-600 tabular-nums">
+                    {metrics.totalBoxesSold} Pcs
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">Kemasan resmi tersalurkan</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* 3. TAB DAFTAR TRANSAKSI (ESCROW LEDGER) */}
+        {activeTab === "transaksi" && (
+          <div className="space-y-6 max-w-5xl">
+            <div>
+              <h2 className="text-xl font-black text-foreground tracking-tight">
+                Daftar Transaksi & Rekening Penjamin (Escrow)
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Audit status pemesanan, kode PIN verifikasi fisik kasir, dan penahanan dana
+              </p>
+            </div>
+
+            <Card className="border-border shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
+                    <tr>
+                      <th className="p-3.5 px-4">ID Pesanan</th>
+                      <th className="p-3.5">Pembeli</th>
+                      <th className="p-3.5">Mitra Toko</th>
+                      <th className="p-3.5">Total & Komisi</th>
+                      <th className="p-3.5">PIN Pickup</th>
+                      <th className="p-3.5">Status Escrow</th>
+                      <th className="p-3.5 text-right">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {orders.map((ord) => (
+                      <tr key={ord.id} className="hover:bg-muted/20">
+                        <td className="p-3.5 px-4 font-mono font-bold text-foreground">{ord.id}</td>
+                        <td className="p-3.5">
+                          <span className="font-semibold block text-foreground">{ord.buyerName}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono">{ord.buyerPhone}</span>
+                        </td>
+                        <td className="p-3.5">
+                          <span className="font-semibold block text-foreground">{ord.storeName}</span>
+                          <span className="text-[10px] text-muted-foreground">{ord.bagTitle}</span>
+                        </td>
+                        <td className="p-3.5 tabular-nums">
+                          <span className="font-bold text-foreground block">
+                            Rp {ord.totalPrice.toLocaleString("id-ID")}
+                          </span>
+                          <span className="text-[10px] text-purple-600 block">
+                            Fee: Rp {ord.platformFee.toLocaleString("id-ID")}
+                          </span>
+                        </td>
+                        <td className="p-3.5 font-mono font-bold text-foreground">{ord.pickupCode}</td>
+                        <td className="p-3.5">
+                          <Badge
+                            variant={
+                              ord.status === "COMPLETED"
+                                ? "default"
+                                : ord.status === "PAID"
+                                ? "secondary"
+                                : "outline"
+                            }
+                            className={`text-[10px] font-bold ${
+                              ord.status === "COMPLETED" ? "bg-emerald-600" : ""
+                            }`}
+                          >
+                            {ord.status === "COMPLETED" ? "Dana Dilepas" : "Dana Ditahan (Held)"}
+                          </Badge>
+                        </td>
+                        <td className="p-3.5 text-right">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setInspectedChatOrder(ord)}
+                            className="text-xs font-semibold gap-1.5 text-purple-600 hover:text-purple-700"
+                          >
+                            <MessageSquare className="size-3.5" />
+                            <span>Log Chat</span>
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* 4. TAB KEUANGAN & PENCAIRAN (WITHDRAWAL) */}
+        {activeTab === "keuangan" && (
+          <div className="space-y-6 max-w-5xl">
+            <div>
+              <h2 className="text-xl font-black text-foreground tracking-tight">
+                Persetujuan Pencairan Dana (Withdrawal) Mitra
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Verifikasi rekening bank tujuan dan eksekusi transfer dana dompet toko
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {withdrawals.length === 0 ? (
+                <div className="p-8 text-center bg-card border border-dashed border-border rounded-2xl text-xs text-muted-foreground">
+                  Tidak ada permohonan pencairan dana saat ini.
+                </div>
+              ) : (
+                withdrawals.map((w) => (
+                  <Card key={w.id} className="border-border shadow-xs">
+                    <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-foreground">{w.storeName}</span>
+                          <span className="text-xs font-mono text-muted-foreground">({w.id})</span>
+                          <Badge
+                            variant={w.status === "APPROVED" ? "default" : "secondary"}
+                            className={`text-[10px] font-bold ${
+                              w.status === "APPROVED" ? "bg-emerald-600" : "bg-amber-500 text-white"
+                            }`}
+                          >
+                            {w.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          Rekening: <strong>{w.bankName}</strong> • {w.accountNumber} a/n {w.accountHolder}
+                        </p>
+                        <p className="text-base font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+                          Rp {w.amount.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+
+                      <div>
+                        {w.status === "PENDING" ? (
+                          <Button
+                            size="sm"
+                            onClick={() => handleApproveWithdrawal(w.id)}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
+                          >
+                            Transfer & Setujui (Approve)
+                          </Button>
+                        ) : (
+                          <span className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5">
+                            <CheckCircle2 className="size-4 text-emerald-600" />
+                            Telah Ditransfer
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+
+            {/* B2B Logistics Table */}
+            <div className="pt-4">
+              <h3 className="font-extrabold text-sm text-foreground mb-3">
+                Logistik Kemasan Rescue Box B2B
+              </h3>
+              <Card className="border-border shadow-xs overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
+                      <tr>
+                        <th className="p-3.5 px-4">ID Pesanan</th>
+                        <th className="p-3.5">Nama Toko</th>
+                        <th className="p-3.5">Jumlah Box</th>
+                        <th className="p-3.5">Total Tagihan</th>
+                        <th className="p-3.5">Resi Pengiriman</th>
+                        <th className="p-3.5">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border/60">
+                      {boxOrders.map((bo) => (
+                        <tr key={bo.id} className="hover:bg-muted/20">
+                          <td className="p-3.5 px-4 font-mono font-bold text-foreground">{bo.id}</td>
+                          <td className="p-3.5 font-semibold text-foreground">{bo.storeName}</td>
+                          <td className="p-3.5 font-bold tabular-nums">{bo.quantityPcs} pcs</td>
+                          <td className="p-3.5 font-bold tabular-nums">
+                            Rp {bo.totalPrice.toLocaleString("id-ID")}
+                          </td>
+                          <td className="p-3.5 font-mono text-muted-foreground">{bo.trackingNumber}</td>
+                          <td className="p-3.5">
+                            <Badge variant="secondary" className="text-[10px] font-bold">
+                              {bo.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* 5. TAB PENGATURAN & AUDIT SENGKETA */}
+        {activeTab === "pengaturan" && (
+          <div className="space-y-6 max-w-5xl">
+            <div>
+              <h2 className="text-xl font-black text-foreground tracking-tight">
+                Pengaturan Sistem & Resolusi Sengketa
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Pengawasan komplain penjemputan dan checklist kepatuhan kemasan dari ulasan pembeli
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <h3 className="font-extrabold text-sm text-foreground">
+                Audit Kepatuhan Penggunaan Rescue Box dari Ulasan Pembeli
+              </h3>
+              <div className="space-y-2">
+                {reviews.map((rev) => (
+                  <Card key={rev.id} className="border-border shadow-2xs">
+                    <CardContent className="p-3 text-xs flex items-center justify-between gap-3">
+                      <div>
+                        <span className="font-bold text-foreground">{rev.buyerName}</span>
+                        <p className="text-[11px] text-muted-foreground italic mt-0.5">
+                          &quot;{rev.comment}&quot;
+                        </p>
+                      </div>
+                      <Badge
+                        variant={rev.usedOfficialRescueBox ? "outline" : "destructive"}
+                        className={`text-[10px] font-bold shrink-0 ${
+                          rev.usedOfficialRescueBox ? "border-emerald-500 text-emerald-700 dark:text-emerald-300" : ""
+                        }`}
+                      >
+                        {rev.usedOfficialRescueBox ? "✓ Box Resmi Terpasang" : "✗ Tidak Pakai Box Resmi"}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* ─── DIALOG MODAL INSPEKSI FOTO BUKTI USAHA (KYC STORE INSPECTOR) ────── */}
+      <Dialog open={!!selectedKycStore} onOpenChange={(open) => !open && setSelectedKycStore(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Verifikasi Dokumen Bukti Usaha</DialogTitle>
+            <DialogDescription>
+              {selectedKycStore?.name} • Pemilik: {selectedKycStore?.kycDetails?.ownerName || "Mitra Cirebon"}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedKycStore && (
+            <div className="space-y-4 text-xs pt-2">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-muted/40 rounded-xl">
+                <div>
+                  <span className="text-muted-foreground text-[10px] block">Nomor Induk KTP</span>
+                  <span className="font-mono font-bold text-foreground">
+                    {selectedKycStore.kycDetails?.ktpNumber || "3274012903890002"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground text-[10px] block">Waktu Pengajuan</span>
+                  <span className="font-mono text-muted-foreground">
+                    {selectedKycStore.kycDetails?.submittedAt
+                      ? new Date(selectedKycStore.kycDetails.submittedAt).toLocaleDateString("id-ID")
+                      : "Terdaftar"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Showcase 2 Bukti Fisik: Foto KTP & Foto Toko */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <span className="font-bold text-foreground block">1. Foto KTP Pemilik</span>
+                  <div className="h-36 rounded-xl border border-border bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-3 text-center gap-1.5">
+                    <Shield className="size-8 text-purple-600/70" />
+                    <span className="text-[11px] font-mono text-muted-foreground">KTP-NIK-TERVERIFIKASI</span>
+                    <span className="text-[10px] text-emerald-600 font-semibold">Tercatat di Dukcapil</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <span className="font-bold text-foreground block">2. Foto Tampak Depan Toko</span>
+                  <div className="h-36 rounded-xl border border-border bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-3 text-center gap-1.5">
+                    <Building2 className="size-8 text-emerald-600/70" />
+                    <span className="text-[11px] font-semibold text-foreground">{selectedKycStore.name}</span>
+                    <span className="text-[10px] text-muted-foreground">{selectedKycStore.address}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+                {selectedKycStore.status === "PENDING_APPROVAL" ? (
+                  <>
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleSuspendStore(st.id)}
-                      className="text-xs font-bold shadow-xs gap-1"
-                    >
-                      <XCircle className="size-3.5" />
-                      <span>Bekukan (Suspend)</span>
-                    </Button>
-                  )}
-
-                  {st.status === "SUSPENDED" && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleApproveStore(st.id)}
+                      onClick={() => handleRejectOrSuspendStore(selectedKycStore.id)}
                       className="text-xs font-bold"
                     >
-                      Pulihkan Mitra
+                      Tolak Kemitraan (Reject)
                     </Button>
-                  )}
-                </div>
+                    <Button
+                      size="sm"
+                      onClick={() => handleApproveStore(selectedKycStore.id)}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+                    >
+                      Setujui Kemitraan (Approve)
+                    </Button>
+                  </>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={() => setSelectedKycStore(null)}>
+                    Tutup Pratinjau
+                  </Button>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Tab: B2B Rescue Box Logistics */}
-      {activeTab === "boxes" && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-sm text-foreground">
-              Manajemen Distribusi Kemasan Resmi Rescue Box B2B
-            </h3>
-            <span className="text-xs text-muted-foreground">
-              Gudang Logistik Cirebon Hub
-            </span>
-          </div>
-
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xs">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
-                  <tr>
-                    <th className="p-3.5 px-4">ID Pesanan</th>
-                    <th className="p-3.5">Nama Mitra Toko</th>
-                    <th className="p-3.5">Jumlah Box</th>
-                    <th className="p-3.5">Total Tagihan</th>
-                    <th className="p-3.5">No. Resi SiCepat</th>
-                    <th className="p-3.5">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/60">
-                  {boxOrders.map((bo) => (
-                    <tr key={bo.id} className="hover:bg-muted/20">
-                      <td className="p-3.5 px-4 font-mono font-bold text-foreground">{bo.id}</td>
-                      <td className="p-3.5 font-semibold text-foreground">{bo.storeName}</td>
-                      <td className="p-3.5 font-bold tabular-nums">{bo.quantityPcs} pcs</td>
-                      <td className="p-3.5 font-bold tabular-nums">
-                        Rp {bo.totalPrice.toLocaleString("id-ID")}
-                      </td>
-                      <td className="p-3.5 font-mono text-muted-foreground">{bo.trackingNumber}</td>
-                      <td className="p-3.5">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
-                          {bo.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tab: Pencairan Dana (Withdrawals) */}
-      {activeTab === "withdrawals" && (
-        <div className="space-y-4">
-          <h3 className="font-extrabold text-sm text-foreground">
-            Persetujuan Penarikan Dana (Withdrawal) Mitra
-          </h3>
-
-          <div className="space-y-3">
-            {withdrawals.length === 0 ? (
-              <div className="p-6 text-center bg-muted/30 border border-dashed border-border rounded-2xl text-xs text-muted-foreground">
-                Tidak ada permintaan penarikan dana pending.
-              </div>
-            ) : (
-              withdrawals.map((w) => (
-                <div
-                  key={w.id}
-                  className="bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-sm text-foreground">{w.storeName}</span>
-                      <span className="text-xs font-mono text-muted-foreground">({w.id})</span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          w.status === "APPROVED"
-                            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                            : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                        }`}
-                      >
-                        {w.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Rekening: {w.bankName} • {w.accountNumber} a/n {w.accountHolder}
-                    </p>
-                    <p className="text-base font-black text-emerald-600 tabular-nums">
-                      Rp {w.amount.toLocaleString("id-ID")}
-                    </p>
-                  </div>
-
-                  <div>
-                    {w.status === "PENDING" ? (
-                      <button
-                        type="button"
-                        onClick={() => handleApproveWithdrawal(w.id)}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors shadow-xs"
-                      >
-                        Transfer & Setujui (Approve)
-                      </button>
-                    ) : (
-                      <span className="text-xs text-muted-foreground font-semibold flex items-center gap-1.5">
-                        <CheckCircle2 className="size-4 text-emerald-600" />
-                        Telah Ditransfer
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Tab: Audit Log & Dispute */}
-      {activeTab === "audit" && (
-        <div className="space-y-6">
-          {/* Dispute Orders & Chat Inspection */}
-          <div className="space-y-3">
-            <h3 className="font-extrabold text-sm text-foreground">
-              Audit Riwayat Chat Transaksi (Sengketa & Koordinasi)
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              Super Admin berwenang menginspeksi ruang chat pesanan untuk menyelesaikan komplain ketidakhadiran atau keterlambatan pickup.
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {orders.map((ord) => (
-                <div
-                  key={ord.id}
-                  className="bg-card border border-border rounded-2xl p-3.5 text-xs space-y-2 shadow-2xs"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-extrabold text-foreground">{ord.id}</span>
-                      <p className="text-muted-foreground text-[11px] mt-0.5">
-                        {ord.buyerName} ↔ {ord.storeName}
-                      </p>
-                    </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                      {ord.status}
-                    </span>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setInspectedChatOrder(ord)}
-                    className="w-full bg-muted hover:bg-muted/80 text-foreground font-bold text-xs py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <MessageSquare className="size-3.5 text-purple-600" />
-                    <span>Inspeksi Log Chat Pesanan</span>
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Audit Kepatuhan Kemasan dari Ulasan Pembeli */}
-          <div className="space-y-3 pt-4 border-t border-border">
-            <h3 className="font-extrabold text-sm text-foreground">
-              Hasil Validasi Kepatuhan Rescue Box oleh Pembeli
-            </h3>
-            <div className="space-y-2">
-              {reviews.map((rev) => (
-                <div
-                  key={rev.id}
-                  className="bg-card border border-border rounded-xl p-3 text-xs flex items-center justify-between gap-3"
-                >
-                  <div>
-                    <span className="font-bold text-foreground">{rev.buyerName}</span>
-                    <p className="text-[11px] text-muted-foreground italic mt-0.5">
-                      &quot;{rev.comment}&quot;
-                    </p>
-                  </div>
-                  <span
-                    className={`text-[10px] font-bold px-2 py-1 rounded-lg shrink-0 ${
-                      rev.usedOfficialRescueBox
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                    }`}
-                  >
-                    {rev.usedOfficialRescueBox ? "✓ Box Resmi Terpasang" : "✗ Tidak Pakai Box Resmi"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Chat Inspector Modal */}
       {inspectedChatOrder && (
