@@ -30,6 +30,7 @@ export default function SellerBagsPage() {
   const [pickupWindow, setPickupWindow] = useState("19:30 - 21:00 WIB");
   const [allergensWarning, setAllergensWarning] = useState("Mengandung gandum dan susu");
   const [imageUrl, setImageUrl] = useState("https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=80");
+  const [isLastCall, setIsLastCall] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
   const syncData = () => {
@@ -92,6 +93,7 @@ export default function SellerBagsPage() {
       quotaToday: Number(quotaToday),
       quotaRemaining: Number(quotaToday),
       isActive: true,
+      isLastCall: Boolean(isLastCall),
       pickupWindow: pickupWindow.trim() || "19:30 - 21:00 WIB",
       estimatedWeightKg: 0.8,
       allergensWarning: allergensWarning.trim() || undefined,
@@ -155,9 +157,16 @@ export default function SellerBagsPage() {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <span className="font-extrabold text-foreground text-sm block truncate">
-                          {bag.title}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-extrabold text-foreground text-sm block truncate">
+                            {bag.title}
+                          </span>
+                          {bag.isLastCall && (
+                            <Badge className="bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0">
+                              Last Call
+                            </Badge>
+                          )}
+                        </div>
                         <span className="text-[11px] text-muted-foreground block mt-0.5 truncate max-w-xs">
                           {bag.category} • {bag.description}
                         </span>
@@ -416,6 +425,25 @@ export default function SellerBagsPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Last Call Food Toggle Checkbox */}
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+              <input
+                type="checkbox"
+                id="isLastCallToggle"
+                checked={isLastCall}
+                onChange={(e) => setIsLastCall(e.target.checked)}
+                className="size-4 mt-0.5 rounded accent-amber-600 cursor-pointer"
+              />
+              <label htmlFor="isLastCallToggle" className="cursor-pointer text-xs space-y-0.5">
+                <span className="font-extrabold text-amber-800 dark:text-amber-400 block">
+                  Tandai sebagai Last Call Food (Cuci Gudang Jelang Tutup)
+                </span>
+                <span className="text-[11px] text-muted-foreground block leading-relaxed">
+                  Paket ini akan ditampilkan di seksi penawaran kilat beranda untuk pembeli yang mencari makanan malam ini.
+                </span>
+              </label>
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-border">

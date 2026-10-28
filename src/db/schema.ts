@@ -141,6 +141,7 @@ export const surpriseBags = pgTable(
     quotaToday: integer("quota_today").notNull().default(10),
     quotaRemaining: integer("quota_remaining").notNull().default(10),
     isActive: boolean("is_active").notNull().default(true),
+    isLastCall: boolean("is_last_call").notNull().default(false),
     pickupWindow: text("pickup_window").notNull(), // e.g. "19:30 - 21:00 WIB"
     estimatedWeightKg: doublePrecision("estimated_weight_kg").notNull().default(0.8),
     allergensWarning: text("allergens_warning"),

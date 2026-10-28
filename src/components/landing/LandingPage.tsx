@@ -75,6 +75,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
 
   // Guest Checkout State
   const [selectedCheckoutBag, setSelectedCheckoutBag] = useState<SurpriseBag | null>(null);
@@ -168,10 +169,11 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
         !searchQuery.trim() ||
         bag.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         store?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchLastCall = !isLastCallOnly || Boolean(bag.isLastCall);
 
-      return matchArea && matchCategory && matchSearch;
+      return matchArea && matchCategory && matchSearch && matchLastCall;
     });
-  }, [bags, stores, selectedArea, selectedCategory, searchQuery]);
+  }, [bags, stores, selectedArea, selectedCategory, searchQuery, isLastCallOnly]);
 
   // Handle Instant Guest Checkout
   const handleConfirmOrder = () => {
@@ -587,7 +589,61 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                 </Button>
               );
             })}
+
+            {/* Last Call Pill Toggle */}
+            <Button
+              type="button"
+              variant={isLastCallOnly ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsLastCallOnly(!isLastCallOnly)}
+              className={`text-xs h-7 px-3.5 rounded-full font-bold gap-1.5 shrink-0 ${
+                isLastCallOnly
+                  ? "bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
+                  : "border-amber-500/50 text-amber-800 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20"
+              }`}
+            >
+              <Sparkles className="size-3" />
+              <span>Last Call Food</span>
+              {bags.filter((b) => b.isLastCall).length > 0 && (
+                <span className="size-1.5 rounded-full bg-amber-500 ml-0.5" />
+              )}
+            </Button>
           </div>
+        </div>
+
+        {/* Last Call Food Spotlight Banner */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-start gap-3">
+            <div className="size-9 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 font-bold shadow-xs">
+              <Clock className="size-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-foreground text-sm">
+                  Last Call Food Cirebon
+                </span>
+                <Badge className="bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0">
+                  Diskon Kilat s/d 70%
+                </Badge>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                Porsi makanan segar terakhir dari toko roti dan resto sebelum tutup malam ini. Kuota terbatas dan siap diambil sekarang!
+              </p>
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            variant={isLastCallOnly ? "default" : "outline"}
+            onClick={() => setIsLastCallOnly(!isLastCallOnly)}
+            className={`text-xs font-bold shrink-0 ${
+              isLastCallOnly
+                ? "bg-amber-600 hover:bg-amber-700 text-white"
+                : "border-amber-600/40 text-amber-800 dark:text-amber-300"
+            }`}
+          >
+            {isLastCallOnly ? "Tampilkan Semua Makanan" : "Lihat Hanya Last Call"}
+          </Button>
         </div>
 
         {/* Live Card Grid */}
@@ -620,9 +676,14 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                         loading="lazy"
                       />
                       {/* Urgency Badge: Quota & Pickup Urgency */}
-                      <div className="absolute top-2.5 left-2.5">
+                      <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                        {bag.isLastCall && (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-black bg-amber-600 text-white shadow-xs uppercase tracking-wider">
+                            Last Call
+                          </span>
+                        )}
                         {bag.quotaRemaining <= 3 ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xs flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-900/85 backdrop-blur-xs text-amber-300 shadow-xs flex items-center gap-1">
                             <Clock className="size-3" />
                             <span>Sisa {bag.quotaRemaining} paket</span>
                           </span>

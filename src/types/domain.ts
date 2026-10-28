@@ -78,6 +78,7 @@ export interface SurpriseBag {
   quotaToday: number;
   quotaRemaining: number;
   isActive: boolean;
+  isLastCall?: boolean; // Penawaran kilat jelang toko tutup
   pickupWindow: string; // e.g. "19:30 - 21:00 WIB"
   estimatedWeightKg: number; // e.g. 0.8 kg per bag
   allergensWarning?: string;

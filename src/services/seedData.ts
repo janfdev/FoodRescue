@@ -373,6 +373,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 6,
     quotaRemaining: 4,
     isActive: true,
+    isLastCall: true,
     pickupWindow: "19:30 - 21:30 WIB",
     estimatedWeightKg: 0.7,
     allergensWarning: "Mengandung gluten, susu, dan telur."
@@ -389,6 +390,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 4,
     quotaRemaining: 2,
     isActive: true,
+    isLastCall: false,
     pickupWindow: "20:00 - 21:45 WIB",
     estimatedWeightKg: 0.5,
     allergensWarning: "Mengandung telur dan gandum."
@@ -405,6 +407,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 8,
     quotaRemaining: 5,
     isActive: true,
+    isLastCall: true,
     pickupWindow: "20:30 - 22:00 WIB",
     estimatedWeightKg: 0.9
   },
@@ -420,6 +423,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 5,
     quotaRemaining: 3,
     isActive: true,
+    isLastCall: false,
     pickupWindow: "20:00 - 21:30 WIB",
     estimatedWeightKg: 0.8
   },
@@ -435,6 +439,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 7,
     quotaRemaining: 4,
     isActive: true,
+    isLastCall: false,
     pickupWindow: "19:00 - 21:00 WIB",
     estimatedWeightKg: 1.1
   },
@@ -450,6 +455,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     quotaToday: 4,
     quotaRemaining: 2,
     isActive: true,
+    isLastCall: true,
     pickupWindow: "21:00 - 22:30 WIB",
     estimatedWeightKg: 0.6
   }
