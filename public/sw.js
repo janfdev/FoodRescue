@@ -1,11 +1,16 @@
 // Rerasa PWA Service Worker (Native)
-const CACHE_NAME = "rerasa-pwa-v1";
+const CACHE_NAME = "rerasa-pwa-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
   "/icon.svg",
   "/apple-icon.png",
+  "/apple-touch-icon.png",
   "/favicon.ico",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
+  "/icons/icon-maskable-192x192.png",
+  "/icons/icon-maskable-512x512.png",
 ];
 
 // Install: Cache core app shell
