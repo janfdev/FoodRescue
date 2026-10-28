@@ -126,6 +126,7 @@ export interface ChatMessage {
   senderAvatarUrl?: string;
   text: string;
   timestamp: string;
+  status?: "sending" | "sent" | "failed";
 }
 
 export interface RescueBoxPackage {

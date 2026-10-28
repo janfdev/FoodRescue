@@ -10,13 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { resolveUserAvatar } from "@/lib/avatar";
+import { resolveUserAvatar, getDefaultAvatar } from "@/lib/avatar";
 import {
   ArrowLeft,
   ChevronRight,
   Send,
   Lock,
   Clock,
+  CheckCheck,
+  AlertCircle,
   Building2,
   ShieldCheck,
   MapPin,
@@ -44,15 +46,26 @@ function ChatContent() {
     return state.orders.find((o) => o.id === orderId) || null;
   }, [state.orders, orderId]);
 
-  const loadMessages = () => {
+  const syncServerMessages = () => {
     if (!orderId) return;
-    const list = storeService.getChatMessages(orderId);
-    setMessages(list);
+    const serverList = storeService.getChatMessages(orderId);
+    setMessages((prev) => {
+      // Pertahankan pesan optimistik yang sedang dikirim atau gagal
+      const pendingMessages = prev.filter(
+        (m) => m.status === "sending" || m.status === "failed"
+      );
+      const serverIds = new Set(serverList.map((m) => m.id));
+      const remainingPending = pendingMessages.filter((m) => !serverIds.has(m.id));
+      return [
+        ...serverList.map((m) => ({ ...m, status: "sent" as const })),
+        ...remainingPending,
+      ];
+    });
   };
 
   useEffect(() => {
-    loadMessages();
-    const unsub = storeService.subscribe(loadMessages);
+    syncServerMessages();
+    const unsub = storeService.subscribe(syncServerMessages);
     return unsub;
   }, [orderId]);
 
@@ -62,21 +75,59 @@ function ChatContent() {
 
   const currentUser = state.currentUser;
 
+  const executeSendMessage = (textToSend: string) => {
+    if (!textToSend.trim() || !order || order.isChatLocked) return;
+
+    const trimmed = textToSend.trim();
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+    // 1. Optimistic Update: langsung perbarui UI seketika tanpa menunggu I/O DB
+    const optimisticMsg: ChatMessage = {
+      id: tempId,
+      orderId: order.id,
+      senderRole: currentUser.role === "seller" ? "seller" : "buyer",
+      senderName: currentUser.name,
+      senderAvatarUrl: currentUser.avatarUrl || getDefaultAvatar(currentUser.name),
+      text: trimmed,
+      timestamp: new Date().toISOString(),
+      status: "sending",
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setInputText("");
+
+    // 2. Kirim ke persistent storage/DB secara asynchronous
+    setTimeout(() => {
+      try {
+        const persisted = storeService.sendChatMessage(order.id, trimmed);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId ? { ...persisted, status: "sent" as const } : m
+          )
+        );
+      } catch (err: unknown) {
+        console.error("Gagal menyimpan pesan chat:", err);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId ? { ...m, status: "failed" as const } : m
+          )
+        );
+      }
+    }, 30);
+  };
+
   const handleSend = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || !order || order.isChatLocked) return;
-
-    try {
-      storeService.sendChatMessage(order.id, inputText.trim());
-      setInputText("");
-    } catch (err: unknown) {
-      console.error("Error sending message:", err);
-    }
+    executeSendMessage(inputText);
   };
 
   const handleQuickSend = (text: string) => {
-    if (!order || order.isChatLocked) return;
-    storeService.sendChatMessage(order.id, text);
+    executeSendMessage(text);
+  };
+
+  const handleRetry = (msg: ChatMessage) => {
+    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+    executeSendMessage(msg.text);
   };
 
   const formatTime = (isoString: string) => {
@@ -278,13 +329,36 @@ function ChatContent() {
                       }`}
                     >
                       <p className="break-words">{msg.text}</p>
-                      <span
-                        className={`block text-[9px] mt-1 text-right tabular-nums ${
+                      <div
+                        className={`flex items-center justify-end gap-1.5 text-[9px] mt-1 tabular-nums ${
                           isMe ? "text-emerald-200" : "text-muted-foreground"
                         }`}
                       >
-                        {formatTime(msg.timestamp)}
-                      </span>
+                        <span>{formatTime(msg.timestamp)}</span>
+                        {isMe && (
+                          <>
+                            {msg.status === "sending" ? (
+                              <span className="flex items-center gap-0.5 opacity-80" title="Mengirim...">
+                                <Clock className="size-2.5" />
+                              </span>
+                            ) : msg.status === "failed" ? (
+                              <button
+                                type="button"
+                                onClick={() => handleRetry(msg)}
+                                className="flex items-center gap-0.5 text-rose-200 hover:text-white underline cursor-pointer"
+                                title="Gagal terkirim, klik untuk coba lagi"
+                              >
+                                <AlertCircle className="size-2.5 text-rose-300" />
+                                <span>Coba lagi</span>
+                              </button>
+                            ) : (
+                              <span title="Terkirim">
+                                <CheckCheck className="size-2.5 text-emerald-300" />
+                              </span>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
 

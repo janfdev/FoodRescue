@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Order, ChatMessage } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { resolveUserAvatar } from "@/lib/avatar";
-import { X, Send, Lock, Clock, ShieldCheck } from "lucide-react";
+import { resolveUserAvatar, getDefaultAvatar } from "@/lib/avatar";
+import { X, Send, Lock, Clock, ShieldCheck, CheckCheck, AlertCircle } from "lucide-react";
 
 interface ChatModalProps {
   order: Order;
@@ -24,14 +24,24 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
     return resolveUserAvatar(undefined, partnerName);
   }, [partnerName]);
 
-  const loadMessages = () => {
-    const list = storeService.getChatMessages(order.id);
-    setMessages(list);
+  const syncServerMessages = () => {
+    const serverList = storeService.getChatMessages(order.id);
+    setMessages((prev) => {
+      const pendingMessages = prev.filter(
+        (m) => m.status === "sending" || m.status === "failed"
+      );
+      const serverIds = new Set(serverList.map((m) => m.id));
+      const remainingPending = pendingMessages.filter((m) => !serverIds.has(m.id));
+      return [
+        ...serverList.map((m) => ({ ...m, status: "sent" as const })),
+        ...remainingPending,
+      ];
+    });
   };
 
   useEffect(() => {
-    loadMessages();
-    const unsub = storeService.subscribe(loadMessages);
+    syncServerMessages();
+    const unsub = storeService.subscribe(syncServerMessages);
     return unsub;
   }, [order.id]);
 
@@ -39,18 +49,57 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const executeSendMessage = (textToSend: string) => {
+    if (!textToSend.trim() || isLocked) return;
+
+    const trimmed = textToSend.trim();
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+
+    // 1. Optimistic Update
+    const optimisticMsg: ChatMessage = {
+      id: tempId,
+      orderId: order.id,
+      senderRole: currentUser.role === "seller" ? "seller" : "buyer",
+      senderName: currentUser.name,
+      senderAvatarUrl: currentUser.avatarUrl || getDefaultAvatar(currentUser.name),
+      text: trimmed,
+      timestamp: new Date().toISOString(),
+      status: "sending",
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setInputText("");
+
+    // 2. Async persistence
+    setTimeout(() => {
+      try {
+        const persisted = storeService.sendChatMessage(order.id, trimmed);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId ? { ...persisted, status: "sent" as const } : m
+          )
+        );
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("terkunci")) {
+          setIsLocked(true);
+        }
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === tempId ? { ...m, status: "failed" as const } : m
+          )
+        );
+      }
+    }, 30);
+  };
+
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputText.trim() || isLocked) return;
+    executeSendMessage(inputText);
+  };
 
-    try {
-      storeService.sendChatMessage(order.id, inputText.trim());
-      setInputText("");
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setIsLocked(true);
-      }
-    }
+  const handleRetry = (msg: ChatMessage) => {
+    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+    executeSendMessage(msg.text);
   };
 
   const formatTime = (isoString: string) => {
@@ -160,13 +209,36 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
                     }`}
                   >
                     <p className="whitespace-pre-wrap break-words">{msg.text}</p>
-                    <span
-                      className={`block text-[9px] mt-1 text-right tabular-nums ${
+                    <div
+                      className={`flex items-center justify-end gap-1.5 text-[9px] mt-1 tabular-nums ${
                         isMe ? "text-emerald-100" : "text-muted-foreground"
                       }`}
                     >
-                      {formatTime(msg.timestamp)}
-                    </span>
+                      <span>{formatTime(msg.timestamp)}</span>
+                      {isMe && (
+                        <>
+                          {msg.status === "sending" ? (
+                            <span className="flex items-center gap-0.5 opacity-80" title="Mengirim...">
+                              <Clock className="size-2.5" />
+                            </span>
+                          ) : msg.status === "failed" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRetry(msg)}
+                              className="flex items-center gap-0.5 text-rose-200 hover:text-white underline cursor-pointer"
+                              title="Gagal terkirim, klik untuk coba lagi"
+                            >
+                              <AlertCircle className="size-2.5 text-rose-300" />
+                              <span>Coba lagi</span>
+                            </button>
+                          ) : (
+                            <span title="Terkirim">
+                              <CheckCheck className="size-2.5 text-emerald-200" />
+                            </span>
+                          )}
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
 

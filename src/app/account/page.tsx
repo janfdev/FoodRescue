@@ -10,6 +10,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import {
   ArrowLeft,
   ShieldCheck,
@@ -181,7 +182,7 @@ export default function AccountPage() {
           >
             <div className="flex items-center gap-2.5">
               <div className="size-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Sparkles className="size-4" />
+                <Image src="/icons/icon-144x144.png" alt="Rerasa PWA Icon" width={24} height={24} className="size-6 object-contain" />
               </div>
               <div>
                 <span className="font-extrabold text-foreground block">
