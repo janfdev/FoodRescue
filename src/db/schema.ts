@@ -137,6 +137,8 @@ export const stores = pgTable(
     reviewCount: integer("review_count").notNull().default(0),
     isOpen: boolean("is_open").notNull().default(true),
     status: storeStatusEnum("status").notNull().default("PENDING_APPROVAL"),
+    logoUrl: text("logo_url"),
+    imageUrl: text("image_url"),
     pickupStartTime: text("pickup_start_time").notNull(), // "19:00"
     pickupEndTime: text("pickup_end_time").notNull(),     // "21:00"
     boxComplianceRate: integer("box_compliance_rate").notNull().default(100), // percentage e.g. 96

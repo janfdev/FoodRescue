@@ -46,6 +46,8 @@ export interface Store {
   reviewCount: number;
   isOpen: boolean;
   status: StoreStatus;
+  logoUrl?: string;
+  imageUrl?: string;
   pickupStartTime: string; // "19:00"
   pickupEndTime: string;   // "21:00"
   boxComplianceRate: number; // e.g. 96 (%)
