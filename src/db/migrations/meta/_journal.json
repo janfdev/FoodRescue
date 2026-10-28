@@ -8,6 +8,13 @@
       "when": 1793181631025,
       "tag": "0000_slim_khan",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793196824113,
+      "tag": "0001_dusty_zarek",
+      "breakpoints": true
     }
   ]
 }
