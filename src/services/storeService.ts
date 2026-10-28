@@ -22,6 +22,7 @@ import {
   SEED_REVIEWS,
   SEED_USERS
 } from "./seedData";
+import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
 
 const STORAGE_KEY = "sisarasa_app_state_v1";
 
@@ -132,7 +133,15 @@ class StoreService {
       try {
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
-          this.state = JSON.parse(cached);
+          const parsed = JSON.parse(cached);
+          // Migrasi avatar jika masih menggunakan format lama atau kosong
+          if (parsed?.currentUser) {
+            parsed.currentUser.avatarUrl = resolveUserAvatar(
+              parsed.currentUser.avatarUrl,
+              parsed.currentUser.name
+            );
+          }
+          this.state = parsed;
         } else {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
         }
@@ -201,6 +210,7 @@ class StoreService {
         email: email.toLowerCase(),
         role: "buyer" as UserRole,
         phone: "081234567890",
+        avatarUrl: getDefaultAvatar(email.split("@")[0]),
         status: "ACTIVE" as const,
         createdAt: new Date().toISOString(),
       };

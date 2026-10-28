@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { User, Store } from "@/types/domain";
 import { storeService } from "@/services/storeService";
+import { resolveUserAvatar } from "@/lib/avatar";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +41,7 @@ export function EditProfileModal({
 }: EditProfileModalProps) {
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone || "");
-  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || "");
+  const [avatarUrl, setAvatarUrl] = useState(resolveUserAvatar(user.avatarUrl, user.name));
   
   // Seller-specific state
   const [storeName, setStoreName] = useState(store?.name || "");

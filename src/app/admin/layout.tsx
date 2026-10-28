@@ -24,6 +24,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { storeService } from "@/services/storeService";
 import { SEED_USERS } from "@/services/seedData";
+import { resolveUserAvatar } from "@/lib/avatar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -282,7 +283,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left cursor-pointer">
               <div className="flex items-center gap-2.5 min-w-0">
                 <Avatar className="size-8 rounded-full border border-border">
-                  <AvatarImage src={adminUser.avatarUrl} alt={adminUser.name} />
+                  <AvatarImage src={resolveUserAvatar(adminUser.avatarUrl, adminUser.name)} alt={adminUser.name} />
                   <AvatarFallback className="bg-purple-700 text-white font-bold text-xs">
                     {initials}
                   </AvatarFallback>

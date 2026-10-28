@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { usePwa } from "@/components/pwa/PwaProvider";
+import { resolveUserAvatar } from "@/lib/avatar";
 
 export default function AccountPage() {
   const router = useRouter();
@@ -76,7 +77,7 @@ export default function AccountPage() {
           <Card className="p-4 border-border/80 rounded-2xl shadow-2xs space-y-3 bg-card">
             <div className="flex items-center gap-3">
               <Avatar className="size-14 rounded-2xl ring-2 ring-emerald-600/30">
-                <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
                 <AvatarFallback className="bg-emerald-700 text-white font-black text-sm">
                   {currentUser.name.slice(0, 2).toUpperCase()}
                 </AvatarFallback>

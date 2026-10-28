@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { resolveUserAvatar } from "@/lib/avatar";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AdminUsersPage() {
@@ -132,12 +134,22 @@ export default function AdminUsersPage() {
                   return (
                     <tr key={u.id} className="hover:bg-muted/20">
                       <td className="p-3.5 px-4">
-                        <span className="font-extrabold text-foreground block text-sm">
-                          {u.name}
-                        </span>
-                        <span className="text-[11px] text-muted-foreground font-mono block mt-0.5">
-                          {u.email}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          <Avatar className="size-8 rounded-full border border-border shrink-0">
+                            <AvatarImage src={resolveUserAvatar(u.avatarUrl, u.name)} alt={u.name} />
+                            <AvatarFallback className="text-[10px] font-bold">
+                              {u.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <span className="font-extrabold text-foreground block text-sm truncate max-w-[180px]">
+                              {u.name}
+                            </span>
+                            <span className="text-[11px] text-muted-foreground font-mono block mt-0.5 truncate max-w-[180px]">
+                              {u.email}
+                            </span>
+                          </div>
+                        </div>
                       </td>
                       <td className="p-3.5">
                         <Badge

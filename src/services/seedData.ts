@@ -17,7 +17,7 @@ export const SEED_USERS: User[] = [
     role: "super_admin",
     phone: "082111222333",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=AhmadFauzi&backgroundColor=d1d4f9",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AhmadFauzi",
     createdAt: "2026-01-15T08:00:00Z"
   },
   {
@@ -27,7 +27,7 @@ export const SEED_USERS: User[] = [
     role: "super_admin",
     phone: "082111222334",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=DewiSartika&backgroundColor=ffd5dc",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=DewiSartika",
     createdAt: "2026-01-20T09:30:00Z"
   },
   // Mitra Toko (Sellers)
@@ -38,7 +38,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654321",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=SitiRahma&backgroundColor=ffdfbf",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=SitiRahma",
     storeId: "store-ruby-bakery",
     createdAt: "2026-02-10T10:00:00Z"
   },
@@ -49,7 +49,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654322",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=BambangPratama&backgroundColor=b6e3f4",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=BambangPratama",
     storeId: "store-kopi-nako",
     createdAt: "2026-02-12T11:00:00Z"
   },
@@ -60,7 +60,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654323",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=MangDul&backgroundColor=c0aede",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=MangDul",
     storeId: "store-jamblang-dul",
     createdAt: "2026-02-15T14:20:00Z"
   },
@@ -71,7 +71,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654324",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=HApud&backgroundColor=b6e3f4",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=HApud",
     storeId: "store-empal-apud",
     createdAt: "2026-02-18T16:00:00Z"
   },
@@ -82,7 +82,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654325",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=KevinSanjaya&backgroundColor=ffdfbf",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=KevinSanjaya",
     storeId: "store-martabak-sanfran",
     createdAt: "2026-02-22T13:45:00Z"
   },
@@ -93,7 +93,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654326",
     status: "SUSPENDED",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=HendraGunawan&backgroundColor=ffd5dc",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=HendraGunawan",
     storeId: "store-dapur-ciremai",
     createdAt: "2026-10-27T08:30:00Z"
   },
@@ -105,7 +105,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567890",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=FauzanRizqi&backgroundColor=d1d4f9",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=FauzanRizqi",
     createdAt: "2026-03-01T10:00:00Z"
   },
   {
@@ -115,7 +115,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567891",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=BudiSantoso&backgroundColor=b6e3f4",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=BudiSantoso",
     createdAt: "2026-03-05T11:30:00Z"
   },
   {
@@ -125,7 +125,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567892",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=AnisaNur&backgroundColor=ffd5dc",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AnisaNur",
     createdAt: "2026-03-08T15:10:00Z"
   },
   {
@@ -135,7 +135,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567893",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=DimasAng&backgroundColor=ffdfbf",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=DimasAng",
     createdAt: "2026-03-12T09:20:00Z"
   },
   {
@@ -145,7 +145,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567894",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=RinaKartika&backgroundColor=c0aede",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RinaKartika",
     createdAt: "2026-03-16T14:00:00Z"
   },
   {
@@ -155,7 +155,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567895",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=EkoPras&backgroundColor=d1d4f9",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=EkoPras",
     createdAt: "2026-03-20T17:40:00Z"
   },
   {
@@ -165,7 +165,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567896",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=MegaUtami&backgroundColor=ffd5dc",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=MegaUtami",
     createdAt: "2026-03-25T12:15:00Z"
   },
   {
@@ -175,7 +175,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567897",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=RezaPrat&backgroundColor=ffdfbf",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RezaPrat",
     createdAt: "2026-03-28T16:50:00Z"
   }
 ];

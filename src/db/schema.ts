@@ -73,7 +73,7 @@ export const users = pgTable("users", {
   phone: text("phone").notNull(),
   role: userRoleEnum("role").notNull().default("buyer"),
   status: text("status").notNull().default("ACTIVE"), // "ACTIVE" | "SUSPENDED"
-  avatarUrl: text("avatar_url"),
+  avatarUrl: text("avatar_url").default("https://api.dicebear.com/10.x/adventurer-neutral/svg"),
   storeId: text("store_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

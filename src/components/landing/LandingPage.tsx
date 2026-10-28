@@ -39,6 +39,7 @@ import { cartService } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { SEED_USERS } from "@/services/seedData";
+import { resolveUserAvatar } from "@/lib/avatar";
 import { User as UserType, SurpriseBag } from "@/types/domain";
 
 export function LandingPage() {
@@ -187,7 +188,7 @@ export function LandingPage() {
               <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted">
                 <Avatar className="size-full">
                   <AvatarImage
-                    src={currentUser.avatarUrl}
+                    src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)}
                     alt={currentUser.name}
                     className="object-cover"
                   />
@@ -199,7 +200,7 @@ export function LandingPage() {
               <PopoverContent align="end" className="w-64 p-3 space-y-3">
                 <div className="flex items-center gap-2.5 pb-2 border-b border-border">
                   <Avatar className="size-10 shrink-0">
-                    <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                    <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
                     <AvatarFallback className="text-xs font-bold bg-emerald-700 text-white">
                       {currentUser.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>

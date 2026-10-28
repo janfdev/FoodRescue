@@ -23,7 +23,7 @@ async function runSeed() {
         phone: "082111222333",
         role: "super_admin",
         status: "ACTIVE",
-        avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=AhmadFauzi&backgroundColor=d1d4f9",
+        avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AhmadFauzi",
       })
       .onConflictDoNothing();
 
