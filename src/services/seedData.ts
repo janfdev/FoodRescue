@@ -19,7 +19,7 @@ export const SEED_USERS: User[] = [
   },
   {
     id: "user-seller-1",
-    name: "Siti Rahma",
+    name: "Siti Rahmawati",
     email: "owner.ruby@gmail.com",
     role: "seller",
     phone: "081987654321",
@@ -117,6 +117,30 @@ export const SEED_STORES: Store[] = [
     }
   },
   {
+    id: "store-empal-apud",
+    name: "Empal Gentong H. Apud",
+    category: "Makanan Berat",
+    address: "Jl. Ir. H. Juanda No. 24, Battembat",
+    area: "Tuparev, Cirebon",
+    latitude: -6.7118,
+    longitude: 108.5320,
+    rating: 4.9,
+    reviewCount: 410,
+    isOpen: true,
+    status: "ACTIVE",
+    pickupStartTime: "20:00",
+    pickupEndTime: "21:30",
+    boxComplianceRate: 96,
+    boxesSoldTotal: 195,
+    currentBoxStock: 28,
+    walletBalance: 960000,
+    bankAccount: {
+      bankName: "BCA",
+      accountNumber: "1340998877",
+      accountHolder: "H. Apud Cirebon"
+    }
+  },
+  {
     id: "store-surya-market",
     name: "Surya Toserba Fresh Corner",
     category: "Swalayan & Buah",
@@ -133,7 +157,36 @@ export const SEED_STORES: Store[] = [
     boxComplianceRate: 97,
     boxesSoldTotal: 88,
     currentBoxStock: 24,
-    walletBalance: 310000
+    walletBalance: 310000,
+    bankAccount: {
+      bankName: "BCA",
+      accountNumber: "1340112233",
+      accountHolder: "PT Surya Cirebon Jaya"
+    }
+  },
+  {
+    id: "store-martabak-sanfran",
+    name: "Martabak San Francisco Cirebon",
+    category: "Bakery & Pastry",
+    address: "Jl. Siliwangi No. 112, Kejaksan",
+    area: "Kejaksan, Cirebon",
+    latitude: -6.7095,
+    longitude: 108.5582,
+    rating: 4.8,
+    reviewCount: 165,
+    isOpen: true,
+    status: "ACTIVE",
+    pickupStartTime: "21:00",
+    pickupEndTime: "22:30",
+    boxComplianceRate: 93,
+    boxesSoldTotal: 130,
+    currentBoxStock: 16,
+    walletBalance: 520000,
+    bankAccount: {
+      bankName: "BCA",
+      accountNumber: "1340776655",
+      accountHolder: "Kevin Sanjaya"
+    }
   },
   {
     id: "store-dapur-ciremai",
@@ -209,6 +262,20 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     estimatedWeightKg: 0.9
   },
   {
+    id: "bag-empal-1",
+    storeId: "store-empal-apud",
+    title: "Surprise Meal: Daging Empal Gentong Gurih",
+    category: "Makanan Berat",
+    description: "Satu porsi empal gentong bumbu rempah kuning khas Cirebon dengan potongan daging empuk dan kuah santan gurih ditambah lontong.",
+    originalPrice: 45000,
+    discountedPrice: 20000,
+    quotaToday: 5,
+    quotaRemaining: 3,
+    isActive: true,
+    pickupWindow: "20:00 - 21:30 WIB",
+    estimatedWeightKg: 0.8
+  },
+  {
     id: "bag-surya-1",
     storeId: "store-surya-market",
     title: "Surprise Pack: Buah Segar & Whole Wheat Bread",
@@ -221,6 +288,20 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
     isActive: true,
     pickupWindow: "19:00 - 20:30 WIB",
     estimatedWeightKg: 1.1
+  },
+  {
+    id: "bag-martabak-1",
+    storeId: "store-martabak-sanfran",
+    title: "Surprise Box: Martabak Manis Cokelat Keju",
+    category: "Bakery & Pastry",
+    description: "Setengah loyang martabak manis tebal lembut dengan taburan meses cokelat premium dan keju cheddar melimpah.",
+    originalPrice: 60000,
+    discountedPrice: 25000,
+    quotaToday: 4,
+    quotaRemaining: 2,
+    isActive: true,
+    pickupWindow: "21:00 - 22:30 WIB",
+    estimatedWeightKg: 0.85
   }
 ];
 
@@ -272,6 +353,50 @@ export const SEED_ORDERS: Order[] = [
     pickupCode: "4829",
     pickupQrData: "RESCUE_ORDER:RB-7821:4829",
     isChatLocked: false
+  },
+  {
+    id: "RB-6100",
+    buyerId: "user-buyer-1",
+    buyerName: "Budi Santoso",
+    buyerPhone: "081234567890",
+    storeId: "store-ruby-bakery",
+    storeName: "Ruby Bakery & Cake",
+    bagId: "bag-ruby-1",
+    bagTitle: "Surprise Bag: Aneka Roti & Danish Pastry",
+    quantity: 1,
+    unitPrice: 24000,
+    totalPrice: 24000,
+    platformFee: 2880,
+    sellerEarning: 21120,
+    status: "COMPLETED",
+    paymentMethod: "GoPay",
+    paidAt: "2026-10-25T19:00:00Z",
+    completedAt: "2026-10-25T20:10:00Z",
+    pickupCode: "1092",
+    pickupQrData: "RESCUE_ORDER:RB-6100:1092",
+    isChatLocked: true
+  },
+  {
+    id: "RB-5219",
+    buyerId: "user-buyer-1",
+    buyerName: "Budi Santoso",
+    buyerPhone: "081234567890",
+    storeId: "store-jamblang-dul",
+    storeName: "Nasi Jamblang Mang Dul",
+    bagId: "bag-jamblang-1",
+    bagTitle: "Rescue Box: Paket Lauk Komplit Daun Jati",
+    quantity: 1,
+    unitPrice: 17000,
+    totalPrice: 17000,
+    platformFee: 2040,
+    sellerEarning: 14960,
+    status: "COMPLETED",
+    paymentMethod: "QRIS",
+    paidAt: "2026-10-26T19:30:00Z",
+    completedAt: "2026-10-26T21:05:00Z",
+    pickupCode: "6541",
+    pickupQrData: "RESCUE_ORDER:RB-5219:6541",
+    isChatLocked: true
   }
 ];
 
@@ -299,6 +424,18 @@ export const SEED_BOX_ORDERS: RescueBoxOrder[] = [
     trackingNumber: "SICEPAT-CRB-112233",
     status: "SHIPPED",
     orderedAt: "2026-10-26T14:15:00Z"
+  },
+  {
+    id: "BOX-ORD-103",
+    storeId: "store-empal-apud",
+    storeName: "Empal Gentong H. Apud",
+    packageId: "box-100",
+    quantityPcs: 100,
+    totalPrice: 140000,
+    shippingAddress: "Jl. Ir. H. Juanda No. 24, Battembat, Cirebon",
+    trackingNumber: "SICEPAT-CRB-445566",
+    status: "SHIPPED",
+    orderedAt: "2026-10-27T16:20:00Z"
   }
 ];
 
@@ -313,5 +450,16 @@ export const SEED_REVIEWS: Review[] = [
     comment: "Rotinya masih empuk banget dan wangi! Dapat 4 macam roti yang biasanya seharga 60 ribuan. Mantap SisaRasa!",
     usedOfficialRescueBox: true,
     createdAt: "2026-10-25T20:15:00Z"
+  },
+  {
+    id: "rev-2",
+    orderId: "RB-5219",
+    storeId: "store-jamblang-dul",
+    buyerId: "user-buyer-1",
+    buyerName: "Budi Santoso",
+    rating: 5,
+    comment: "Porsi lauk daun jatinya melimpah, ada semur daging dan perkedel. Kotak rescue box nya higienis dan tebal.",
+    usedOfficialRescueBox: true,
+    createdAt: "2026-10-26T21:15:00Z"
   }
 ];

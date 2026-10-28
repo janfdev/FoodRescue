@@ -52,8 +52,8 @@ const DEFAULT_INITIAL_STATE: AppState = {
         id: "msg-1",
         orderId: "RB-7821",
         senderRole: "system",
-        senderName: "Sistem",
-        text: "Pesanan telah dibayar. Dana diamankan di Rekber Escrow. Silakan ambil paket pada jam 19:30 - 21:30 WIB.",
+        senderName: "Sistem Escrow",
+        text: "Pesanan telah dibayar Rp 24.000. Dana diamankan di Rekber Escrow. Silakan ambil paket pada jam 19:30 - 21:30 WIB.",
         timestamp: "2026-10-28T18:40:05Z"
       },
       {
@@ -61,16 +61,36 @@ const DEFAULT_INITIAL_STATE: AppState = {
         orderId: "RB-7821",
         senderRole: "buyer",
         senderName: "Budi Santoso",
-        text: "Halo kak, saya otw ambil jam 20:00 ya.",
+        text: "Halo kak, saya otw ambil sekitar jam 20:00 ya.",
         timestamp: "2026-10-28T18:45:00Z"
       },
       {
         id: "msg-3",
         orderId: "RB-7821",
         senderRole: "seller",
-        senderName: "Ruby Bakery",
-        text: "Baik kak Budi! Paket surprise bag sudah kami siapkan di kotak Rescue Box resmi. Ditunggu kedatangannya ya.",
+        senderName: "Ruby Bakery & Cake",
+        text: "Baik kak Budi! Paket surprise bag sudah kami siapkan di kemasan Rescue Box resmi. Ditunggu di kasir ya.",
         timestamp: "2026-10-28T18:46:12Z"
+      }
+    ],
+    "RB-6100": [
+      {
+        id: "msg-61-1",
+        orderId: "RB-6100",
+        senderRole: "system",
+        senderName: "Sistem Escrow",
+        text: "Pesanan telah dibayar dan diverifikasi kasir. Dana Rp 21.120 berhasil dilepas ke saldo toko.",
+        timestamp: "2026-10-25T20:10:00Z"
+      }
+    ],
+    "RB-5219": [
+      {
+        id: "msg-52-1",
+        orderId: "RB-5219",
+        senderRole: "system",
+        senderName: "Sistem Escrow",
+        text: "Pengambilan makanan di Nasi Jamblang Mang Dul berhasil diverifikasi.",
+        timestamp: "2026-10-26T21:05:00Z"
       }
     ]
   },
@@ -86,6 +106,17 @@ const DEFAULT_INITIAL_STATE: AppState = {
       status: "APPROVED",
       requestedAt: "2026-10-22T09:00:00Z",
       processedAt: "2026-10-22T14:30:00Z"
+    },
+    {
+      id: "WD-102",
+      storeId: "store-jamblang-dul",
+      storeName: "Nasi Jamblang Mang Dul",
+      amount: 400000,
+      bankName: "BRI",
+      accountNumber: "010901029384501",
+      accountHolder: "Abdul Kadir Mang Dul",
+      status: "PENDING",
+      requestedAt: "2026-10-27T10:15:00Z"
     }
   ],
   disputes: []
