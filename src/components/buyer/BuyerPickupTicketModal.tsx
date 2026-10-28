@@ -58,13 +58,13 @@ export function BuyerPickupTicketModal({
             />
           </div>
 
-          {/* 4-Digit PIN */}
-          <div className="w-full bg-muted/60 border border-border rounded-2xl p-3">
+          {/* Status Badge */}
+          <div className="w-full bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-3">
             <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              PIN Kasir (4-Digit)
+              Status Pembayaran
             </p>
-            <p className="text-3xl font-black text-emerald-600 tracking-widest tabular-nums mt-1">
-              {order.pickupCode}
+            <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 mt-1">
+              Terbayar • Langsung Ambil di Toko
             </p>
           </div>
 
@@ -92,10 +92,10 @@ export function BuyerPickupTicketModal({
           </div>
 
           {/* Notice */}
-          <div className="flex items-start gap-2 text-left bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 p-2.5 rounded-xl text-[11px] text-amber-800 dark:text-amber-300">
-            <AlertCircle className="size-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 text-left bg-muted/60 border border-border p-2.5 rounded-xl text-[11px] text-muted-foreground">
+            <AlertCircle className="size-4 text-emerald-600 shrink-0 mt-0.5" />
             <p>
-              Tunjukkan QR Code atau sebutkan PIN ke kasir toko. Dana Anda tetap aman di Escrow hingga paket diterima.
+              Tunjukkan nomor pesanan ini atau QR Code ke kasir toko saat mengambil paket makanan Anda.
             </p>
           </div>
 

@@ -14,9 +14,8 @@ const initialRemaining = bag.quotaRemaining;
 const newOrder = storeService.createOrder(bag.id, "QRIS");
 
 console.assert(newOrder.status === "PAID", "New order should be PAID");
-console.assert(newOrder.pickupCode.length === 4, "PIN should be 4 digits");
 console.assert(bag.quotaRemaining === initialRemaining - 1, "Bag quota should decrease by 1");
-console.log(`✓ Buyer ordered ${newOrder.id} with PIN ${newOrder.pickupCode}`);
+console.log(`✓ Buyer ordered ${newOrder.id} successfully`);
 
 // 3. Buyer & Seller Chat
 storeService.switchRole("buyer");
@@ -32,8 +31,8 @@ console.log("✓ In-app chat exchange verified");
 const rubyStore = storeService.getStores().find((s) => s.id === "store-ruby-bakery")!;
 const initialBalance = rubyStore.walletBalance;
 
-const verifyRes = storeService.verifyPickup(newOrder.pickupCode);
-console.assert(verifyRes.success, "Verification with PIN should succeed");
+const verifyRes = storeService.confirmOrderHandover(newOrder.id);
+console.assert(verifyRes.success, "Handover verification with Order ID should succeed");
 console.assert(newOrder.status === "COMPLETED", "Order should be COMPLETED");
 console.assert(rubyStore.walletBalance === initialBalance + newOrder.sellerEarning, "Seller balance should receive escrow release");
 console.log(`✓ Escrow released! Added Rp ${newOrder.sellerEarning} to Ruby Bakery`);

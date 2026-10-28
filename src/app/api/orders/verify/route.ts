@@ -8,16 +8,17 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { orderId, pin } = body;
+    const target = (orderId || pin || "").trim();
 
-    if (!pin) {
+    if (!target) {
       return NextResponse.json(
-        { success: false, error: "Field pin/pickupCode wajib disertakan" },
+        { success: false, error: "Field orderId wajib disertakan" },
         { status: 400 }
       );
     }
 
-    // Eksekusi verifikasi via storeService (merilis escrow dan menambah saldo wallet seller)
-    const result = storeService.verifyPickup(pin.trim());
+    // Eksekusi serah terima pesanan via storeService
+    const result = storeService.confirmOrderHandover(target);
 
     if (!result.success) {
       return NextResponse.json(

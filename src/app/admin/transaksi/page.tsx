@@ -30,7 +30,7 @@ export default function AdminTransaksiPage() {
           Daftar Transaksi & Rekening Penjamin (Escrow)
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Audit status pemesanan, kode PIN verifikasi fisik kasir, dan penahanan dana platform
+          Audit status pemesanan, serah terima pesanan kasir, dan pelepasan dana mitra platform
         </p>
       </div>
 
@@ -43,8 +43,8 @@ export default function AdminTransaksiPage() {
                 <th className="p-3.5">Pembeli</th>
                 <th className="p-3.5">Mitra Toko</th>
                 <th className="p-3.5">Total & Komisi</th>
-                <th className="p-3.5">PIN Pickup</th>
-                <th className="p-3.5">Status Escrow</th>
+                <th className="p-3.5">Metode Bayar</th>
+                <th className="p-3.5">Status Transaksi</th>
                 <th className="p-3.5 text-right">Aksi</th>
               </tr>
             </thead>
@@ -68,7 +68,11 @@ export default function AdminTransaksiPage() {
                       Fee: Rp {ord.platformFee.toLocaleString("id-ID")}
                     </span>
                   </td>
-                  <td className="p-3.5 font-mono font-bold text-foreground">{ord.pickupCode}</td>
+                  <td className="p-3.5 font-medium text-foreground">
+                    <Badge variant="outline" className="text-[10px] font-mono">
+                      {ord.paymentMethod}
+                    </Badge>
+                  </td>
                   <td className="p-3.5">
                     <Badge
                       variant={

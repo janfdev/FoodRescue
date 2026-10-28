@@ -167,7 +167,7 @@ export default function AccountPage() {
                     Portal Mitra Kuliner (POS)
                   </span>
                   <span className="text-[11px] text-muted-foreground">
-                    Validasi PIN kasir, atur surprise bag, dan box B2B
+                    Serah terima pesanan kasir, atur surprise bag, dan box B2B
                   </span>
                 </div>
               </div>

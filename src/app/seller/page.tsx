@@ -26,11 +26,11 @@ export default function SellerPosPage() {
     return unsub;
   }, []);
 
-  const handleVerify = (codeToVerify?: string) => {
-    const code = codeToVerify || pickupCodeInput;
-    if (!code.trim()) return;
+  const handleVerify = (orderIdToVerify?: string) => {
+    const targetId = orderIdToVerify || pickupCodeInput;
+    if (!targetId.trim()) return;
 
-    const res = storeService.verifyPickup(code);
+    const res = storeService.confirmOrderHandover(targetId);
     setVerifyResult(res);
     setPickupCodeInput("");
     syncData();
@@ -48,24 +48,24 @@ export default function SellerPosPage() {
     <div className="space-y-6 w-full">
       <div>
         <h2 className="text-xl font-black text-foreground tracking-tight">
-          Kasir POS & Verifikasi PIN Pengambilan
+          Kasir POS & Serah Terima Pesanan
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Validasi tiket pengambilan pembeli untuk mencairkan dana escrow langsung ke dompet toko
+          Konfirmasi serah terima makanan surplus saat pembeli datang mengambil langsung ke toko
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Input Verifikasi PIN Cepat */}
+        {/* Input Verifikasi Cepat No Pesanan */}
         <div className="lg:col-span-5">
           <Card className="border-border shadow-xs">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-sm font-extrabold flex items-center gap-2">
                 <QrCode className="size-4 text-emerald-600" />
-                <span>Input PIN Verifikasi Kasir</span>
+                <span>Konfirmasi No. Pesanan</span>
               </CardTitle>
               <CardDescription className="text-xs">
-                Minta pembeli menyebutkan 4-digit PIN tiket saat serah terima makanan
+                Masukkan No. Pesanan pembeli untuk menyelesaikan serah terima makanan
               </CardDescription>
             </CardHeader>
 
@@ -73,11 +73,11 @@ export default function SellerPosPage() {
               <div className="flex gap-2">
                 <Input
                   type="text"
-                  placeholder="PIN 4-Digit..."
+                  placeholder="Contoh: RB-8492"
                   value={pickupCodeInput}
                   onChange={(e) => setPickupCodeInput(e.target.value)}
-                  className="font-mono text-center tracking-widest text-lg font-bold"
-                  maxLength={8}
+                  className="font-mono text-center tracking-wider text-base font-bold uppercase"
+                  maxLength={12}
                 />
                 <Button
                   type="button"
@@ -85,7 +85,7 @@ export default function SellerPosPage() {
                   disabled={!pickupCodeInput.trim()}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
                 >
-                  Verifikasi
+                  Serahkan
                 </Button>
               </div>
 
@@ -107,9 +107,9 @@ export default function SellerPosPage() {
               )}
 
               <div className="p-3 bg-muted/40 rounded-xl text-xs text-muted-foreground space-y-1">
-                <p className="font-bold text-foreground">Ketentuan Escrow:</p>
+                <p className="font-bold text-foreground">Alur Serah Terima Instan:</p>
                 <p className="text-[11px] leading-relaxed">
-                  Dana pembelian ditahan di sistem penjamin dan akan langsung diteruskan ke saldo toko saat kasir memvalidasi kode PIN tiket ini.
+                  Seperti Gojek / GrabFood, pembeli yang telah membayar langsung datang ke toko. Klik <strong>Serahkan</strong> untuk mencairkan dana bersih (88%) ke saldo dompet toko.
                 </p>
               </div>
             </CardContent>
@@ -143,9 +143,9 @@ export default function SellerPosPage() {
                   <thead className="bg-muted/40 border-b border-border text-[11px] text-muted-foreground font-bold uppercase">
                     <tr>
                       <th className="p-3 px-4">Pembeli</th>
+                      <th className="p-3">No. Pesanan</th>
                       <th className="p-3">Paket</th>
                       <th className="p-3">Earning (Net)</th>
-                      <th className="p-3">PIN</th>
                       <th className="p-3 text-right">Aksi Kasir</th>
                     </tr>
                   </thead>
@@ -154,7 +154,10 @@ export default function SellerPosPage() {
                       <tr key={ord.id} className="hover:bg-muted/20">
                         <td className="p-3 px-4">
                           <span className="font-bold text-foreground block">{ord.buyerName}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">{ord.id}</span>
+                          <span className="text-[10px] text-muted-foreground">{ord.buyerPhone}</span>
+                        </td>
+                        <td className="p-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                          {ord.id}
                         </td>
                         <td className="p-3">
                           <span className="font-medium text-foreground block">{ord.bagTitle}</span>
@@ -162,9 +165,6 @@ export default function SellerPosPage() {
                         </td>
                         <td className="p-3 font-bold tabular-nums text-emerald-600">
                           Rp {ord.sellerEarning.toLocaleString("id-ID")}
-                        </td>
-                        <td className="p-3 font-mono font-bold text-foreground">
-                          {ord.pickupCode}
                         </td>
                         <td className="p-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
@@ -179,10 +179,10 @@ export default function SellerPosPage() {
                             </Button>
                             <Button
                               size="sm"
-                              onClick={() => handleVerify(ord.pickupCode)}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-7 px-2.5"
+                              onClick={() => handleVerify(ord.id)}
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-7 px-3 cursor-pointer"
                             >
-                              Validasi
+                              Serahkan
                             </Button>
                           </div>
                         </td>

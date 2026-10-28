@@ -117,10 +117,10 @@ function CheckoutContent() {
 
             <div className="text-center space-y-1">
               <span className="text-[11px] text-muted-foreground uppercase tracking-wider block font-semibold">
-                PIN 4-Digit Kasir
+                Status Pesanan
               </span>
-              <div className="inline-block px-5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 font-mono text-2xl font-black text-amber-800 dark:text-amber-400 tracking-widest">
-                {confirmedOrder.pickupCode}
+              <div className="inline-block px-4 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs font-extrabold text-emerald-800 dark:text-emerald-300">
+                Terbayar • Siap Diambil di Toko
               </div>
             </div>
 

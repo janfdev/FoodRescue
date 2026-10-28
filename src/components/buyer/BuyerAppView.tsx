@@ -354,7 +354,7 @@ export function BuyerAppView() {
                           <MessageSquare className="size-4" />
                         </button>
 
-                        {/* Tombol Tiket QR/PIN */}
+                        {/* Tombol Tiket Ambil */}
                         {isPaid && (
                           <button
                             type="button"
@@ -362,7 +362,7 @@ export function BuyerAppView() {
                             className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-colors shadow-xs"
                           >
                             <QrCode className="size-3.5" />
-                            <span>Lihat Tiket (PIN {order.pickupCode})</span>
+                            <span>Lihat Tiket Pengambilan</span>
                           </button>
                         )}
 

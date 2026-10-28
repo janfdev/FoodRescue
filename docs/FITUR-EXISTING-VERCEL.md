@@ -46,10 +46,10 @@ FoodRescue kini dilengkapi dengan sekumpulan endpoint serverless Next.js App Rou
 
 ### C. Manajemen Pesanan (`/api/orders`)
 - `GET /api/orders`: Mengambil daftar pesanan (mendukung filter `?buyerId=...` dan `?storeId=...`).
-- `POST /api/orders`: Membuat pesanan baru, mengunci dana ke rekening penampung (*Escrow HELD*), dan men-generate 4-digit PIN verifikasi.
+- `POST /api/orders`: Membuat pesanan baru, mengonfirmasi status `PAID`, dan mengunci dana ke rekening penampung (*Escrow HELD*).
 
-### D. Validasi POS Kasir (`/api/orders/verify`)
-- `POST /api/orders/verify`: Kasir mitra memasukkan 4-digit PIN atau scan QR pembeli.
+### D. Validasi Serah Terima Kasir (`/api/orders/verify`)
+- `POST /api/orders/verify`: Kasir mitra mengonfirmasi penyerahan makanan berdasarkan No. Pesanan.
 - Mengubah status pesanan menjadi `COMPLETED`, merilis dana penampung (*Escrow RELEASED*), dan menambahkan saldo bersih (88%) ke dompet mitra.
 
 ### E. Katalog Surprise Bags & Mitra Toko
@@ -84,7 +84,7 @@ FoodRescue kini dilengkapi dengan sekumpulan endpoint serverless Next.js App Rou
    - Halaman `/checkout` dengan rincian biaya transparan (harga makanan surplus + biaya layanan platform Rp 1.000).
    - Simulasi pembayaran instan (QRIS).
 3. **Tiket Digital & Escrow Protection**:
-   - Halaman `/tickets` menampilkan tiket aktif lengkap dengan 4-digit PIN unik dan QR code dinamis untuk verifikasi fisik di kasir toko.
+   - Halaman `/tickets` menampilkan tiket pengambilan aktif lengkap dengan No. Pesanan dan QR code dinamis untuk ditunjukkan di kasir toko.
    - In-app chat terisolasi per nomor pesanan (`/chat?orderId=...`) dengan *Optimistic UI Update* (0ms latency pengiriman).
 4. **Rating & Audit Kepatuhan Kemasan**:
    - Formulir ulasan bintang 1-5 dan verifikasi apakah toko menyajikan makanan menggunakan kemasan resmi FoodRescue.
@@ -92,8 +92,8 @@ FoodRescue kini dilengkapi dengan sekumpulan endpoint serverless Next.js App Rou
 ### C. Portal Mitra Toko (Seller Dashboard - `/seller/*`)
 1. **Ringkasan Outlet (`/seller`)**:
    - Metrik penjualan harian, saldo dompet, kuota bag aktif, dan skor kepatuhan box.
-2. **POS Validasi Pesanan (`/seller/orders`)**:
-   - Kasir toko memasukkan 4-digit PIN pembeli -> pesanan selesai seketika -> dana escrow dilepas ke saldo dompet toko secara otomatis (88% dari subtotal).
+2. **POS Serah Terima Pesanan (`/seller`)**:
+   - Kasir toko melihat antrean pesanan masuk dan menekan 1-klik tombol **Serahkan** berdasarkan No. Pesanan pembeli -> pesanan selesai seketika -> dana escrow dilepas ke saldo dompet toko secara otomatis (88% dari subtotal).
 3. **Manajemen Menu Bag (`/seller/bags`)**:
    - Tambah, edit, aktifkan, dan nonaktifkan kuota Surprise Bag harian serta atur jam pickup.
 4. **B2B Packaging Store (`/seller/boxes`)**:

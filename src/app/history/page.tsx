@@ -153,11 +153,11 @@ export default function HistoryPage() {
                   </Badge>
                 </div>
 
-                {/* QR Code & PIN Presentation for Active Orders */}
+                {/* QR Code & Presentation for Active Orders */}
                 {ord.status !== "COMPLETED" ? (
                   <div className="p-3.5 bg-muted/40 rounded-xl border border-border/60 text-center space-y-3">
                     <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
-                      Tunjukkan PIN atau QR ke Kasir
+                      Tunjukkan No. Pesanan atau QR ke Kasir
                     </span>
 
                     <div className="inline-block p-2.5 bg-white rounded-xl border border-border/80 shadow-2xs">
@@ -165,9 +165,9 @@ export default function HistoryPage() {
                     </div>
 
                     <div>
-                      <span className="text-[10px] text-muted-foreground block">PIN 4-Digit Kasir:</span>
-                      <span className="font-mono text-2xl font-black text-amber-800 dark:text-amber-400 tracking-widest block tabular-nums">
-                        {ord.pickupCode}
+                      <span className="text-[10px] text-muted-foreground block">Nomor Pesanan:</span>
+                      <span className="font-mono text-xl font-black text-emerald-700 dark:text-emerald-400 tracking-wider block tabular-nums">
+                        {ord.id}
                       </span>
                     </div>
                   </div>

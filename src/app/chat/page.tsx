@@ -245,9 +245,9 @@ function ChatContent() {
           </div>
 
           <div className="text-right shrink-0">
-            <span className="text-[9px] text-muted-foreground block uppercase font-bold">PIN Kasir:</span>
-            <span className="font-mono text-sm font-black text-amber-800 dark:text-amber-400 tracking-wider tabular-nums bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded-md inline-block">
-              {order.pickupCode}
+            <span className="text-[9px] text-muted-foreground block uppercase font-bold">No. Pesanan:</span>
+            <span className="font-mono text-xs font-black text-emerald-800 dark:text-emerald-300 tracking-wider tabular-nums bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-md inline-block">
+              {order.id}
             </span>
           </div>
         </div>

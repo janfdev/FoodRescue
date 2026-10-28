@@ -346,8 +346,7 @@ class StoreService {
     // Reduce bag quota
     bag.quotaRemaining -= quantity;
 
-    // Generate PIN 4-digit
-    const randomPin = Math.floor(1000 + Math.random() * 9000).toString();
+    // Nomor pesanan unik e.g. "RB-8492"
     const orderId = `RB-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const subtotalPrice = bag.discountedPrice * quantity;
@@ -375,11 +374,11 @@ class StoreService {
       totalPrice,
       platformFee,
       sellerEarning,
-      status: "PAID", // Simulation: instant mock payment
+      status: "PAID", // Pembayaran langsung terkonfirmasi (seperti Gojek / Grab)
       paymentMethod,
       paidAt: new Date().toISOString(),
-      pickupCode: randomPin,
-      pickupQrData: `RESCUE_ORDER:${orderId}:${randomPin}`,
+      pickupCode: orderId,
+      pickupQrData: `RESCUE_ORDER:${orderId}`,
       isChatLocked: false
     };
 
@@ -391,8 +390,8 @@ class StoreService {
         id: `msg-${Date.now()}`,
         orderId,
         senderRole: "system",
-        senderName: "Sistem Escrow",
-        text: `Pesanan berhasil dibayar Rp ${bag.discountedPrice.toLocaleString("id-ID")}. Dana disimpan aman di Escrow hingga Anda mengonfirmasi pengambilan makanan di kasir toko.`,
+        senderName: "Sistem Transaksi",
+        text: `Pesanan ${orderId} berhasil dibayar Rp ${totalPrice.toLocaleString("id-ID")}. Pembeli dapat langsung mengambil makanan surplus ke lokasi ${store.name} dengan menyebutkan nomor pesanan.`,
         timestamp: new Date().toISOString()
       }
     ];
@@ -422,7 +421,7 @@ class StoreService {
     if (!order) {
       return {
         success: false,
-        message: "Kode pengambilan / QR Code tidak valid atau pesanan sudah pernah diambil."
+        message: "Nomor pesanan tidak ditemukan atau pesanan sudah diselesaikan sebelumnya."
       };
     }
 

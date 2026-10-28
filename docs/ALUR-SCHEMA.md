@@ -10,8 +10,8 @@ Penyelarasan role sistem di level database dan tampilan antarmuka (UI):
 
 | Role di DB (`user_role`) | Label di UI | Deskripsi & Hak Akses |
 | :--- | :--- | :--- |
-| `buyer` | **Pelanggan** / **Pembeli** | Eksplorasi katalog, reservasi & pembayaran Surprise Bag, chat per pesanan, verifikasi pickup via PIN/QR, memberikan rating & review kepatuhan box, pengajuan sengketa (dispute). |
-| `seller` | **Mitra Toko** | Manajemen inventaris Surprise Bag, pengaturan jam operasional pickup, scanner/validasi PIN pickup pembeli, pembelian kemasan ramah lingkungan (B2B Rescue Box), monitoring saldo & pengajuan penarikan dana (*withdrawal*). |
+| `buyer` | **Pelanggan** / **Pembeli** | Eksplorasi katalog, reservasi & pembayaran Surprise Bag, chat per pesanan, pengambilan langsung di toko dengan No. Pesanan/QR, memberikan rating & review kepatuhan box, pengajuan sengketa (dispute). |
+| `seller` | **Mitra Toko** | Manajemen inventaris Surprise Bag, pengaturan jam operasional pickup, kasir POS serah terima pesanan (1-klik konfirmasi tanpa PIN rumit), pembelian kemasan ramah lingkungan (B2B Rescue Box), monitoring saldo & pengajuan penarikan dana (*withdrawal*). |
 | `admin` | **Admin** (Super Admin) | Approval pendaftaran & verifikasi KYC mitra baru, moderasi sengketa (*escrow dispute release/refund*), approval pencairan dana toko, audit kepatuhan kemasan, dan kontrol penuh manajemen pengguna (*suspend/activate*, promosi role). |
 
 > **Catatan Rekomendasi Domain Model**:
@@ -134,11 +134,11 @@ Eskalasi masalah jika makanan basi, toko tutup saat jam pickup, atau pesanan tid
 
 ## 4. Alur Siklus Hidup Transaksi (State Machine Flow)
 
-### A. Alur Pemesanan & Pelepasan Escrow
-1. **Checkout & Pembayaran**: Pembeli memilih kantong makanan -> Sistem membuat record `orders` (`PENDING_PAYMENT`) -> Pembeli membayar via QRIS/VA -> Status berubah menjadi `PAID`, sistem membuat record `escrow_accounts` dengan status `HELD` dan menghasilkan 4-digit PIN serta QR pickup.
-2. **Koordinasi Pickup**: Pembeli dan Mitra dapat berkirim pesan via `chat_messages` yang terikat pada `order_id`.
-3. **Validasi Fisik di Toko**: Pembeli datang ke toko pada jam pickup dan menyebutkan PIN / menunjukkan QR -> Kasir toko memasukkan PIN di dashboard mitra (`/seller/orders`).
-4. **Pelepasan Dana**: PIN valid -> Status order menjadi `COMPLETED` -> Sistem mengubah status escrow menjadi `RELEASED_TO_SELLER` -> Saldo bersih (`seller_earning`) otomatis bertambah ke `stores.wallet_balance` -> Ruang chat pesanan dikunci (`is_chat_locked = true`).
+### A. Alur Pemesanan & Serah Terima Pesanan (Seperti Gojek / GrabFood Takeaway)
+1. **Checkout & Pembayaran**: Pembeli memilih kantong makanan -> Pembeli membayar -> Status langsung terkonfirmasi `PAID` (Terbayar), pesanan memperoleh No. Pesanan resmi (misal `RB-8492`), dan dana penampung masuk ke `escrow_accounts` dengan status `HELD`.
+2. **Koordinasi Pickup**: Pembeli dan Mitra dapat berkirim pesan via `chat_messages` yang terikat pada `order_id` untuk konfirmasi perkiraan waktu tiba di toko.
+3. **Pengambilan Fisik di Toko**: Pembeli langsung datang ke outlet toko pada jam operasional pickup dan menunjukkan nomor pesanan atau QR code.
+4. **Pelepasan Dana Otomatis**: Kasir toko menekan tombol 1-klik **Serahkan** pada kasir POS (`/seller`) berdasarkan No. Pesanan -> Status order menjadi `COMPLETED` -> Sistem mengubah status escrow menjadi `RELEASED_TO_SELLER` -> Saldo bersih (`seller_earning` 88%) otomatis bertambah ke `stores.wallet_balance` -> Ruang chat pesanan dikunci (`is_chat_locked = true`).
 5. **Audit Kemasan**: Pembeli memberikan ulasan dan mencentang apakah toko menggunakan kemasan resmi -> Nilai kepatuhan toko (`box_compliance_rate`) diperbarui secara real-time.
 
 ### B. Alur Sengketa (Dispute Resolution)

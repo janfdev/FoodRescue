@@ -531,10 +531,10 @@ export function LandingPage() {
                     3
                   </div>
                   <span className="font-bold text-[10px] block leading-tight text-foreground">
-                    Ambil Pakai PIN/QR
+                    Ambil di Toko
                   </span>
                   <span className="text-[8px] text-muted-foreground block leading-none">
-                    Tunjukkan ke Kasir
+                    Tunjukkan No. Pesanan
                   </span>
                 </div>
               </div>
