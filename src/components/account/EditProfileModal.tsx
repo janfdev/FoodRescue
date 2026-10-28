@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Store } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
@@ -57,13 +57,31 @@ export function EditProfileModal({
   const isSeller = user.role === "seller";
   const isAdmin = user.role === "super_admin";
 
-  const cirebonAreas = [
+  const [cirebonAreas, setCirebonAreas] = useState<string[]>([
     "Tuparev",
     "Kesambi",
     "Pekiringan",
     "Karanggetas",
     "Kejaksan",
-  ];
+    "Siliwangi",
+    "Kartini",
+    "Harjamukti",
+    "Kedawung",
+  ]);
+
+  useEffect(() => {
+    fetch("/api/locations")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data)) {
+          const list = json.data.filter((item: string) => item.toLowerCase() !== "semua lokasi" && item.toLowerCase() !== "semua");
+          if (list.length > 0) {
+            setCirebonAreas(Array.from(new Set(list)));
+          }
+        }
+      })
+      .catch((err) => console.warn("Failed fetching locations:", err));
+  }, []);
 
   // Handle Photo Upload directly to Dahono S3 API
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

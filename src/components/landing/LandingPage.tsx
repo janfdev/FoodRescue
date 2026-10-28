@@ -50,6 +50,19 @@ export function LandingPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);
+  const [areaSearchQuery, setAreaSearchQuery] = useState<string>("");
+  const [availableAreas, setAvailableAreas] = useState<string[]>([
+    "Semua",
+    "Tuparev",
+    "Kesambi",
+    "Pekiringan",
+    "Karanggetas",
+    "Kejaksan",
+    "Siliwangi",
+    "Kartini",
+    "Harjamukti",
+    "Kedawung",
+  ]);
   const [flyingDot, setFlyingDot] = useState<{ id: string; startX: number; startY: number } | null>(null);
 
   const flashSaleRef = useHorizontalScroll<HTMLDivElement>();
@@ -61,6 +74,23 @@ export function LandingPage() {
       setState(storeService.getState());
     });
     return unsub;
+  }, []);
+
+  // Fetch dynamic locations from database / API
+  useEffect(() => {
+    fetch("/api/locations")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          const list = json.data.map((item: string) =>
+            item.toLowerCase() === "semua lokasi" ? "Semua" : item
+          );
+          setAvailableAreas(Array.from(new Set(["Semua", ...list])));
+        }
+      })
+      .catch((err) => {
+        console.warn("Fallback to preset areas:", err);
+      });
   }, []);
 
   const { surpriseBags: bags, stores, currentUser, orders } = state;
@@ -85,14 +115,12 @@ export function LandingPage() {
     storeService.setCurrentUser(user);
   };
 
-  const cirebonAreas = [
-    "Semua",
-    "Tuparev",
-    "Kesambi",
-    "Pekiringan",
-    "Karanggetas",
-    "Kejaksan",
-  ];
+  const filteredAreas = useMemo(() => {
+    if (!areaSearchQuery.trim()) return availableAreas;
+    return availableAreas.filter((a) =>
+      a.toLowerCase().includes(areaSearchQuery.toLowerCase())
+    );
+  }, [availableAreas, areaSearchQuery]);
 
   // Filtering live catalog
   const filteredBags = useMemo(() => {
@@ -158,28 +186,46 @@ export function LandingPage() {
                 </span>
                 <ChevronDown className="size-3 text-muted-foreground shrink-0" />
               </PopoverTrigger>
-              <PopoverContent align="start" className="w-56 p-2 space-y-1">
-                <div className="px-2 py-1 text-[11px] font-black text-muted-foreground uppercase tracking-wider">
+              <PopoverContent align="start" className="w-64 p-2 space-y-2">
+                <div className="px-1 pt-1 text-[11px] font-black text-muted-foreground uppercase tracking-wider">
                   Pilih Wilayah Penjemputan
                 </div>
-                {cirebonAreas.map((area) => (
-                  <button
-                    key={area}
-                    type="button"
-                    onClick={() => {
-                      setSelectedArea(area);
-                      setIsAreaPickerOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                      selectedArea === area
-                        ? "bg-emerald-700 text-white font-bold"
-                        : "hover:bg-muted text-foreground"
-                    }`}
-                  >
-                    <span>{area === "Semua" ? "Semua Wilayah Cirebon" : area}</span>
-                    {selectedArea === area && <Check className="size-3.5" />}
-                  </button>
-                ))}
+                <div className="relative px-0.5">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Cari nama area Cirebon..."
+                    value={areaSearchQuery}
+                    onChange={(e) => setAreaSearchQuery(e.target.value)}
+                    className="pl-7.5 h-8 text-xs bg-muted/40"
+                  />
+                </div>
+                <div className="max-h-52 overflow-y-auto space-y-0.5 px-0.5">
+                  {filteredAreas.length === 0 ? (
+                    <div className="py-3 text-center text-xs text-muted-foreground">
+                      Wilayah tidak ditemukan.
+                    </div>
+                  ) : (
+                    filteredAreas.map((area) => (
+                      <button
+                        key={area}
+                        type="button"
+                        onClick={() => {
+                          setSelectedArea(area);
+                          setIsAreaPickerOpen(false);
+                          setAreaSearchQuery("");
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          selectedArea === area
+                            ? "bg-emerald-700 text-white font-bold"
+                            : "hover:bg-muted text-foreground"
+                        }`}
+                      >
+                        <span>{area === "Semua" ? "Semua Wilayah Cirebon" : area}</span>
+                        {selectedArea === area && <Check className="size-3.5" />}
+                      </button>
+                    ))
+                  )}
+                </div>
               </PopoverContent>
             </Popover>
 
