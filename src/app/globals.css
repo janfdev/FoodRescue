@@ -121,10 +121,16 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overscroll-behavior-y: none;
+  }
+  button, a, [role="button"] {
+    touch-action: manipulation;
   }
 }
