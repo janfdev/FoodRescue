@@ -223,6 +223,57 @@ class StoreService {
     this.persist();
   }
 
+  public updateUserProfile(
+    userId: string,
+    data: {
+      name?: string;
+      phone?: string;
+      avatarUrl?: string;
+      storeData?: {
+        name?: string;
+        phone?: string;
+        area?: string;
+        pickupStartTime?: string;
+        pickupEndTime?: string;
+        address?: string;
+      };
+    }
+  ) {
+    if (this.state.currentUser.id === userId) {
+      this.state.currentUser = {
+        ...this.state.currentUser,
+        ...(data.name ? { name: data.name } : {}),
+        ...(data.phone ? { phone: data.phone } : {}),
+        ...(data.avatarUrl ? { avatarUrl: data.avatarUrl } : {}),
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("foodrescue_auth_user", JSON.stringify(this.state.currentUser));
+      }
+    }
+
+    // If storeData is provided, update associated store
+    if (data.storeData) {
+      const storeIndex = this.state.stores.findIndex(
+        (s) =>
+          (this.state.currentUser.storeId && s.id === this.state.currentUser.storeId) ||
+          s.name.toLowerCase().includes(this.state.currentUser.name.toLowerCase())
+      );
+      if (storeIndex !== -1) {
+        const currentStore = this.state.stores[storeIndex];
+        this.state.stores[storeIndex] = {
+          ...currentStore,
+          ...(data.storeData.name ? { name: data.storeData.name } : {}),
+          ...(data.storeData.area ? { area: data.storeData.area } : {}),
+          ...(data.storeData.pickupStartTime ? { pickupStartTime: data.storeData.pickupStartTime } : {}),
+          ...(data.storeData.pickupEndTime ? { pickupEndTime: data.storeData.pickupEndTime } : {}),
+          ...(data.storeData.address ? { address: data.storeData.address } : {}),
+        };
+      }
+    }
+
+    this.persist();
+  }
+
   // =====================
   // STORES & SURPRISE BAGS
   // =====================

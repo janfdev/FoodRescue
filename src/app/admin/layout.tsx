@@ -14,7 +14,9 @@ import {
   ArrowLeft,
   ChevronDown,
   LogOut,
-  UserCheck
+  Menu,
+  X,
+  UserCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -27,6 +29,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState(storeService.getState());
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -34,6 +37,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     });
     return unsub;
   }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const adminUser =
     state.currentUser?.role === "super_admin"
@@ -103,16 +111,123 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     },
   ];
 
+  const activeNavItem = navItems.find((item) =>
+    item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/")
+  ) || navItems[0];
+
   return (
     <div className="w-full min-h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans">
-      {/* ─── SIDEBAR KIRI PERSISTEN ────────────────────────────────────────── */}
-      <aside className="w-full md:w-64 bg-card border-r border-border shrink-0 p-4 flex flex-col justify-between">
+      
+      {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
+      <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Link href="/" className="size-8 rounded-lg overflow-hidden shrink-0 border border-purple-500/30">
+            <img
+              src="/icons/icon-96x96.png"
+              alt="Rerasa Logo"
+              className="w-full h-full object-cover"
+            />
+          </Link>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-extrabold text-xs text-foreground truncate">
+                Rerasa Admin
+              </span>
+              <Badge variant="outline" className="text-[9px] font-bold px-1 py-0 border-purple-500/30 text-purple-700 dark:text-purple-300">
+                {activeNavItem.label}
+              </Badge>
+            </div>
+            <span className="text-[9px] text-muted-foreground block truncate">
+              Command Center Cirebon
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {(pendingStoresCount > 0 || pendingWdCount > 0) && (
+            <span className="size-2 rounded-full bg-red-600 animate-pulse" />
+          )}
+
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="size-8 rounded-lg border border-border bg-muted/50 hover:bg-muted flex items-center justify-center text-foreground transition-colors cursor-pointer"
+            aria-label="Toggle Menu Admin"
+          >
+            {isMobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
+          </button>
+        </div>
+      </header>
+
+      {/* ─── MOBILE DRAWER MENU (< MD) ───────────────────────────────────── */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-x-0 top-13 z-40 bg-card/98 border-b border-border shadow-xl p-4 space-y-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-in fade-in slide-in-from-top-2">
+          <nav className="space-y-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = item.exact
+                ? pathname === item.href
+                : pathname === item.href || pathname.startsWith(item.href + "/");
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
+                    isActive
+                      ? "bg-purple-100 text-purple-900 dark:bg-purple-950/80 dark:text-purple-300 shadow-2xs"
+                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Icon className="size-4" />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.badge !== null && (
+                    <Badge
+                      className={`text-[10px] px-1.5 py-0 font-mono ${
+                        item.badgeColor || ""
+                      }`}
+                    >
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <Separator />
+
+          <div className="flex items-center justify-between text-xs pt-1">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
+            >
+              <ArrowLeft className="size-3.5" />
+              <span>Kembali ke Beranda</span>
+            </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-1 text-red-600 font-bold"
+            >
+              <LogOut className="size-3.5" />
+              <span>Keluar</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── SIDEBAR KIRI PERSISTEN DESKTOP (>= MD) ───────────────────────── */}
+      <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between min-h-screen">
         <div className="space-y-6">
           {/* Logo & Brand Header */}
           <div className="flex items-center gap-3 px-2">
-            <Link href="/" className="size-9 rounded-xl overflow-hidden shadow-xs shrink-0 block">
+            <Link href="/" className="size-9 rounded-xl overflow-hidden shadow-xs shrink-0 block border border-purple-500/30">
               <img
-                src="/brand/rerasa-mascot-r.svg"
+                src="/icons/icon-96x96.png"
                 alt="Rerasa Logo"
                 className="w-full h-full object-cover"
               />
@@ -179,12 +294,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* Interactive Profile Card with Popover & Dicebear Avatar */}
+        {/* Interactive Profile Card with Popover & Avatar */}
         <div className="pt-4 border-t border-border/80">
           <Popover>
-            <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left">
+            <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left cursor-pointer">
               <div className="flex items-center gap-2.5 min-w-0">
-                <Avatar size="sm" className="size-8 rounded-full border border-border">
+                <Avatar className="size-8 rounded-full border border-border">
                   <AvatarImage src={adminUser.avatarUrl} alt={adminUser.name} />
                   <AvatarFallback className="bg-purple-700 text-white font-bold text-xs">
                     {initials}
@@ -203,7 +318,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </PopoverTrigger>
 
             <PopoverContent align="start" side="top" className="w-60 p-3 space-y-2.5 bg-card border border-border shadow-lg">
-              {/* Profile Header */}
               <div className="space-y-1 pb-2 border-b border-border">
                 <div className="flex items-center justify-between">
                   <span className="font-extrabold text-foreground text-xs block truncate">
@@ -218,7 +332,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </span>
               </div>
 
-              {/* Quick Links */}
               <div className="space-y-1">
                 <Link
                   href="/admin/users"
@@ -226,6 +339,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 >
                   <Users className="size-3.5 text-purple-600" />
                   <span>Manajemen User</span>
+                </Link>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <Settings className="size-3.5 text-purple-600" />
+                  <span>Profil & Pengaturan</span>
                 </Link>
                 <Link
                   href="/"
@@ -238,11 +358,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
               <Separator />
 
-              {/* Logout Button */}
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors text-left"
+                className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors text-left cursor-pointer"
               >
                 <LogOut className="size-3.5" />
                 <span>Keluar Akun (Logout)</span>
@@ -253,7 +372,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ─── KONTEN HALAMAN ROUTE MASING-MASING ────────────────────────────── */}
-      <main className="flex-1 p-4 md:p-8 overflow-y-auto">
+      <main className="flex-1 min-w-0 p-3 sm:p-5 md:p-8 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
     </div>

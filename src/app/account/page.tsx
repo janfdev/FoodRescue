@@ -20,11 +20,14 @@ import {
   User,
   ChevronRight,
   Sparkles,
+  Pencil,
 } from "lucide-react";
+import { EditProfileModal } from "@/components/account/EditProfileModal";
 
 export default function AccountPage() {
   const router = useRouter();
   const [state, setState] = useState(storeService.getState());
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -33,7 +36,10 @@ export default function AccountPage() {
     return unsub;
   }, []);
 
-  const { currentUser, orders } = state;
+  const { currentUser, orders, stores } = state;
+  const currentStore = currentUser.storeId
+    ? stores.find((s) => s.id === currentUser.storeId)
+    : null;
 
   const myOrdersCount = orders.filter(
     (o) =>
@@ -90,15 +96,35 @@ export default function AccountPage() {
             </div>
 
             <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
-              <span className="text-muted-foreground">Peran Akun:</span>
-              <Badge
-                variant="secondary"
-                className="font-bold text-[10px] capitalize bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20"
+              <div className="flex items-center gap-1.5">
+                <span className="text-muted-foreground">Peran:</span>
+                <Badge
+                  variant="secondary"
+                  className="font-bold text-[10px] capitalize bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20"
+                >
+                  {currentUser.role.replace("_", " ")}
+                </Badge>
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditModalOpen(true)}
+                className="h-7 text-[11px] font-bold rounded-lg gap-1.5 border-emerald-600/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/10 cursor-pointer"
               >
-                {currentUser.role.replace("_", " ")}
-              </Badge>
+                <Pencil className="size-3" />
+                <span>Ubah Profil</span>
+              </Button>
             </div>
           </Card>
+
+          {/* Edit Profile Modal */}
+          <EditProfileModal
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            user={currentUser}
+            store={currentStore}
+          />
 
           {/* Role Portal Banners */}
           {currentUser.role === "super_admin" && (

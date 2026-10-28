@@ -69,8 +69,12 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
         >
           <div className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-stone-900/95 dark:bg-stone-900/95 text-white shadow-xl border border-emerald-500/30 backdrop-blur-md">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="size-8 rounded-xl bg-emerald-600 flex items-center justify-center shrink-0 shadow-inner">
-                <Sparkles className="size-4 text-white" />
+              <div className="size-9 rounded-xl overflow-hidden shrink-0 border border-emerald-500/30 bg-emerald-950/40 p-0.5 shadow-xs">
+                <img
+                  src="/icons/icon-96x96.png"
+                  alt="Logo Rerasa"
+                  className="size-full object-cover rounded-lg"
+                />
               </div>
               <div className="min-w-0">
                 <span className="text-xs font-black block leading-tight truncate">
