@@ -37,6 +37,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { storeService } from "@/services/storeService";
 import { cartService } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { SEED_USERS } from "@/services/seedData";
 import { User as UserType, SurpriseBag } from "@/types/domain";
 
@@ -49,6 +50,10 @@ export function LandingPage() {
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);
   const [flyingDot, setFlyingDot] = useState<{ id: string; startX: number; startY: number } | null>(null);
+
+  const flashSaleRef = useHorizontalScroll<HTMLDivElement>();
+  const storesRef = useHorizontalScroll<HTMLDivElement>();
+  const categoriesRef = useHorizontalScroll<HTMLDivElement>();
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -330,7 +335,10 @@ export function LandingPage() {
               <span className="text-[10px] text-muted-foreground">Sebelum toko tutup</span>
             </div>
 
-            <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+            <div
+              ref={flashSaleRef}
+              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+            >
               <div className="flex items-stretch gap-2.5 w-max">
                 {flashSaleBags.map((bag) => {
                   const store = stores.find((s) => s.id === bag.storeId);
@@ -412,7 +420,10 @@ export function LandingPage() {
               )}
             </div>
 
-            <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+            <div
+              ref={storesRef}
+              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+            >
               <div className="flex items-center gap-2 w-max">
                 {stores.slice(0, 5).map((st) => {
                   const isSelected = selectedStoreId === st.id;
@@ -450,7 +461,10 @@ export function LandingPage() {
           </section>
 
           {/* 4. Quick Category Bubbles */}
-          <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+          <div
+            ref={categoriesRef}
+            className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+          >
             <div className="flex items-center gap-1.5 w-max">
               {[
                 { id: "Semua", label: "Semua Kategori", icon: Utensils },

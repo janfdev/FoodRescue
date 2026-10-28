@@ -6,6 +6,7 @@ import { storeService } from "@/services/storeService";
 import { BuyerPickupTicketModal } from "./BuyerPickupTicketModal";
 import { BuyerReviewModal } from "./BuyerReviewModal";
 import { ChatModal } from "@/components/shared/ChatModal";
+import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import {
   Compass,
   ShoppingBag,
@@ -54,6 +55,7 @@ export function BuyerAppView() {
   // Checkout modal
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState<Order["paymentMethod"]>("QRIS");
+  const buyerCategoriesRef = useHorizontalScroll<HTMLDivElement>();
 
   const syncData = () => {
     const state = storeService.getState();
@@ -180,7 +182,10 @@ export function BuyerAppView() {
             </div>
 
             {/* Kategori Filter */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <div
+              ref={buyerCategoriesRef}
+              className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+            >
               {categories.map((cat) => (
                 <button
                   key={cat}
