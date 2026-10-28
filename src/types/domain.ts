@@ -101,7 +101,7 @@ export interface Order {
   platformFee: number; // 12% take-rate toko
   sellerEarning: number; // 88%
   status: OrderStatus;
-  paymentMethod: "QRIS" | "GoPay" | "ShopeePay" | "BCA_VA";
+  paymentMethod: "QRIS" | "GoPay" | "ShopeePay" | "BCA_VA" | "TUNAI_KASIR" | "TRANSFER_VA";
   paidAt?: string;
   pickupCode: string; // 4-digit PIN e.g. "4829"
   pickupQrData: string;

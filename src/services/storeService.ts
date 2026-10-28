@@ -185,6 +185,14 @@ class StoreService {
     this.persist();
   }
 
+  public setCurrentUser(user: User) {
+    this.state.currentUser = user;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foodrescue_auth_user", JSON.stringify(user));
+    }
+    this.persist();
+  }
+
   public loginWithEmail(email: string): User {
     const user =
       SEED_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase()) || {
@@ -262,23 +270,24 @@ class StoreService {
   public createOrder(
     bagId: string,
     paymentMethod: Order["paymentMethod"],
-    guestDetails?: { name: string; phone: string }
+    guestDetails?: { name: string; phone: string },
+    quantity: number = 1
   ): Order {
     const bag = this.state.surpriseBags.find((b) => b.id === bagId);
     if (!bag) throw new Error("Paket tidak ditemukan");
-    if (bag.quotaRemaining <= 0) throw new Error("Kuota paket sudah habis hari ini");
+    if (bag.quotaRemaining < quantity) throw new Error("Sisa kuota porsi tidak mencukupi");
 
     const store = this.state.stores.find((s) => s.id === bag.storeId);
     if (!store) throw new Error("Toko tidak ditemukan");
 
     // Reduce bag quota
-    bag.quotaRemaining -= 1;
+    bag.quotaRemaining -= quantity;
 
     // Generate PIN 4-digit
     const randomPin = Math.floor(1000 + Math.random() * 9000).toString();
     const orderId = `RB-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const subtotalPrice = bag.discountedPrice;
+    const subtotalPrice = bag.discountedPrice * quantity;
     const adminFee = 1000; // Biaya layanan aplikasi Rp 1.000
     const totalPrice = subtotalPrice + adminFee;
     const platformFee = Math.round(subtotalPrice * 0.12); // 12% take-rate toko
@@ -296,7 +305,7 @@ class StoreService {
       storeName: store.name,
       bagId: bag.id,
       bagTitle: bag.title,
-      quantity: 1,
+      quantity,
       unitPrice: bag.discountedPrice,
       subtotalPrice,
       adminFee,
