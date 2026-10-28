@@ -62,6 +62,7 @@ const DEFAULT_INITIAL_STATE: AppState = {
         orderId: "RB-7821",
         senderRole: "buyer",
         senderName: "Budi Santoso",
+        senderAvatarUrl: getDefaultAvatar("BudiSantoso"),
         text: "Halo kak, saya otw ambil sekitar jam 20:00 ya.",
         timestamp: "2026-10-28T18:45:00Z"
       },
@@ -70,6 +71,7 @@ const DEFAULT_INITIAL_STATE: AppState = {
         orderId: "RB-7821",
         senderRole: "seller",
         senderName: "Ruby Bakery & Cake",
+        senderAvatarUrl: getDefaultAvatar("SitiRahma"),
         text: "Baik kak Budi! Paket surprise bag sudah kami siapkan di kemasan Rescue Box resmi. Ditunggu di kasir ya.",
         timestamp: "2026-10-28T18:46:12Z"
       }
@@ -490,6 +492,9 @@ class StoreService {
       orderId,
       senderRole: this.state.currentUser.role === "seller" ? "seller" : "buyer",
       senderName: this.state.currentUser.name,
+      senderAvatarUrl:
+        this.state.currentUser.avatarUrl ||
+        getDefaultAvatar(this.state.currentUser.name),
       text,
       timestamp: new Date().toISOString()
     };

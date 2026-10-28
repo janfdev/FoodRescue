@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Order, ChatMessage } from "@/types/domain";
 import { storeService } from "@/services/storeService";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { resolveUserAvatar } from "@/lib/avatar";
 import { X, Send, Lock, Clock, ShieldCheck } from "lucide-react";
 
 interface ChatModalProps {
@@ -17,6 +19,10 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const currentUser = storeService.getState().currentUser;
+  const partnerName = currentUser.role === "buyer" ? order.storeName : order.buyerName;
+  const partnerAvatarUrl = useMemo(() => {
+    return resolveUserAvatar(undefined, partnerName);
+  }, [partnerName]);
 
   const loadMessages = () => {
     const list = storeService.getChatMessages(order.id);
@@ -61,18 +67,27 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
       <div className="bg-card border border-border w-full max-w-lg rounded-2xl shadow-2xl flex flex-col h-[85vh] max-h-[640px] overflow-hidden">
         {/* Header */}
         <div className="bg-muted/50 border-b border-border p-3.5 px-4 flex items-center justify-between gap-3 shrink-0">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-sm text-foreground truncate">
-                {currentUser.role === "buyer" ? order.storeName : order.buyerName}
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
-                {order.id}
-              </span>
+          <div className="flex items-center gap-3 min-w-0">
+            <Avatar className="size-9 rounded-full border border-border shrink-0">
+              <AvatarImage src={partnerAvatarUrl} alt={partnerName} />
+              <AvatarFallback className="bg-emerald-700 text-white font-bold text-xs">
+                {partnerName.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-sm text-foreground truncate">
+                  {partnerName}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary">
+                  {order.id}
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground truncate font-medium mt-0.5">
+                {order.bagTitle}
+              </p>
             </div>
-            <p className="text-[11px] text-muted-foreground truncate font-medium mt-0.5">
-              {order.bagTitle}
-            </p>
           </div>
 
           <button
@@ -96,8 +111,9 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
             if (msg.senderRole === "system") {
               return (
                 <div key={msg.id} className="flex justify-center my-2">
-                  <div className="bg-muted border border-border/80 text-muted-foreground text-[11px] px-3.5 py-1.5 rounded-xl text-center max-w-[85%] font-medium">
-                    {msg.text}
+                  <div className="bg-muted border border-border/80 text-foreground text-[11px] px-3.5 py-1.5 rounded-xl text-center max-w-[85%] font-medium flex items-center gap-1.5 shadow-2xs">
+                    <ShieldCheck className="size-3.5 text-emerald-600 shrink-0" />
+                    <span>{msg.text}</span>
                   </div>
                 </div>
               );
@@ -107,26 +123,61 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
               (currentUser.role === "buyer" && msg.senderRole === "buyer") ||
               (currentUser.role === "seller" && msg.senderRole === "seller");
 
+            const avatarSrc = resolveUserAvatar(
+              isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
+              msg.senderName
+            );
+
             return (
               <div
                 key={msg.id}
-                className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}
               >
-                <div
-                  className={`max-w-[80%] rounded-2xl p-3 text-xs shadow-2xs ${
-                    isMe
-                      ? "bg-emerald-600 text-white rounded-br-xs"
-                      : "bg-muted text-foreground rounded-bl-xs border border-border"
-                  }`}
-                >
-                  <p className="font-semibold text-[10px] opacity-80 mb-0.5">
-                    {msg.senderName}
-                  </p>
-                  <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                {!isMe && (
+                  <Avatar className="size-7 rounded-full border border-border/70 shrink-0 mb-1">
+                    <AvatarImage src={avatarSrc} alt={msg.senderName} />
+                    <AvatarFallback className="text-[9px] font-bold bg-muted text-foreground">
+                      {msg.senderName.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+
+                <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[78%]`}>
+                  <div className="flex items-center gap-1 mb-1 px-1">
+                    <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px]">
+                      {msg.senderName}
+                    </span>
+                    <span className="text-[9px] text-muted-foreground/75">
+                      ({msg.senderRole === "seller" ? "Mitra Toko" : "Pelanggan"})
+                    </span>
+                  </div>
+
+                  <div
+                    className={`rounded-2xl p-3 text-xs shadow-2xs leading-relaxed ${
+                      isMe
+                        ? "bg-emerald-600 text-white rounded-br-xs"
+                        : "bg-muted text-foreground rounded-bl-xs border border-border"
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                    <span
+                      className={`block text-[9px] mt-1 text-right tabular-nums ${
+                        isMe ? "text-emerald-100" : "text-muted-foreground"
+                      }`}
+                    >
+                      {formatTime(msg.timestamp)}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-[10px] text-muted-foreground mt-1 px-1 font-medium">
-                  {formatTime(msg.timestamp)}
-                </span>
+
+                {isMe && (
+                  <Avatar className="size-7 rounded-full border border-emerald-600/40 shrink-0 mb-1">
+                    <AvatarImage src={avatarSrc} alt={currentUser.name} />
+                    <AvatarFallback className="text-[9px] font-bold bg-emerald-700 text-white">
+                      {currentUser.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
               </div>
             );
           })}

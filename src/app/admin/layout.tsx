@@ -230,7 +230,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Rerasa Admin
               </span>
               <span className="text-[10px] font-mono text-muted-foreground uppercase block -mt-0.5">
-                Cirebon Command
+                Penyelamat Makanan
               </span>
             </div>
           </div>

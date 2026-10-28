@@ -123,6 +123,7 @@ export interface ChatMessage {
   orderId: string;
   senderRole: "buyer" | "seller" | "system";
   senderName: string;
+  senderAvatarUrl?: string;
   text: string;
   timestamp: string;
 }

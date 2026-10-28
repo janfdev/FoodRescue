@@ -223,6 +223,7 @@ export const chatMessages = pgTable(
       .references(() => orders.id, { onDelete: "cascade" }),
     senderRole: text("sender_role").notNull(), // "buyer" | "seller" | "system"
     senderName: text("sender_name").notNull(),
+    senderAvatarUrl: text("sender_avatar_url"),
     text: text("text").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },

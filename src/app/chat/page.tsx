@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { resolveUserAvatar } from "@/lib/avatar";
 import {
   ArrowLeft,
   ChevronRight,
@@ -104,6 +106,9 @@ function ChatContent() {
 
   const isBuyer = currentUser.role === "buyer";
   const chatPartnerName = isBuyer ? order.storeName : order.buyerName;
+  const partnerAvatarUrl = useMemo(() => {
+    return resolveUserAvatar(undefined, chatPartnerName);
+  }, [chatPartnerName]);
 
   return (
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex justify-center py-0 sm:py-6">
@@ -128,7 +133,7 @@ function ChatContent() {
 
           {/* Top Bar with Navigation Back */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -137,6 +142,13 @@ function ChatContent() {
               >
                 <ArrowLeft className="size-4 text-foreground" />
               </button>
+
+              <Avatar className="size-8 rounded-full border border-border/80 shrink-0">
+                <AvatarImage src={partnerAvatarUrl} alt={chatPartnerName} />
+                <AvatarFallback className="bg-emerald-700 text-white font-bold text-xs">
+                  {chatPartnerName.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -148,8 +160,8 @@ function ChatContent() {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span className="truncate">Kasir Gerai Siap Membalas</span>
+                  <span className="size-1.5 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="truncate">{isBuyer ? "Mitra Toko Siap Membalas" : "Pelanggan Aktif"}</span>
                 </div>
               </div>
             </div>
@@ -211,37 +223,79 @@ function ChatContent() {
             </div>
           ) : (
             messages.map((msg) => {
+              if (msg.senderRole === "system") {
+                return (
+                  <div key={msg.id} className="flex justify-center my-2">
+                    <div className="bg-muted/80 border border-border/80 text-foreground text-[10px] px-3.5 py-1.5 rounded-xl text-center max-w-[90%] flex items-center gap-1.5 shadow-2xs">
+                      <ShieldCheck className="size-3.5 text-emerald-600 shrink-0" />
+                      <span className="leading-snug">{msg.text}</span>
+                    </div>
+                  </div>
+                );
+              }
+
               const isMe = msg.senderRole === currentUser.role;
+              const avatarSrc = resolveUserAvatar(
+                isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
+                msg.senderName
+              );
+
               return (
                 <div
                   key={msg.id}
-                  className={`flex flex-col ${isMe ? "items-end" : "items-start"}`}
+                  className={`flex items-end gap-2 ${
+                    isMe ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  <div className="flex items-center gap-1 mb-1">
-                    <span className="text-[9px] font-bold text-muted-foreground capitalize">
-                      {msg.senderName}
-                    </span>
-                    <span className="text-[8px] text-muted-foreground">
-                      ({msg.senderRole === "seller" ? "Kasir Toko" : "Pembeli"})
-                    </span>
-                  </div>
+                  {!isMe && (
+                    <Avatar className="size-7 rounded-full border border-border/80 shrink-0 mb-0.5">
+                      <AvatarImage src={avatarSrc} alt={msg.senderName} />
+                      <AvatarFallback className="text-[9px] font-bold bg-muted text-foreground">
+                        {msg.senderName.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
 
                   <div
-                    className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-2xs ${
-                      isMe
-                        ? "bg-emerald-700 text-white rounded-br-xs"
-                        : "bg-muted border border-border/70 text-foreground rounded-bl-xs"
-                    }`}
+                    className={`flex flex-col ${
+                      isMe ? "items-end" : "items-start"
+                    } max-w-[78%]`}
                   >
-                    <p className="break-words">{msg.text}</p>
-                    <span
-                      className={`block text-[9px] mt-1 text-right tabular-nums ${
-                        isMe ? "text-emerald-200" : "text-muted-foreground"
+                    <div className="flex items-center gap-1 mb-1 px-1">
+                      <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px]">
+                        {msg.senderName}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground/75">
+                        ({msg.senderRole === "seller" ? "Mitra Toko" : "Pelanggan"})
+                      </span>
+                    </div>
+
+                    <div
+                      className={`rounded-2xl px-3.5 py-2 text-xs leading-relaxed shadow-2xs ${
+                        isMe
+                          ? "bg-emerald-700 text-white rounded-br-xs"
+                          : "bg-muted border border-border/70 text-foreground rounded-bl-xs"
                       }`}
                     >
-                      {formatTime(msg.timestamp)}
-                    </span>
+                      <p className="break-words">{msg.text}</p>
+                      <span
+                        className={`block text-[9px] mt-1 text-right tabular-nums ${
+                          isMe ? "text-emerald-200" : "text-muted-foreground"
+                        }`}
+                      >
+                        {formatTime(msg.timestamp)}
+                      </span>
+                    </div>
                   </div>
+
+                  {isMe && (
+                    <Avatar className="size-7 rounded-full border border-emerald-600/40 shrink-0 mb-0.5">
+                      <AvatarImage src={avatarSrc} alt={currentUser.name} />
+                      <AvatarFallback className="text-[9px] font-bold bg-emerald-700 text-white">
+                        {currentUser.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                 </div>
               );
             })
