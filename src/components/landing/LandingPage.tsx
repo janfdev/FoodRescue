@@ -32,7 +32,8 @@ import {
   LogIn,
   LogOut,
   Check,
-  Sparkle
+  Sparkle,
+  ChevronDown
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,6 +51,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   Dialog,
   DialogContent,
@@ -214,9 +220,9 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             </div>
           </div>
 
-          {/* Quick Access Links, Guest Ticket Access & User Auth */}
+          {/* Header Actions: Tiket Saya & Dynamic User Profile Popover */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Button Tiket Saya (Frictionless Guest Access) */}
+            {/* Button Tiket Saya */}
             <Button
               type="button"
               variant="outline"
@@ -233,64 +239,110 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
               )}
             </Button>
 
-            {/* User Auth Profile / Login Button */}
+            {/* Profile Popover or Login Button */}
             {currentUser ? (
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="text-xs font-bold gap-1.5 p-1 px-2.5 h-8 bg-muted/40"
-                >
-                  <div className="size-5 rounded-full bg-emerald-700 text-white text-[10px] font-bold flex items-center justify-center">
+              <Popover>
+                <PopoverTrigger className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl border border-border bg-card hover:bg-muted/50 text-xs font-bold transition-colors shadow-2xs">
+                  <div className="size-6 rounded-full bg-emerald-700 text-white text-[11px] font-black flex items-center justify-center">
                     {currentUser.name.charAt(0)}
                   </div>
-                  <span className="max-w-[90px] truncate hidden sm:inline">{currentUser.name}</span>
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleLogoutUser}
-                  className="size-8 p-0 text-muted-foreground hover:text-red-600"
-                  title="Keluar"
-                >
-                  <LogOut className="size-3.5" />
-                </Button>
-              </div>
-            ) : (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setIsAuthModalOpen(true)}
-                className="text-xs font-bold gap-1.5"
-              >
-                <LogIn className="size-3.5 text-emerald-700 dark:text-emerald-400" />
-                <span>Masuk</span>
-              </Button>
-            )}
+                  <span className="max-w-[110px] truncate hidden sm:inline text-foreground">
+                    {currentUser.name}
+                  </span>
+                  <ChevronDown className="size-3 text-muted-foreground" />
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-3 space-y-2.5 bg-card border border-border shadow-md">
+                  {/* User Profile Header */}
+                  <div className="space-y-1 pb-2 border-b border-border">
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold text-foreground text-xs block truncate">
+                        {currentUser.name}
+                      </span>
+                      <Badge
+                        variant={
+                          currentUser.role === "super_admin"
+                            ? "default"
+                            : currentUser.role === "seller"
+                            ? "secondary"
+                            : "outline"
+                        }
+                        className={`text-[9px] font-bold ${
+                          currentUser.role === "super_admin"
+                            ? "bg-purple-700 text-white"
+                            : currentUser.role === "seller"
+                            ? "bg-orange-600 text-white"
+                            : "text-emerald-700 border-emerald-600"
+                        }`}
+                      >
+                        {currentUser.role === "super_admin"
+                          ? "Super Admin"
+                          : currentUser.role === "seller"
+                          ? "Mitra Toko"
+                          : "Pelanggan"}
+                      </Badge>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                      {currentUser.email}
+                    </span>
+                  </div>
 
-            <Link
-              href="/seller"
-              className={buttonVariants({
-                variant: "ghost",
-                size: "sm",
-                className: "text-xs font-semibold gap-1.5 hidden sm:flex",
-              })}
-            >
-              <Store className="size-3.5 text-orange-600" />
-              <span>Portal Mitra</span>
-            </Link>
-            <Link
-              href="/admin"
-              className={buttonVariants({
-                variant: "ghost",
-                size: "sm",
-                className: "text-xs font-semibold gap-1.5 hidden sm:flex",
-              })}
-            >
-              <ShieldCheck className="size-3.5 text-purple-600" />
-              <span>Super Admin</span>
-            </Link>
+                  {/* Dynamic Destination based on Role */}
+                  <div className="space-y-1">
+                    {currentUser.role === "super_admin" && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-purple-700 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors"
+                      >
+                        <ShieldCheck className="size-4" />
+                        <span>Pusat Kendali Admin</span>
+                      </Link>
+                    )}
+
+                    {currentUser.role === "seller" && (
+                      <Link
+                        href="/seller"
+                        className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-950/40 transition-colors"
+                      >
+                        <Store className="size-4" />
+                        <span>Dashboard Toko (POS)</span>
+                      </Link>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={() => setShowTicketsDrawer(true)}
+                      className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
+                    >
+                      <Receipt className="size-4 text-emerald-600" />
+                      <span>Tiket & Riwayat Pesanan</span>
+                    </button>
+                  </div>
+
+                  <Separator />
+
+                  {/* Logout Button */}
+                  <button
+                    type="button"
+                    onClick={handleLogoutUser}
+                    className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors text-left"
+                  >
+                    <LogOut className="size-4" />
+                    <span>Keluar Akun (Logout)</span>
+                  </button>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <Link
+                href="/login"
+                className={buttonVariants({
+                  size: "sm",
+                  className: "bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs gap-1.5 shadow-xs",
+                })}
+              >
+                <LogIn className="size-3.5" />
+                <span>Masuk</span>
+              </Link>
+            )}
           </div>
         </div>
       </header>

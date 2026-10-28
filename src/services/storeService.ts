@@ -179,6 +179,39 @@ class StoreService {
   public switchRole(role: UserRole) {
     const targetUser = SEED_USERS.find((u) => u.role === role) || SEED_USERS[0];
     this.state.currentUser = targetUser;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foodrescue_auth_user", JSON.stringify(targetUser));
+    }
+    this.persist();
+  }
+
+  public loginWithEmail(email: string): User {
+    const user =
+      SEED_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase()) || {
+        id: `user-${Date.now()}`,
+        name: email.split("@")[0],
+        email: email.toLowerCase(),
+        role: "buyer" as UserRole,
+        phone: "081234567890",
+        status: "ACTIVE" as const,
+        createdAt: new Date().toISOString(),
+      };
+
+    this.state.currentUser = user;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foodrescue_auth_user", JSON.stringify(user));
+      localStorage.setItem("foodrescue_guest_name", user.name);
+      localStorage.setItem("foodrescue_guest_phone", user.phone);
+    }
+    this.persist();
+    return user;
+  }
+
+  public logoutUser() {
+    this.state.currentUser = SEED_USERS[0];
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("foodrescue_auth_user");
+    }
     this.persist();
   }
 
