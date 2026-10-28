@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { orders, escrowAccounts } from "@/db/schema";
 import { storeService } from "@/services/storeService";
+import { recordAuditLog } from "@/lib/audit";
 import { desc } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -106,6 +107,17 @@ export async function POST(req: NextRequest) {
         console.warn("Dual-write DB gagal, order tetap tersimpan di in-memory:", dbErr);
       }
     }
+
+    // Catat ke Audit Log
+    recordAuditLog({
+      actorId: newOrder.buyerId,
+      actorName: newOrder.buyerName,
+      actorRole: "buyer",
+      action: "ORDER_PAID",
+      entityType: "order",
+      entityId: newOrder.id,
+      details: `Pesanan ${newOrder.bagTitle} (Qty: ${newOrder.quantity}) terbayar Rp ${newOrder.totalPrice.toLocaleString("id-ID")} via ${newOrder.paymentMethod}`,
+    }).catch((err) => console.warn("Gagal merekam audit log order:", err));
 
     return NextResponse.json({
       success: true,

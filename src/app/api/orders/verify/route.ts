@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { orders, escrowAccounts } from "@/db/schema";
 import { storeService } from "@/services/storeService";
+import { recordAuditLog } from "@/lib/audit";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
@@ -52,6 +53,19 @@ export async function POST(req: NextRequest) {
       } catch (dbErr) {
         console.warn("DB update verifikasi gagal, state tersimpan di storeService:", dbErr);
       }
+    }
+
+    // Catat ke Audit Log jika berhasil
+    if (verifiedOrder) {
+      recordAuditLog({
+        actorId: verifiedOrder.storeId,
+        actorName: verifiedOrder.storeName || "Kasir Toko",
+        actorRole: "seller",
+        action: "ORDER_HANDED_OVER",
+        entityType: "order",
+        entityId: verifiedOrder.id,
+        details: `Serah terima ${verifiedOrder.id} selesai. Escrow dirilis Rp ${(verifiedOrder.sellerEarning || 0).toLocaleString("id-ID")} ke dompet mitra`,
+      }).catch((err) => console.warn("Gagal merekam audit log handover:", err));
     }
 
     return NextResponse.json({

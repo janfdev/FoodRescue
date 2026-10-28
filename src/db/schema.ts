@@ -371,6 +371,29 @@ export const disputeTickets = pgTable(
   (table) => [index("disputes_order_idx").on(table.orderId)]
 );
 
+// ─── 12. AUDIT LOGS ──────────────────────────────────────────────────────────
+
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: text("id").primaryKey(),
+    actorId: text("actor_id").notNull(),
+    actorName: text("actor_name").notNull(),
+    actorRole: text("actor_role").notNull(), // "buyer" | "seller" | "super_admin" | "system"
+    action: text("action").notNull(), // "ORDER_PAID" | "ORDER_HANDED_OVER" | "USER_SUSPENDED" | "USER_ACTIVATED" | "STORE_APPROVED" | "WITHDRAWAL_REQUESTED" | "WITHDRAWAL_APPROVED"
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    details: text("details"),
+    ipAddress: text("ip_address"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("audit_logs_actor_idx").on(table.actorId),
+    index("audit_logs_action_idx").on(table.action),
+    index("audit_logs_created_idx").on(table.createdAt),
+  ]
+);
+
 // ─── RELATIONS ───────────────────────────────────────────────────────────────
 
 export const storesRelations = relations(stores, ({ many }) => ({

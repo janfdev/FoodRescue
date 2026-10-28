@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   UserCheck,
+  History,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -107,6 +108,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: "/admin/audit",
       label: "Audit & Sengketa",
       icon: Settings,
+      badge: null,
+      exact: false,
+    },
+    {
+      href: "/admin/audit-logs",
+      label: "Audit Log Aktivitas",
+      icon: History,
       badge: null,
       exact: false,
     },
