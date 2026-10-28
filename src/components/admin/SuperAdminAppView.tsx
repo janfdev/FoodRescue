@@ -156,12 +156,16 @@ export function SuperAdminAppView() {
         <div className="space-y-6">
           {/* Logo & Operational Zone */}
           <div className="flex items-center gap-3 px-2">
-            <div className="size-9 rounded-xl bg-purple-700 text-white flex items-center justify-center font-black text-base shadow-xs">
-              <Shield className="size-5" />
-            </div>
+            <Link href="/" className="size-9 rounded-xl overflow-hidden shadow-xs shrink-0 block">
+              <img
+                src="/brand/rerasa-mascot-r.svg"
+                alt="Rerasa Logo"
+                className="w-full h-full object-cover"
+              />
+            </Link>
             <div>
               <span className="font-extrabold text-sm text-foreground block tracking-tight">
-                Super Admin
+                Rerasa Admin
               </span>
               <span className="text-[10px] font-mono text-muted-foreground uppercase block -mt-0.5">
                 Cirebon Command

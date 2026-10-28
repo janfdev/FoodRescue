@@ -199,7 +199,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
           <div className="flex items-center gap-3">
             <Link href="/" className="size-9 rounded-xl overflow-hidden shadow-xs shrink-0 block">
               <img
-                src="/brand/concept-a-cloche-r.svg"
+                src="/brand/rerasa-mascot-r.svg"
                 alt="Rerasa Logo"
                 className="w-full h-full object-cover"
               />
