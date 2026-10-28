@@ -184,14 +184,14 @@ export function BuyerAppView() {
             {/* Kategori Filter */}
             <div
               ref={buyerCategoriesRef}
-              className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none"
+              className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
             >
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-grab active:cursor-grabbing ${
                     selectedCategory === cat
                       ? "bg-emerald-600 text-white shadow-xs font-bold"
                       : "bg-muted text-muted-foreground hover:bg-muted/80"

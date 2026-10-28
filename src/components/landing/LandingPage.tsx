@@ -337,7 +337,7 @@ export function LandingPage() {
 
             <div
               ref={flashSaleRef}
-              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
             >
               <div className="flex items-stretch gap-2.5 w-max">
                 {flashSaleBags.map((bag) => {
@@ -422,7 +422,7 @@ export function LandingPage() {
 
             <div
               ref={storesRef}
-              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
             >
               <div className="flex items-center gap-2 w-max">
                 {stores.slice(0, 5).map((st) => {
@@ -434,7 +434,7 @@ export function LandingPage() {
                       onClick={() =>
                         setSelectedStoreId(isSelected ? null : st.id)
                       }
-                      className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all shrink-0 cursor-pointer ${
+                      className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all shrink-0 cursor-grab active:cursor-grabbing ${
                         isSelected
                           ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
                           : "bg-muted/50 hover:bg-muted text-foreground border-border/70"
@@ -463,7 +463,7 @@ export function LandingPage() {
           {/* 4. Quick Category Bubbles */}
           <div
             ref={categoriesRef}
-            className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none"
+            className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
           >
             <div className="flex items-center gap-1.5 w-max">
               {[
@@ -480,7 +480,7 @@ export function LandingPage() {
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition-colors ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition-colors cursor-grab active:cursor-grabbing ${
                       isSelected
                         ? "bg-emerald-700 text-white shadow-2xs"
                         : "bg-muted/50 hover:bg-muted text-muted-foreground border border-border/50"

@@ -117,7 +117,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="w-full min-h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans">
-      
+
       {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
       <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -200,14 +200,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Separator />
 
           <div className="flex items-center justify-between text-xs pt-1">
-            <Link
-              href="/"
-              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Kembali ke Beranda</span>
-            </Link>
-
             <button
               type="button"
               onClick={handleLogout}
@@ -282,16 +274,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <Separator />
 
-          {/* Clean Quick Link ke Beranda */}
-          <div className="px-1">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground p-2 rounded-xl hover:bg-muted/50 transition-colors"
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Kembali ke Beranda</span>
-            </Link>
-          </div>
         </div>
 
         {/* Interactive Profile Card with Popover & Avatar */}
