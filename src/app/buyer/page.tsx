@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function BuyerPage() {
-  return <LandingPage initialShowTickets={false} />;
+  return <LandingPage />;
 }

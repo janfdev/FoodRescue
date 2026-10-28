@@ -30,30 +30,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { QRCodeSVG } from "qrcode.react";
 import { storeService } from "@/services/storeService";
 import { SEED_USERS } from "@/services/seedData";
-import { ChatModal } from "@/components/shared/ChatModal";
-import { SurpriseBag, Order, User as UserType } from "@/types/domain";
+import { User as UserType } from "@/types/domain";
 
-export function LandingPage({ initialShowTickets = false }: { initialShowTickets?: boolean }) {
+export function LandingPage() {
   const [state, setState] = useState(storeService.getState());
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
-
-  // Active Ticket Modal State
-  const [activeTicketOrder, setActiveTicketOrder] = useState<Order | null>(null);
-  const [showTicketsDrawer, setShowTicketsDrawer] = useState<boolean>(initialShowTickets);
-  const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -212,9 +198,8 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                     </Link>
                   )}
 
-                  <button
-                    type="button"
-                    onClick={() => setShowTicketsDrawer(true)}
+                  <Link
+                    href="/tickets"
                     className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
                   >
                     <span className="flex items-center gap-2">
@@ -226,7 +211,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                         {activeTicketsCount}
                       </Badge>
                     )}
-                  </button>
+                  </Link>
                 </div>
 
                 <div className="pt-2 border-t border-border space-y-1">
@@ -466,8 +451,8 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
 
         {/* Floating Bottom App Navigation */}
         <nav className="fixed bottom-0 sm:absolute z-30 left-0 right-0 max-w-md mx-auto bg-background/95 backdrop-blur-xs border-t border-border/80 px-4 py-2 flex items-center justify-around">
-          <button
-            type="button"
+          <Link
+            href="/"
             onClick={() => {
               setSelectedArea("Semua");
               setSelectedCategory("Semua");
@@ -477,11 +462,10 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
           >
             <ShoppingBag className="size-5" />
             <span className="text-[10px] font-extrabold">Jelajah</span>
-          </button>
+          </Link>
 
-          <button
-            type="button"
-            onClick={() => setShowTicketsDrawer(true)}
+          <Link
+            href="/tickets"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors"
           >
             <Ticket className="size-5" />
@@ -489,158 +473,16 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             {activeTicketsCount > 0 && (
               <span className="size-2 rounded-full bg-emerald-600 absolute top-0 right-3" />
             )}
-          </button>
+          </Link>
 
           <Link
-            href={
-              currentUser.role === "super_admin"
-                ? "/admin"
-                : currentUser.role === "seller"
-                ? "/seller"
-                : "/login"
-            }
+            href="/account"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <User className="size-5" />
-            <span className="text-[10px] font-bold">
-              {currentUser.role === "super_admin"
-                ? "Admin"
-                : currentUser.role === "seller"
-                ? "Toko"
-                : "Akun"}
-            </span>
+            <span className="text-[10px] font-bold">Akun</span>
           </Link>
         </nav>
-
-        {/* Dialog Modal Tiket Saya */}
-        <Dialog open={showTicketsDrawer} onOpenChange={setShowTicketsDrawer}>
-          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Tiket Penyelamatan Makanan</DialogTitle>
-              <DialogDescription>
-                Daftar pesanan voucher aktif Anda untuk diambil di gerai mitra kuliner Cirebon
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-3 pt-2">
-              {userOrders.length === 0 ? (
-                <div className="py-8 text-center text-xs text-muted-foreground space-y-1">
-                  <Ticket className="size-8 mx-auto opacity-40" />
-                  <p className="font-bold text-foreground">Belum ada pesanan aktif</p>
-                  <p>Pilih makanan surplus di beranda untuk memulai penyelamatan pangan.</p>
-                </div>
-              ) : (
-                userOrders.map((ord) => (
-                  <Card
-                    key={ord.id}
-                    className="p-3.5 border-border shadow-2xs space-y-2.5 cursor-pointer hover:border-emerald-600 transition-colors"
-                    onClick={() => setActiveTicketOrder(ord)}
-                  >
-                    <div className="flex items-start justify-between text-xs">
-                      <div>
-                        <span className="font-black text-foreground block">{ord.storeName}</span>
-                        <span className="text-[11px] text-muted-foreground">{ord.bagTitle}</span>
-                      </div>
-                      <Badge
-                        variant={ord.status === "COMPLETED" ? "secondary" : "default"}
-                        className={`text-[10px] font-bold ${
-                          ord.status === "COMPLETED"
-                            ? ""
-                            : "bg-emerald-700 text-white"
-                        }`}
-                      >
-                        {ord.status === "COMPLETED" ? "Sudah Diambil" : "Siap Ambil"}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-border/60">
-                      <div className="flex items-center gap-1 font-mono font-bold text-amber-800 dark:text-amber-400">
-                        <span>PIN:</span>
-                        <span className="bg-amber-500/15 px-2 py-0.5 rounded-md">
-                          {ord.pickupCode}
-                        </span>
-                      </div>
-                      <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                        Rp {ord.totalPrice.toLocaleString("id-ID")}
-                      </span>
-                    </div>
-                  </Card>
-                ))
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Modal Detail Voucher Tiket Aktif dengan QR Code */}
-        {activeTicketOrder && (
-          <Dialog
-            open={Boolean(activeTicketOrder)}
-            onOpenChange={(open) => !open && setActiveTicketOrder(null)}
-          >
-            <DialogContent className="max-w-sm text-center">
-              <DialogHeader>
-                <DialogTitle className="text-center">Tiket Pengambilan Kasir</DialogTitle>
-                <DialogDescription className="text-center">
-                  Tunjukkan kode QR atau PIN ini kepada kasir {activeTicketOrder.storeName}
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="py-2 space-y-4">
-                <div className="inline-block p-4 rounded-2xl bg-white border border-border shadow-xs">
-                  <QRCodeSVG value={activeTicketOrder.pickupQrData} size={150} />
-                </div>
-
-                <div className="space-y-1">
-                  <span className="text-[11px] text-muted-foreground uppercase font-bold tracking-wider block">
-                    PIN 4-Digit Kasir
-                  </span>
-                  <div className="inline-block px-6 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 font-mono text-3xl font-black text-amber-800 dark:text-amber-400 tracking-widest">
-                    {activeTicketOrder.pickupCode}
-                  </div>
-                </div>
-
-                <div className="p-3 bg-muted/40 rounded-xl text-left text-xs space-y-1 border border-border/60">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Order ID:</span>
-                    <span className="font-mono font-bold">{activeTicketOrder.id}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Menu:</span>
-                    <span className="font-semibold truncate max-w-[180px]">{activeTicketOrder.bagTitle}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Jumlah:</span>
-                    <span className="font-bold">{activeTicketOrder.quantity} porsi</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Total Tagihan:</span>
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400">
-                      Rp {activeTicketOrder.totalPrice.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActiveChatOrder(activeTicketOrder)}
-                  className="w-full text-xs font-bold gap-1.5"
-                >
-                  <MessageSquare className="size-3.5 text-emerald-700" />
-                  <span>Buka Chat dengan Toko Mitra</span>
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
-
-        {/* Modal Chat dengan Toko Mitra */}
-        {activeChatOrder && (
-          <ChatModal
-            order={activeChatOrder}
-            onClose={() => setActiveChatOrder(null)}
-          />
-        )}
       </div>
     </div>
   );

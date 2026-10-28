@@ -152,8 +152,15 @@ function CheckoutContent() {
 
           <div className="space-y-2">
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/tickets")}
               className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
+            >
+              Buka Halaman Tiket Saya
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/")}
+              className="w-full text-xs font-semibold"
             >
               Kembali ke Beranda
             </Button>
