@@ -19,15 +19,25 @@ import {
   MessageSquare,
   Star,
   ChevronRight,
-  Info
+  Info,
+  User as UserIcon,
+  Receipt,
+  LogOut,
+  Mail,
+  Phone
 } from "lucide-react";
 
 export function BuyerAppView() {
-  const [activeTab, setActiveTab] = useState<"explore" | "orders" | "impact">("explore");
+  const [activeTab, setActiveTab] = useState<"explore" | "orders" | "impact" | "profile">("explore");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [stores, setStores] = useState<Store[]>([]);
   const [surpriseBags, setSurpriseBags] = useState<SurpriseBag[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [currentUser, setCurrentUser] = useState(storeService.getState().currentUser);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginName, setLoginName] = useState("");
 
   // Modals state
   const [selectedBagForDetail, setSelectedBagForDetail] = useState<SurpriseBag | null>(null);
@@ -44,6 +54,7 @@ export function BuyerAppView() {
     setStores(state.stores.filter((s) => s.status === "ACTIVE"));
     setSurpriseBags(state.surpriseBags);
     setOrders(state.orders.filter((o) => o.buyerId === state.currentUser.id));
+    setCurrentUser(state.currentUser);
   };
 
   useEffect(() => {
@@ -67,6 +78,10 @@ export function BuyerAppView() {
   });
 
   const handleCheckoutConfirm = () => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true);
+      return;
+    }
     if (!selectedBagForDetail) return;
     try {
       const order = storeService.createOrder(selectedBagForDetail.id, selectedPayment);
@@ -78,6 +93,18 @@ export function BuyerAppView() {
         alert(e.message);
       }
     }
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginEmail.trim()) return;
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+  };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setActiveTab("explore");
   };
 
   const getStoreForBag = (storeId: string) => stores.find((s) => s.id === storeId);
@@ -105,9 +132,25 @@ export function BuyerAppView() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-          <Sparkles className="size-3" />
-          <span>Hemat s/d 70%</span>
+        <div className="flex items-center gap-2">
+          {isLoggedIn ? (
+            <button
+              type="button"
+              onClick={() => setActiveTab("profile")}
+              className="flex items-center gap-1.5 bg-muted/60 hover:bg-muted p-1 px-2.5 rounded-full text-xs font-bold transition-colors"
+            >
+              <UserIcon className="size-3.5 text-emerald-600" />
+              <span className="max-w-[80px] truncate">{currentUser.name.split(" ")[0]}</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAuthModal(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold px-3 py-1 rounded-full shadow-xs"
+            >
+              Masuk
+            </button>
+          )}
         </div>
       </div>
 
@@ -370,6 +413,78 @@ export function BuyerAppView() {
             </div>
           </div>
         )}
+
+        {/* Tab Profil Pembeli */}
+        {activeTab === "profile" && (
+          <div className="p-4 space-y-4">
+            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
+              <div className="flex items-center gap-3.5">
+                <div className="size-12 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-lg border border-emerald-200 dark:border-emerald-800">
+                  {currentUser.name.charAt(0)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-extrabold text-base text-foreground truncate">
+                    {currentUser.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                    <Mail className="size-3" />
+                    <span>{currentUser.email}</span>
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border">
+                <div className="bg-muted/40 p-2.5 rounded-xl">
+                  <span className="text-[10px] text-muted-foreground font-semibold block">Nomor Ponsel</span>
+                  <span className="text-xs font-bold text-foreground font-mono">{currentUser.phone}</span>
+                </div>
+                <div className="bg-muted/40 p-2.5 rounded-xl">
+                  <span className="text-[10px] text-muted-foreground font-semibold block">Peran Akun</span>
+                  <span className="text-xs font-bold text-emerald-600 uppercase font-mono">{currentUser.role}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Menu Aksi Profil */}
+            <div className="bg-card border border-border rounded-2xl p-2 divide-y divide-border text-xs">
+              <button
+                type="button"
+                onClick={() => setActiveTab("orders")}
+                className="w-full p-3 flex items-center justify-between hover:bg-muted/30 rounded-xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Receipt className="size-4 text-emerald-600" />
+                  <span className="font-bold text-foreground">Riwayat Pembelian</span>
+                </div>
+                <span className="text-[11px] text-muted-foreground font-mono">{orders.length} pesanan</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("impact")}
+                className="w-full p-3 flex items-center justify-between hover:bg-muted/30 rounded-xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Leaf className="size-4 text-emerald-600" />
+                  <span className="font-bold text-foreground">Dampak Penyelamatan Saya</span>
+                </div>
+                <span className="text-[11px] text-emerald-600 font-bold">{personalKgSaved} kg</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full p-3 flex items-center justify-between hover:bg-red-500/10 text-red-600 rounded-xl transition-colors text-left"
+              >
+                <div className="flex items-center gap-2.5">
+                  <LogOut className="size-4" />
+                  <span className="font-bold">Keluar Akun</span>
+                </div>
+                <ChevronRight className="size-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Detail & Checkout Sheet */}
@@ -549,6 +664,66 @@ export function BuyerAppView() {
         />
       )}
 
+      {/* Auth Modal (Masuk Akun Pembeli) */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-card border border-border w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <h3 className="font-extrabold text-base text-foreground">Masuk Akun Pembeli</h3>
+                <p className="text-xs text-muted-foreground">Simulasi autentikasi SisaRasa Cirebon</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(false)}
+                className="size-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleLoginSubmit} className="space-y-3">
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground block mb-1">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={loginName || currentUser.name}
+                  onChange={(e) => setLoginName(e.target.value)}
+                  placeholder="Budi Santoso"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs font-medium focus:outline-emerald-600"
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground block mb-1">
+                  Email Akun
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={loginEmail || currentUser.email}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="budi.cirebon@gmail.com"
+                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs font-medium focus:outline-emerald-600"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold shadow-xs transition-colors"
+                >
+                  Masuk Sekarang
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Bottom Navigation Bar */}
       <nav className="absolute bottom-0 left-0 right-0 bg-card/95 backdrop-blur-md border-t border-border flex items-center justify-around py-2 px-3 z-30">
         <button
@@ -585,6 +760,17 @@ export function BuyerAppView() {
         >
           <Leaf className="size-5" />
           <span>Dampak</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("profile")}
+          className={`flex flex-col items-center gap-1 text-[10px] font-semibold transition-colors ${
+            activeTab === "profile" ? "text-emerald-600 font-bold" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <UserIcon className="size-5" />
+          <span>Profil</span>
         </button>
       </nav>
     </div>
