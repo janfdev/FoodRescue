@@ -26,6 +26,12 @@ import {
   Mail,
   Phone
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function BuyerAppView() {
   const [activeTab, setActiveTab] = useState<"explore" | "orders" | "impact" | "profile">("explore");
@@ -264,12 +270,13 @@ export function BuyerAppView() {
                           </span>
                         </div>
 
-                        <button
+                        <Button
                           type="button"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl transition-colors shadow-xs"
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
                         >
                           Pesan
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   );
@@ -417,33 +424,37 @@ export function BuyerAppView() {
         {/* Tab Profil Pembeli */}
         {activeTab === "profile" && (
           <div className="p-4 space-y-4">
-            <div className="bg-card border border-border rounded-2xl p-5 shadow-xs space-y-4">
-              <div className="flex items-center gap-3.5">
-                <div className="size-12 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 flex items-center justify-center font-black text-lg border border-emerald-200 dark:border-emerald-800">
-                  {currentUser.name.charAt(0)}
+            <Card className="border-border shadow-xs">
+              <CardContent className="p-5 space-y-4">
+                <div className="flex items-center gap-3.5">
+                  <Avatar className="size-12">
+                    <AvatarFallback className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black text-lg border border-emerald-200 dark:border-emerald-800">
+                      {currentUser.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-extrabold text-base text-foreground truncate">
+                      {currentUser.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                      <Mail className="size-3" />
+                      <span>{currentUser.email}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-extrabold text-base text-foreground truncate">
-                    {currentUser.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                    <Mail className="size-3" />
-                    <span>{currentUser.email}</span>
-                  </p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border">
-                <div className="bg-muted/40 p-2.5 rounded-xl">
-                  <span className="text-[10px] text-muted-foreground font-semibold block">Nomor Ponsel</span>
-                  <span className="text-xs font-bold text-foreground font-mono">{currentUser.phone}</span>
+                <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border">
+                  <div className="bg-muted/40 p-2.5 rounded-xl">
+                    <span className="text-[10px] text-muted-foreground font-semibold block">Nomor Ponsel</span>
+                    <span className="text-xs font-bold text-foreground font-mono">{currentUser.phone}</span>
+                  </div>
+                  <div className="bg-muted/40 p-2.5 rounded-xl">
+                    <span className="text-[10px] text-muted-foreground font-semibold block">Peran Akun</span>
+                    <span className="text-xs font-bold text-emerald-600 uppercase font-mono">{currentUser.role}</span>
+                  </div>
                 </div>
-                <div className="bg-muted/40 p-2.5 rounded-xl">
-                  <span className="text-[10px] text-muted-foreground font-semibold block">Peran Akun</span>
-                  <span className="text-xs font-bold text-emerald-600 uppercase font-mono">{currentUser.role}</span>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Menu Aksi Profil */}
             <div className="bg-card border border-border rounded-2xl p-2 divide-y divide-border text-xs">
@@ -623,13 +634,13 @@ export function BuyerAppView() {
               <span>Dana disimpan di Rekber sampai Anda mengambil makanan di toko.</span>
             </div>
 
-            <button
+            <Button
               type="button"
               onClick={handleCheckoutConfirm}
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-xs shadow-xs transition-colors"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs py-3 h-auto"
             >
               Simulasi 1-Klik Bayar Sekarang
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -687,13 +698,13 @@ export function BuyerAppView() {
                 <label className="text-[11px] font-bold text-muted-foreground block mb-1">
                   Nama Lengkap
                 </label>
-                <input
+                <Input
                   type="text"
                   required
                   value={loginName || currentUser.name}
                   onChange={(e) => setLoginName(e.target.value)}
                   placeholder="Budi Santoso"
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs font-medium focus:outline-emerald-600"
+                  className="text-xs font-medium"
                 />
               </div>
 
@@ -701,23 +712,23 @@ export function BuyerAppView() {
                 <label className="text-[11px] font-bold text-muted-foreground block mb-1">
                   Email Akun
                 </label>
-                <input
+                <Input
                   type="email"
                   required
                   value={loginEmail || currentUser.email}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="budi.cirebon@gmail.com"
-                  className="w-full bg-background border border-border rounded-xl px-3 py-2 text-xs font-medium focus:outline-emerald-600"
+                  className="text-xs font-medium"
                 />
               </div>
 
               <div className="pt-2">
-                <button
+                <Button
                   type="submit"
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl text-xs font-bold shadow-xs transition-colors"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
                 >
                   Masuk Sekarang
-                </button>
+                </Button>
               </div>
             </form>
           </div>

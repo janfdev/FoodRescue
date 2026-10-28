@@ -19,6 +19,11 @@ import {
   ShieldCheck,
   Send
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 export function SellerAppView() {
   const [activeTab, setActiveTab] = useState<"pos" | "bags" | "boxes" | "finance">("pos");
@@ -182,24 +187,24 @@ export function SellerAppView() {
                 </div>
               </div>
 
-              {/* Input Form */}
+              {/* Input Form with shadcn Input & Button */}
               <div className="flex gap-2 pt-1">
-                <input
+                <Input
                   type="text"
                   placeholder="Masukkan 4-Digit PIN..."
                   value={pickupCodeInput}
                   onChange={(e) => setPickupCodeInput(e.target.value)}
-                  className="flex-1 bg-background border border-border rounded-xl px-3.5 py-2.5 text-sm font-mono tracking-widest text-center text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  className="flex-1 font-mono tracking-widest text-center text-sm"
                   maxLength={10}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => handleVerify()}
                   disabled={!pickupCodeInput.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-colors"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs"
                 >
                   Verifikasi
-                </button>
+                </Button>
               </div>
 
               {/* Result Notice */}

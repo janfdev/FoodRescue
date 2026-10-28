@@ -19,6 +19,11 @@ import {
   Truck,
   Leaf
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export function SuperAdminAppView() {
   const [activeTab, setActiveTab] = useState<"overview" | "stores" | "boxes" | "withdrawals" | "audit">("overview");
@@ -80,130 +85,138 @@ export function SuperAdminAppView() {
           </p>
         </div>
 
-        {/* Tab Switcher */}
+        {/* Tab Switcher with shadcn Tabs */}
         <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-xl border border-border overflow-x-auto">
-          <button
+          <Button
             type="button"
+            variant={activeTab === "overview" ? "default" : "ghost"}
+            size="sm"
             onClick={() => setActiveTab("overview")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "overview"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="text-xs font-bold"
           >
             Ikhtisar & Dampak
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={activeTab === "stores" ? "default" : "ghost"}
+            size="sm"
             onClick={() => setActiveTab("stores")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all relative ${
-              activeTab === "stores"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="text-xs font-bold gap-1.5"
           >
-            Mitra Toko ({stores.filter((s) => s.status === "PENDING_APPROVAL").length} Antre)
-          </button>
-          <button
+            <span>Mitra Toko</span>
+            {stores.filter((s) => s.status === "PENDING_APPROVAL").length > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                {stores.filter((s) => s.status === "PENDING_APPROVAL").length}
+              </Badge>
+            )}
+          </Button>
+          <Button
             type="button"
+            variant={activeTab === "boxes" ? "default" : "ghost"}
+            size="sm"
             onClick={() => setActiveTab("boxes")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "boxes"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="text-xs font-bold"
           >
             Logistik Rescue Box
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={activeTab === "withdrawals" ? "default" : "ghost"}
+            size="sm"
             onClick={() => setActiveTab("withdrawals")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "withdrawals"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="text-xs font-bold gap-1.5"
           >
-            Pencairan Dana ({withdrawals.filter((w) => w.status === "PENDING").length})
-          </button>
-          <button
+            <span>Pencairan Dana</span>
+            {withdrawals.filter((w) => w.status === "PENDING").length > 0 && (
+              <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                {withdrawals.filter((w) => w.status === "PENDING").length}
+              </Badge>
+            )}
+          </Button>
+          <Button
             type="button"
+            variant={activeTab === "audit" ? "default" : "ghost"}
+            size="sm"
             onClick={() => setActiveTab("audit")}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "audit"
-                ? "bg-background text-foreground shadow-xs"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="text-xs font-bold"
           >
-            Audit Log & Dispute
-          </button>
+            Audit Kepatuhan & Sengketa
+          </Button>
         </div>
       </div>
 
       {/* Tab: Overview & Impact Metrics */}
       {activeTab === "overview" && (
         <div className="space-y-6">
-          {/* 4 Key Metric Cards */}
+          {/* 4 Key Metric Cards with shadcn Card */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-card border border-border rounded-2xl p-4 shadow-xs space-y-1">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Makanan Diselamatkan
-                </span>
-                <Leaf className="size-4 text-emerald-600" />
-              </div>
-              <p className="text-2xl font-black text-foreground tabular-nums">
-                {metrics.totalMealsSaved} Porsi
-              </p>
-              <p className="text-[11px] text-emerald-600 font-medium">
-                ±{metrics.estimatedKgSaved} kg limbah organik dicegah
-              </p>
-            </div>
+            <Card className="border-border shadow-xs">
+              <CardContent className="p-4 space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Makanan Diselamatkan
+                  </span>
+                  <Leaf className="size-4 text-emerald-600" />
+                </div>
+                <p className="text-2xl font-black text-foreground tabular-nums">
+                  {metrics.totalMealsSaved} Porsi
+                </p>
+                <p className="text-[11px] text-emerald-600 font-medium">
+                  ±{metrics.estimatedKgSaved} kg limbah organik dicegah
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-card border border-border rounded-2xl p-4 shadow-xs space-y-1">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  GMV Transaksi Makanan
-                </span>
-                <TrendingUp className="size-4 text-blue-600" />
-              </div>
-              <p className="text-2xl font-black text-foreground tabular-nums">
-                Rp {metrics.gmv.toLocaleString("id-ID")}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Perputaran nilai surplus resto
-              </p>
-            </div>
+            <Card className="border-border shadow-xs">
+              <CardContent className="p-4 space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    GMV Transaksi Makanan
+                  </span>
+                  <TrendingUp className="size-4 text-blue-600" />
+                </div>
+                <p className="text-2xl font-black text-foreground tabular-nums">
+                  Rp {metrics.gmv.toLocaleString("id-ID")}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Perputaran nilai surplus resto
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-card border border-border rounded-2xl p-4 shadow-xs space-y-1">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Take-Rate Platform (12%)
-                </span>
-                <CreditCard className="size-4 text-purple-600" />
-              </div>
-              <p className="text-2xl font-black text-purple-600 tabular-nums">
-                Rp {metrics.platformRevenue.toLocaleString("id-ID")}
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Komisi transaksi diselesaikan
-              </p>
-            </div>
+            <Card className="border-border shadow-xs">
+              <CardContent className="p-4 space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Take-Rate Platform (12%)
+                  </span>
+                  <CreditCard className="size-4 text-purple-600" />
+                </div>
+                <p className="text-2xl font-black text-purple-600 tabular-nums">
+                  Rp {metrics.platformRevenue.toLocaleString("id-ID")}
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Komisi transaksi diselesaikan
+                </p>
+              </CardContent>
+            </Card>
 
-            <div className="bg-card border border-border rounded-2xl p-4 shadow-xs space-y-1">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-xs font-bold uppercase tracking-wider">
-                  Rescue Box B2B Terjual
-                </span>
-                <Box className="size-4 text-orange-600" />
-              </div>
-              <p className="text-2xl font-black text-orange-600 tabular-nums">
-                {metrics.totalBoxesSold} Pcs
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                Kemasan resmi berlogo tersalurkan
-              </p>
-            </div>
+            <Card className="border-border shadow-xs">
+              <CardContent className="p-4 space-y-1">
+                <div className="flex items-center justify-between text-muted-foreground">
+                  <span className="text-xs font-bold uppercase tracking-wider">
+                    Rescue Box B2B Terjual
+                  </span>
+                  <Box className="size-4 text-orange-600" />
+                </div>
+                <p className="text-2xl font-black text-orange-600 tabular-nums">
+                  {metrics.totalBoxesSold} Pcs
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Kemasan resmi berlogo tersalurkan
+                </p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Quick Summary of Active vs Pending Stores */}
@@ -285,33 +298,37 @@ export function SuperAdminAppView() {
 
                 <div className="flex items-center gap-2">
                   {st.status === "PENDING_APPROVAL" && (
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
                       onClick={() => handleApproveStore(st.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition-colors shadow-xs"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs gap-1"
                     >
-                      Setujui Kemitraan (Approve)
-                    </button>
+                      <CheckCircle2 className="size-3.5" />
+                      <span>Setujui Kemitraan (Approve)</span>
+                    </Button>
                   )}
 
                   {st.status === "ACTIVE" && (
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
+                      variant="destructive"
                       onClick={() => handleSuspendStore(st.id)}
-                      className="bg-red-600/10 hover:bg-red-600 text-red-600 hover:text-white text-xs font-bold px-3 py-2 rounded-xl border border-red-200 transition-colors"
+                      className="text-xs font-bold shadow-xs gap-1"
                     >
-                      Bekukan (Suspend)
-                    </button>
+                      <XCircle className="size-3.5" />
+                      <span>Bekukan (Suspend)</span>
+                    </Button>
                   )}
 
                   {st.status === "SUSPENDED" && (
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => handleApproveStore(st.id)}
-                      className="bg-muted hover:bg-muted/80 text-foreground text-xs font-bold px-3 py-2 rounded-xl transition-colors"
+                      className="text-xs font-bold"
                     >
                       Pulihkan Mitra
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
