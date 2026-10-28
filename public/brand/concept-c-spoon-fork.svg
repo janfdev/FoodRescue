@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="goldCutlery" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="256" height="256" rx="48" fill="#0f172a" />
+
+  <g transform="translate(36, 28)">
+    <!-- Main Outer Monogram R Architecture -->
+    <!-- Circular Shield Loop of R -->
+    <path d="M 64 36 L 110 36 C 146 36 172 58 172 90 C 172 120 146 142 110 142 L 64 142 Z" fill="url(#shieldGrad)" />
+    
+    <!-- Negative Space Cutout inside R Bowl (Creating Spoon Silhouette) -->
+    <ellipse cx="106" cy="88" rx="24" ry="26" fill="#0f172a" />
+    <!-- Spoon Head In Negative Space (Amber Accent) -->
+    <ellipse cx="106" cy="84" rx="14" ry="18" fill="url(#goldCutlery)" />
+    <path d="M 104 102 L 108 102 L 108 124 L 104 124 Z" fill="url(#goldCutlery)" />
+
+    <!-- Left Stem: Stylized Dining Fork Architecture -->
+    <!-- Handle -->
+    <rect x="24" y="36" width="28" height="150" rx="8" fill="url(#shieldGrad)" />
+    <!-- Fork Prongs Cutout Accent on the Stem -->
+    <rect x="29" y="44" width="4" height="28" rx="2" fill="#34d399" />
+    <rect x="36" y="44" width="4" height="28" rx="2" fill="#34d399" />
+    <rect x="43" y="44" width="4" height="28" rx="2" fill="#34d399" />
+
+    <!-- Dynamic Kick Leg of R (Culinary Ribbon) -->
+    <path d="M 98 134 L 146 186 C 152 192 160 194 168 194 L 176 194 C 180 194 182 190 179 187 L 132 136 Z" fill="url(#goldCutlery)" />
+  </g>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bowlGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="256" height="256" rx="48" fill="#022c22" />
+
+  <!-- Center Group -->
+  <g transform="translate(18, 16)">
+    <!-- The Nurturing Bowl (Bottom Base) -->
+    <path d="M 44 140 C 44 186 82 204 110 204 C 138 204 176 186 176 140 Z" fill="url(#bowlGrad)" />
+    <!-- Bowl Rim Rim Base Line -->
+    <path d="M 36 140 C 36 136 40 134 46 134 L 174 134 C 180 134 184 136 184 140 C 184 144 180 146 174 146 L 46 146 C 40 146 36 144 36 140 Z" fill="#fbbf24" />
+
+    <!-- Steam Flow Forming the Letter "R" -->
+    <!-- Left Vertical Stem of R Rising From Bowl -->
+    <path d="M 68 134 L 68 54 C 68 46 74 40 82 40 L 90 40 C 98 40 104 46 104 54 L 104 134 Z" fill="url(#leafGrad)" />
+
+    <!-- Upper Loop of R (Warm Aroma Wave) -->
+    <path d="M 104 54 C 104 42 118 34 136 34 C 158 34 172 48 172 68 C 172 88 156 100 136 100 L 104 100" fill="none" stroke="url(#leafGrad)" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Sprout / Leaf Tail of R (Descending Right) -->
+    <path d="M 128 96 L 158 132 C 163 138 170 140 178 138 C 184 136 186 128 180 122 L 148 86 Z" fill="url(#leafGrad)" />
+
+    <!-- Floating Herb Leaf (Culinary Garnish Detail) -->
+    <path d="M 144 26 C 144 26 160 22 168 32 C 176 42 166 54 166 54 C 166 54 154 48 150 40 C 146 32 144 26 144 26 Z" fill="#6ee7b7" />
+  </g>
+</svg>

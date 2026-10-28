@@ -197,13 +197,17 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/70">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="size-9 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-lg shadow-xs">
-              R
-            </div>
+            <Link href="/" className="size-9 rounded-xl overflow-hidden shadow-xs shrink-0 block">
+              <img
+                src="/brand/concept-a-cloche-r.svg"
+                alt="Rerasa Logo"
+                className="w-full h-full object-cover"
+              />
+            </Link>
             <div>
-              <span className="font-black text-lg tracking-tight text-emerald-900 dark:text-emerald-400">
+              <Link href="/" className="font-black text-lg tracking-tight text-emerald-900 dark:text-emerald-400 block hover:opacity-90 transition-opacity">
                 Rerasa
-              </span>
+              </Link>
               <span className="text-[10px] block font-semibold text-amber-700 dark:text-amber-500 uppercase tracking-wider -mt-1">
                 Cirebon Raya
               </span>

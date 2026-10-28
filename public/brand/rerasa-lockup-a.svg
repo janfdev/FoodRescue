@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="540" height="120">
+  <defs>
+    <linearGradient id="clocheGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669" />
+      <stop offset="100%" stop-color="#047857" />
+    </linearGradient>
+    <linearGradient id="amberGradL" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+  </defs>
+
+  <!-- Symbol on Left -->
+  <g transform="translate(16, 12)">
+    <rect width="96" height="96" rx="24" fill="#042f2e" />
+    <g transform="translate(10, 10) scale(0.38)">
+      <circle cx="120" cy="32" r="10" fill="url(#amberGradL)" />
+      <path d="M 40 44 C 40 37.37 45.37 32 52 32 L 72 32 C 78.63 32 84 37.37 84 44 L 84 164 C 84 170.63 78.63 176 72 176 L 52 176 C 45.37 176 40 170.63 40 164 Z" fill="url(#clocheGradL)" />
+      <path d="M 84 46 C 84 46 100 32 128 32 C 165.55 32 188 56.5 188 88 C 188 116.5 163.5 136 126 136 L 84 136 Z" fill="none" stroke="url(#clocheGradL)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+      <path d="M 76 136 L 140 136" stroke="url(#amberGradL)" stroke-width="12" stroke-linecap="round" />
+      <path d="M 112 126 L 152 168 C 158 174 166.5 176 175 176 L 180 176 C 183 176 185 172.5 183 170 C 172 156 160 142 148 126 Z" fill="url(#amberGradL)" />
+      <circle cx="128" cy="80" r="7" fill="#fef3c7" />
+      <circle cx="152" cy="74" r="5" fill="#fef3c7" />
+    </g>
+  </g>
+
+  <!-- Wordmark Text -->
+  <g transform="translate(132, 42)">
+    <text x="0" y="28" font-family="Plus Jakarta Sans, Poppins, system-ui, sans-serif" font-weight="900" font-size="44" fill="#047857" letter-spacing="-1">Rerasa</text>
+    <text x="2" y="52" font-family="Plus Jakarta Sans, Poppins, system-ui, sans-serif" font-weight="700" font-size="12" fill="#d97706" letter-spacing="3" text-transform="uppercase">Cirebon • Food Rescue</text>
+  </g>
+</svg>
