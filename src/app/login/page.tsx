@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { storeService } from "@/services/storeService";
 import { SEED_USERS } from "@/services/seedData";
+import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,13 +57,24 @@ export default function LoginPage() {
     setErrorMsg("");
   };
 
-  const handleGoogleLogin = () => {
+  const handleGoogleLogin = async () => {
     setIsLoading(true);
-    setTimeout(() => {
+    setErrorMsg("");
+    try {
+      // Panggil Better-Auth Google OAuth
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+    } catch (err: unknown) {
+      console.warn("Google OAuth backend belum aktif, menggunakan fallback simulasi:", err);
+      // Fallback ke profil buyer default jika OAuth env belum diatur
       const googleUser = SEED_USERS.find((u) => u.email === "fauzan@gmail.com") || SEED_USERS[0];
       storeService.loginWithEmail(googleUser.email);
       router.push("/");
-    }, 400);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
