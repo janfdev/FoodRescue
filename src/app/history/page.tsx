@@ -205,11 +205,11 @@ export default function HistoryPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setActiveChatOrder(ord)}
-                    className="w-full text-xs font-bold gap-1.5 h-8 border-border"
+                    onClick={() => router.push(`/chat?orderId=${ord.id}`)}
+                    className="w-full text-xs font-bold gap-1.5 h-8 border-border hover:bg-emerald-500/10 hover:text-emerald-800 dark:hover:text-emerald-300"
                   >
                     <MessageSquare className="size-3.5 text-emerald-700" />
-                    <span>Obrolan Kasir Toko</span>
+                    <span>Buka Chat dengan Kasir</span>
                   </Button>
                 </div>
               </Card>

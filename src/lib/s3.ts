@@ -2,12 +2,12 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 function getS3Client(): S3Client | null {
   const accessKeyId =
-    process.env.S3_ACCESS_KEY_ID ||
     process.env.DAHONO_S3_ACCESS_KEY ||
+    process.env.S3_ACCESS_KEY_ID ||
     process.env.ACCESS_KEY;
   const secretAccessKey =
-    process.env.S3_SECRET_ACCESS_KEY ||
     process.env.DAHONO_S3_SECRET_KEY ||
+    process.env.S3_SECRET_ACCESS_KEY ||
     process.env.SECRET_KEY;
 
   if (!accessKeyId || !secretAccessKey) {
@@ -15,14 +15,14 @@ function getS3Client(): S3Client | null {
   }
 
   const endpoint =
-    process.env.S3_ENDPOINT_URL ||
     process.env.DAHONO_S3_ENDPOINT ||
+    process.env.S3_ENDPOINT_URL ||
     process.env.ENDPOINT_URL ||
     "https://s3.dahono.com";
 
   const region =
-    process.env.S3_REGION ||
     process.env.DAHONO_S3_REGION ||
+    process.env.S3_REGION ||
     "us-east-1";
 
   return new S3Client({
@@ -32,15 +32,15 @@ function getS3Client(): S3Client | null {
       accessKeyId,
       secretAccessKey,
     },
-    forcePathStyle: true,
+    forcePathStyle: true, // Required for Dahono / S3-compatible endpoints
   });
 }
 
 export function getBucketName(): string {
   return (
+    process.env.DAHONO_S3_BUCKET ||
     process.env.S3_BUCKET_NAME ||
     process.env.S3_BUCKET ||
-    process.env.DAHONO_S3_BUCKET ||
     "foodrescue"
   );
 }
@@ -57,7 +57,7 @@ export async function uploadToS3(
   const key = `${folder}/${cleanFileName}`;
 
   if (!s3) {
-    // Fallback URL jika S3 env belum diatur di Vercel (safe fallback for demo/prerender)
+    // Fallback URL jika S3 env belum diatur (safe fallback for local test/preview)
     return {
       url: `/uploads/${cleanFileName}`,
       key,
@@ -70,13 +70,12 @@ export async function uploadToS3(
       Key: key,
       Body: fileBuffer,
       ContentType: contentType,
-      ACL: "public-read",
     })
   );
 
   const endpoint =
-    process.env.S3_ENDPOINT_URL ||
     process.env.DAHONO_S3_ENDPOINT ||
+    process.env.S3_ENDPOINT_URL ||
     process.env.ENDPOINT_URL ||
     "https://s3.dahono.com";
 

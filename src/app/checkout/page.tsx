@@ -152,15 +152,22 @@ function CheckoutContent() {
 
           <div className="space-y-2">
             <Button
-              onClick={() => router.push("/history")}
+              onClick={() => router.push(`/chat?orderId=${confirmedOrder.id}`)}
               className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
+            >
+              Chat Kasir Toko Sekarang
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push("/history")}
+              className="w-full text-xs font-semibold"
             >
               Lihat Riwayat Pesanan
             </Button>
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => router.push("/")}
-              className="w-full text-xs font-semibold"
+              className="w-full text-xs font-medium text-muted-foreground"
             >
               Kembali ke Beranda
             </Button>

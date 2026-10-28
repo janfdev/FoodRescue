@@ -10,7 +10,6 @@ import {
   Utensils,
   Wheat,
   Apple,
-  MessageSquare,
   ShoppingBag,
   Receipt,
   LogOut,
@@ -19,6 +18,11 @@ import {
   Building2,
   Check,
   User,
+  Plus,
+  Flame,
+  Sparkles,
+  Store as StoreIcon,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,16 +35,20 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { storeService } from "@/services/storeService";
+import { cartService } from "@/services/cartService";
+import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { SEED_USERS } from "@/services/seedData";
-import { User as UserType } from "@/types/domain";
+import { User as UserType, SurpriseBag } from "@/types/domain";
 
 export function LandingPage() {
   const [state, setState] = useState(storeService.getState());
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);
+  const [flyingDot, setFlyingDot] = useState<{ id: string; startX: number; startY: number } | null>(null);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -87,6 +95,7 @@ export function LandingPage() {
       const matchArea =
         selectedArea === "Semua" ||
         (store?.area && store.area.toLowerCase().includes(selectedArea.toLowerCase()));
+      const matchStore = !selectedStoreId || bag.storeId === selectedStoreId;
       const matchCategory =
         selectedCategory === "Semua" || bag.category === selectedCategory;
       const matchSearch =
@@ -95,9 +104,35 @@ export function LandingPage() {
         store?.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchLastCall = !isLastCallOnly || Boolean(bag.isLastCall);
 
-      return matchArea && matchCategory && matchSearch && matchLastCall;
+      return matchArea && matchStore && matchCategory && matchSearch && matchLastCall;
     });
-  }, [bags, stores, selectedArea, selectedCategory, searchQuery, isLastCallOnly]);
+  }, [bags, stores, selectedArea, selectedStoreId, selectedCategory, searchQuery, isLastCallOnly]);
+
+  // Flash Sale / Last Call Items for the Top Promo Carousel
+  const flashSaleBags = useMemo(() => {
+    return bags.filter((b) => b.isLastCall || b.quotaRemaining <= 3);
+  }, [bags]);
+
+  const handleAddToCart = (e: React.MouseEvent, bag: SurpriseBag) => {
+    const store = stores.find((s) => s.id === bag.storeId);
+    if (!store) return;
+
+    // Trigger fly-to-cart animation
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dot = {
+      id: `${bag.id}-${Date.now()}`,
+      startX: rect.left + rect.width / 2,
+      startY: rect.top,
+    };
+    setFlyingDot(dot);
+
+    // Add to cart
+    cartService.addItem(bag, store, 1);
+
+    setTimeout(() => {
+      setFlyingDot(null);
+    }, 550);
+  };
 
   return (
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex justify-center py-0 sm:py-6 selection:bg-emerald-500/20">
@@ -118,9 +153,9 @@ export function LandingPage() {
                 <ChevronDown className="size-3 text-muted-foreground shrink-0" />
               </PopoverTrigger>
               <PopoverContent align="start" className="w-56 p-2 space-y-1">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground px-2 py-1 block">
+                <div className="px-2 py-1 text-[11px] font-black text-muted-foreground uppercase tracking-wider">
                   Pilih Wilayah Penjemputan
-                </span>
+                </div>
                 {cirebonAreas.map((area) => (
                   <button
                     key={area}
@@ -129,7 +164,7 @@ export function LandingPage() {
                       setSelectedArea(area);
                       setIsAreaPickerOpen(false);
                     }}
-                    className={`w-full text-left text-xs px-2.5 py-1.5 rounded-lg flex items-center justify-between font-medium ${
+                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                       selectedArea === area
                         ? "bg-emerald-700 text-white font-bold"
                         : "hover:bg-muted text-foreground"
@@ -142,7 +177,7 @@ export function LandingPage() {
               </PopoverContent>
             </Popover>
 
-            {/* Profile Popover with Notionists Avatar */}
+            {/* Profile Popover with Avatar */}
             <Popover>
               <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted">
                 <Avatar className="size-full">
@@ -263,49 +298,162 @@ export function LandingPage() {
         </header>
 
         {/* Scrollable Content Body */}
-        <main className="flex-1 overflow-y-auto space-y-3.5 pb-4">
-          {/* Spotlight Banner: Last Call Food */}
+        <main className="flex-1 overflow-y-auto space-y-3.5 pb-24">
+          
+          {/* 1. Eco & Food Rescue Impact Ticker */}
           <div className="px-3 pt-2">
-            <div className="p-3 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 flex items-center justify-between gap-2.5">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="size-8 rounded-xl bg-amber-600 text-white flex items-center justify-center shrink-0 font-bold shadow-2xs">
-                  <Clock className="size-4" />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-xs text-foreground truncate">
-                      Last Call Food Malam Ini
-                    </span>
-                    <Badge className="bg-amber-600 text-white text-[9px] font-black px-1 py-0">
-                      s/d -70%
-                    </Badge>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground block truncate">
-                    Paket cuci gudang toko roti & resto sebelum tutup
-                  </span>
-                </div>
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="size-2 rounded-full bg-emerald-600 animate-pulse shrink-0" />
+                <span className="text-[11px] font-bold text-emerald-950 dark:text-emerald-200 truncate">
+                  Dampak Cirebon: <strong className="font-black tabular-nums">1.420+ Porsi</strong> Diselamatkan
+                </span>
               </div>
-
-              <Button
-                size="sm"
-                variant={isLastCallOnly ? "default" : "outline"}
-                onClick={() => setIsLastCallOnly(!isLastCallOnly)}
-                className={`text-[10px] h-7 px-2.5 rounded-lg font-extrabold shrink-0 ${
-                  isLastCallOnly
-                    ? "bg-amber-600 hover:bg-amber-700 text-white"
-                    : "border-amber-600/40 text-amber-800 dark:text-amber-300"
-                }`}
-              >
-                {isLastCallOnly ? "Semua" : "Last Call"}
-              </Button>
+              <Badge variant="outline" className="text-[9px] font-black border-emerald-600/40 text-emerald-800 dark:text-emerald-300 shrink-0">
+                -2,8 Ton CO2
+              </Badge>
             </div>
           </div>
 
-          {/* Quick Category Bubbles (Horizontal Scrollable) */}
+          {/* 2. Urgent Flash Sale Carousel (Horizontal Cards) */}
+          <section className="space-y-1.5">
+            <div className="px-3 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Flame className="size-3.5 text-amber-600 fill-amber-600" />
+                <h3 className="font-black text-xs text-foreground">
+                  Segera Habis Malam Ini
+                </h3>
+                <Badge className="bg-amber-600 text-white text-[9px] font-black px-1 py-0">
+                  s/d -70%
+                </Badge>
+              </div>
+              <span className="text-[10px] text-muted-foreground">Sebelum toko tutup</span>
+            </div>
+
+            <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+              <div className="flex items-stretch gap-2.5 w-max">
+                {flashSaleBags.map((bag) => {
+                  const store = stores.find((s) => s.id === bag.storeId);
+                  const discountPct = Math.round(
+                    ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
+                  );
+
+                  return (
+                    <div
+                      key={`flash-${bag.id}`}
+                      className="w-56 p-2.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-card to-background border border-amber-500/30 flex flex-col justify-between shrink-0 shadow-2xs hover:border-amber-500/60 transition-all"
+                    >
+                      <div className="flex items-start gap-2">
+                        <img
+                          src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
+                          alt={bag.title}
+                          className="size-16 rounded-xl object-cover border border-border/80 shrink-0"
+                        />
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
+                            {store?.name}
+                          </span>
+                          <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
+                            {bag.title}
+                          </h4>
+                          <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                            <Clock className="size-2.5 text-amber-600 shrink-0" />
+                            <span>{bag.pickupWindow}</span>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
+                        <div>
+                          <div className="flex items-baseline gap-1">
+                            <span className="font-black text-xs text-emerald-700 dark:text-emerald-400 tabular-nums">
+                              Rp {bag.discountedPrice.toLocaleString("id-ID")}
+                            </span>
+                            <span className="text-[8px] text-muted-foreground line-through tabular-nums">
+                              Rp {bag.originalPrice.toLocaleString("id-ID")}
+                            </span>
+                          </div>
+                          <span className="text-[8px] font-bold text-amber-800 dark:text-amber-300">
+                            Sisa {bag.quotaRemaining} porsi
+                          </span>
+                        </div>
+
+                        <Button
+                          size="sm"
+                          onClick={(e) => handleAddToCart(e, bag)}
+                          className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
+                        >
+                          <Plus className="size-3" />
+                          <span>Cart</span>
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* 3. Popular Store Quick Bubbles (Mitra Cirebon) */}
+          <section className="space-y-1.5">
+            <div className="px-3 flex items-center justify-between">
+              <span className="font-black text-xs text-foreground flex items-center gap-1.5">
+                <StoreIcon className="size-3 text-emerald-700" />
+                <span>Mitra Kuliner Populer</span>
+              </span>
+              {selectedStoreId && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedStoreId(null)}
+                  className="text-[10px] font-bold text-emerald-700 hover:underline"
+                >
+                  Lihat Semua Toko
+                </button>
+              )}
+            </div>
+
+            <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+              <div className="flex items-center gap-2 w-max">
+                {stores.slice(0, 5).map((st) => {
+                  const isSelected = selectedStoreId === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      type="button"
+                      onClick={() =>
+                        setSelectedStoreId(isSelected ? null : st.id)
+                      }
+                      className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all shrink-0 cursor-pointer ${
+                        isSelected
+                          ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
+                          : "bg-muted/50 hover:bg-muted text-foreground border-border/70"
+                      }`}
+                    >
+                      <Avatar className="size-6 shrink-0">
+                        <AvatarFallback className="text-[9px] font-black bg-emerald-800 text-white">
+                          {st.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left">
+                        <span className="text-[11px] font-extrabold block leading-none truncate max-w-[110px]">
+                          {st.name}
+                        </span>
+                        <span className={`text-[8px] leading-tight block truncate ${isSelected ? "text-emerald-100" : "text-muted-foreground"}`}>
+                          {st.area}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* 4. Quick Category Bubbles */}
           <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
             <div className="flex items-center gap-1.5 w-max">
               {[
-                { id: "Semua", label: "Semua", icon: Utensils },
+                { id: "Semua", label: "Semua Kategori", icon: Utensils },
                 { id: "Bakery & Pastry", label: "Roti & Pastry", icon: Wheat },
                 { id: "Makanan Berat", label: "Makanan Berat", icon: Utensils },
                 { id: "Kafe & Minuman", label: "Kafe & Kopi", icon: Coffee },
@@ -332,8 +480,54 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Section Heading & Result Count */}
-          <div className="px-3 flex items-center justify-between text-xs">
+          {/* 5. 3-Step Micro Guide (How It Works) */}
+          <div className="px-3">
+            <div className="p-3 rounded-2xl bg-muted/40 border border-border/70 space-y-2">
+              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">
+                3 Langkah Penyelamatan Pangan SisaRasa
+              </span>
+              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="p-2 rounded-xl bg-background border border-border/60 space-y-1">
+                  <div className="size-6 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 mx-auto flex items-center justify-center font-black text-[11px]">
+                    1
+                  </div>
+                  <span className="font-bold text-[10px] block leading-tight text-foreground">
+                    Pilih Surprise Bag
+                  </span>
+                  <span className="text-[8px] text-muted-foreground block leading-none">
+                    Hemat s/d 70%
+                  </span>
+                </div>
+
+                <div className="p-2 rounded-xl bg-background border border-border/60 space-y-1">
+                  <div className="size-6 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 mx-auto flex items-center justify-center font-black text-[11px]">
+                    2
+                  </div>
+                  <span className="font-bold text-[10px] block leading-tight text-foreground">
+                    Bayar QRIS Instan
+                  </span>
+                  <span className="text-[8px] text-muted-foreground block leading-none">
+                    Dana Escrow Aman
+                  </span>
+                </div>
+
+                <div className="p-2 rounded-xl bg-background border border-border/60 space-y-1">
+                  <div className="size-6 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 mx-auto flex items-center justify-center font-black text-[11px]">
+                    3
+                  </div>
+                  <span className="font-bold text-[10px] block leading-tight text-foreground">
+                    Ambil Pakai PIN/QR
+                  </span>
+                  <span className="text-[8px] text-muted-foreground block leading-none">
+                    Tunjukkan ke Kasir
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 6. Section Heading & Result Count */}
+          <div className="px-3 flex items-center justify-between text-xs pt-1">
             <span className="font-extrabold text-foreground">
               Paket Makanan di Sekitarmu
             </span>
@@ -342,7 +536,7 @@ export function LandingPage() {
             </span>
           </div>
 
-          {/* 2-Column Marketplace Product Grid (Compact & Dense) */}
+          {/* 7. 2-Column Marketplace Product Grid (Dense & Actionable) */}
           <div className="px-3">
             {filteredBags.length === 0 ? (
               <div className="py-12 text-center space-y-2">
@@ -356,6 +550,7 @@ export function LandingPage() {
                   variant="outline"
                   onClick={() => {
                     setSelectedArea("Semua");
+                    setSelectedStoreId(null);
                     setSelectedCategory("Semua");
                     setSearchQuery("");
                     setIsLastCallOnly(false);
@@ -422,8 +617,8 @@ export function LandingPage() {
                           </span>
                         </div>
 
-                        {/* Price & Action Button */}
-                        <div className="pt-1 border-t border-border/50 space-y-1">
+                        {/* Price & Dual Action Buttons (Tambah Keranjang & Beli Langsung) */}
+                        <div className="pt-1 border-t border-border/50 space-y-1.5">
                           <div className="flex items-baseline gap-1">
                             <span className="font-black text-[11px] text-emerald-700 dark:text-emerald-400 tabular-nums">
                               Rp {bag.discountedPrice.toLocaleString("id-ID")}
@@ -433,12 +628,23 @@ export function LandingPage() {
                             </span>
                           </div>
 
-                          <Link
-                            href={`/checkout?bagId=${bag.id}`}
-                            className="block w-full h-6 leading-6 text-center text-[10px] font-black bg-emerald-700 hover:bg-emerald-800 text-white rounded-md shadow-2xs transition-colors"
-                          >
-                            Ambil
-                          </Link>
+                          <div className="grid grid-cols-2 gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => handleAddToCart(e, bag)}
+                              className="h-6 flex items-center justify-center gap-0.5 rounded-md bg-muted/80 hover:bg-muted text-foreground text-[9px] font-bold border border-border/70 transition-colors cursor-pointer"
+                            >
+                              <Plus className="size-2.5" />
+                              <span>Cart</span>
+                            </button>
+
+                            <Link
+                              href={`/checkout?bagId=${bag.id}`}
+                              className="h-6 flex items-center justify-center rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[9px] font-black shadow-2xs transition-colors"
+                            >
+                              Beli
+                            </Link>
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -449,12 +655,28 @@ export function LandingPage() {
           </div>
         </main>
 
+        {/* Dynamic Flying Dot Indicator Animation */}
+        {flyingDot && (
+          <div
+            className="fixed z-50 pointer-events-none size-4 rounded-full bg-amber-500 shadow-md animate-bounce"
+            style={{
+              left: flyingDot.startX,
+              top: flyingDot.startY,
+              transition: "all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)",
+            }}
+          />
+        )}
+
+        {/* Floating Cart Bar (Sticky above navigation) */}
+        <FloatingCartBar />
+
         {/* Floating Bottom App Navigation */}
         <nav className="fixed bottom-0 sm:absolute z-30 left-0 right-0 max-w-md mx-auto bg-background/95 backdrop-blur-xs border-t border-border/80 px-4 py-2 flex items-center justify-around">
           <Link
             href="/"
             onClick={() => {
               setSelectedArea("Semua");
+              setSelectedStoreId(null);
               setSelectedCategory("Semua");
               setIsLastCallOnly(false);
             }}
