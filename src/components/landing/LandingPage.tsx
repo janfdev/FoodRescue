@@ -316,14 +316,14 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             </div>
           </div>
 
-          {/* Quick Category Bubbles (Horizontal Scroll) */}
-          <div className="px-3">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {/* Quick Category Bubbles (Horizontal Scrollable) */}
+          <div className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth">
+            <div className="flex items-center gap-1.5 w-max">
               {[
                 { id: "Semua", label: "Semua", icon: Utensils },
                 { id: "Bakery & Pastry", label: "Roti & Pastry", icon: Wheat },
                 { id: "Makanan Berat", label: "Makanan Berat", icon: Utensils },
-                { id: "Kafe & Minuman", label: "Kafe & Minuman", icon: Coffee },
+                { id: "Kafe & Minuman", label: "Kafe & Kopi", icon: Coffee },
                 { id: "Swalayan & Buah", label: "Bahan Segar", icon: Apple },
               ].map((cat) => {
                 const Icon = cat.icon;
@@ -333,7 +333,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                     key={cat.id}
                     type="button"
                     onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold shrink-0 transition-colors ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition-colors ${
                       isSelected
                         ? "bg-emerald-700 text-white shadow-2xs"
                         : "bg-muted/50 hover:bg-muted text-muted-foreground border border-border/50"
@@ -352,12 +352,12 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             <span className="font-extrabold text-foreground">
               Paket Makanan di Sekitarmu
             </span>
-            <span className="text-[11px] text-muted-foreground">
+            <span className="text-[10px] text-muted-foreground">
               {filteredBags.length} paket siap ambil
             </span>
           </div>
 
-          {/* 2-Column Marketplace Product Grid */}
+          {/* 2-Column Marketplace Product Grid (Compact & Dense) */}
           <div className="px-3">
             {filteredBags.length === 0 ? (
               <div className="py-12 text-center space-y-2">
@@ -381,7 +381,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-2 gap-2">
                 {filteredBags.map((bag) => {
                   const store = stores.find((s) => s.id === bag.storeId);
                   const discountPct = Math.round(
@@ -391,10 +391,10 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                   return (
                     <Card
                       key={bag.id}
-                      className="border-border/80 shadow-2xs overflow-hidden flex flex-col justify-between hover:border-emerald-600/40 transition-all group"
+                      className="border-border/80 rounded-xl shadow-2xs overflow-hidden flex flex-col justify-between hover:border-emerald-600/40 transition-all group bg-card"
                     >
-                      {/* Photo 1:1 Aspect Ratio */}
-                      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+                      {/* Compact Photo */}
+                      <div className="relative h-24 sm:h-28 w-full overflow-hidden bg-muted">
                         <img
                           src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600"}
                           alt={bag.title}
@@ -403,56 +403,56 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                         />
 
                         {/* Top Overlay Badges */}
-                        <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 items-start">
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-black bg-amber-600 text-white shadow-2xs">
+                        <div className="absolute top-1 left-1 flex flex-col gap-0.5 items-start">
+                          <span className="px-1 py-0.5 rounded text-[8px] font-black bg-amber-600 text-white shadow-2xs leading-none">
                             -{discountPct}%
                           </span>
                           {bag.isLastCall && (
-                            <span className="px-1.5 py-0.5 rounded-md text-[8px] font-black bg-stone-900/90 text-amber-300 shadow-2xs uppercase">
+                            <span className="px-1 py-0.5 rounded text-[7px] font-black bg-stone-900/90 text-amber-300 shadow-2xs uppercase leading-none">
                               Last Call
                             </span>
                           )}
                         </div>
 
                         {/* Quota Indicator */}
-                        <div className="absolute bottom-1.5 left-1.5">
-                          <span className="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-background/90 backdrop-blur-xs text-foreground shadow-2xs">
+                        <div className="absolute bottom-1 left-1">
+                          <span className="px-1 py-0.5 rounded text-[8px] font-bold bg-background/90 backdrop-blur-xs text-foreground shadow-2xs leading-none">
                             Sisa {bag.quotaRemaining}
                           </span>
                         </div>
                       </div>
 
-                      {/* Card Information */}
-                      <div className="p-2 space-y-1.5 flex-1 flex flex-col justify-between">
+                      {/* Compact Card Information */}
+                      <div className="p-2 space-y-1 flex-1 flex flex-col justify-between">
                         <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 block truncate">
+                          <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
                             {store?.name || "Mitra Cirebon"}
                           </span>
-                          <h4 className="font-extrabold text-[11px] text-foreground leading-snug line-clamp-2">
+                          <h4 className="font-extrabold text-[10px] text-foreground leading-tight line-clamp-2 min-h-[24px]">
                             {bag.title}
                           </h4>
-                          <span className="flex items-center gap-1 text-[9px] text-muted-foreground truncate pt-0.5">
-                            <Clock className="size-2.5 text-amber-600 shrink-0" />
+                          <span className="flex items-center gap-0.5 text-[8px] text-muted-foreground truncate">
+                            <Clock className="size-2 text-amber-600 shrink-0" />
                             <span>{bag.pickupWindow}</span>
                           </span>
                         </div>
 
                         {/* Price & Action Button */}
-                        <div className="pt-1.5 border-t border-border/50 space-y-1">
+                        <div className="pt-1 border-t border-border/50 space-y-1">
                           <div className="flex items-baseline gap-1">
-                            <span className="font-black text-xs text-emerald-700 dark:text-emerald-400 tabular-nums">
+                            <span className="font-black text-[11px] text-emerald-700 dark:text-emerald-400 tabular-nums">
                               Rp {bag.discountedPrice.toLocaleString("id-ID")}
                             </span>
-                            <span className="text-[9px] text-muted-foreground line-through tabular-nums">
+                            <span className="text-[8px] text-muted-foreground line-through tabular-nums">
                               Rp {bag.originalPrice.toLocaleString("id-ID")}
                             </span>
                           </div>
 
                           <Link
                             href={`/checkout?bagId=${bag.id}`}
-                            className="block w-full h-7 leading-7 text-center text-[11px] font-black bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg shadow-2xs transition-colors"
+                            className="block w-full h-6 leading-6 text-center text-[10px] font-black bg-emerald-700 hover:bg-emerald-800 text-white rounded-md shadow-2xs transition-colors"
                           >
-                            Ambil Porsi
+                            Ambil
                           </Link>
                         </div>
                       </div>
