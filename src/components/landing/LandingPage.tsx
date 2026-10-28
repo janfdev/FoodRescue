@@ -12,7 +12,7 @@ import {
   Apple,
   MessageSquare,
   ShoppingBag,
-  Ticket,
+  Receipt,
   LogOut,
   ChevronDown,
   ShieldCheck,
@@ -199,12 +199,12 @@ export function LandingPage() {
                   )}
 
                   <Link
-                    href="/tickets"
+                    href="/history"
                     className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
                   >
                     <span className="flex items-center gap-2">
-                      <Ticket className="size-3.5 text-emerald-700" />
-                      <span>Tiket Penyelamatan Saya</span>
+                      <Receipt className="size-3.5 text-emerald-700" />
+                      <span>Riwayat Pesanan Saya</span>
                     </span>
                     {activeTicketsCount > 0 && (
                       <Badge className="size-4 p-0 flex items-center justify-center bg-emerald-700 text-white text-[9px] font-bold rounded-full">
@@ -465,11 +465,11 @@ export function LandingPage() {
           </Link>
 
           <Link
-            href="/tickets"
+            href="/history"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors"
           >
-            <Ticket className="size-5" />
-            <span className="text-[10px] font-bold">Tiket Saya</span>
+            <Receipt className="size-5" />
+            <span className="text-[10px] font-bold">Riwayat</span>
             {activeTicketsCount > 0 && (
               <span className="size-2 rounded-full bg-emerald-600 absolute top-0 right-3" />
             )}

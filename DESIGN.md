@@ -64,7 +64,7 @@ RERASA CIREBON RAYA
 ├── PARADIGMA 1: KONSUMEN (MOBILE-FIRST MARKETPLACE)
 │   ├── / (Katalog Beranda Instan)
 │   ├── /checkout (Rute Checkout & Pemilihan Pembayaran)
-│   ├── /tickets (Halaman Tiket Penjemputan Kasir)
+│   ├── /history (Halaman Riwayat Pesanan & Voucher Pengambilan)
 │   ├── /account (Halaman Akun & Profil Pengguna)
 │   ├── /login (Halaman Masuk Dedicated & Google OAuth)
 │   └── /brand (Showcase Aset Vektor Logo)
@@ -97,7 +97,7 @@ RERASA CIREBON RAYA
   * Tombol **"Ambil"** yang mengarahkan langsung ke rute `/checkout?bagId=[id]`.
 * **Floating Bottom Navigation:** Tiga tombol navigasi bawah mengambang:
   * **Jelajah** (`/`)
-  * **Tiket Saya** (`/tickets` dengan lencana indikator kuota aktif)
+  * **Riwayat** (`/history` dengan lencana indikator pesanan aktif)
   * **Akun** (`/account`)
 
 ---
@@ -115,13 +115,13 @@ RERASA CIREBON RAYA
   * Subtotal Makanan: `Kuantitas x Harga Diskon`.
   * Biaya Layanan Aplikasi: `Rp 1.000` (tetap).
   * Total Tagihan Pembeli.
-* **Penerbitan Tiket Otomatis:** Setelah order dibuat, voucher penjemputan diterbitkan dengan PIN 4-digit kasir dan QR Code SVG.
+* **Penyimpanan Pesanan Otomatis:** Setelah order dibuat, voucher penjemputan diterbitkan dengan PIN 4-digit kasir dan QR Code SVG di halaman riwayat.
 
 ---
 
-### 6.3. Halaman Tiket Penjemputan Kasir (`/tickets`)
+### 6.3. Halaman Riwayat Pesanan (`/history`)
 * **Tab Navigasi:**
-  * *Tiket Aktif*: Menampilkan voucher yang siap diambil di gerai mitra.
+  * *Pesanan Aktif*: Menampilkan voucher yang siap diambil di gerai mitra.
   * *Riwayat Selesai*: Pesanan yang telah selesai diserahterimakan.
 * **Kartu Voucher:**
   * Menampilkan PIN 4-digit dalam box kontras amber besar.

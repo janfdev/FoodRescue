@@ -152,10 +152,10 @@ function CheckoutContent() {
 
           <div className="space-y-2">
             <Button
-              onClick={() => router.push("/tickets")}
+              onClick={() => router.push("/history")}
               className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
             >
-              Buka Halaman Tiket Saya
+              Lihat Riwayat Pesanan
             </Button>
             <Button
               variant="outline"
@@ -403,7 +403,7 @@ function CheckoutContent() {
               onClick={handleConfirmOrder}
               className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs h-10 px-5 rounded-xl shadow-xs"
             >
-              {isSubmitting ? "Memproses..." : "Bayar & Dapatkan Tiket"}
+              {isSubmitting ? "Memproses..." : "Bayar & Simpan Pesanan"}
             </Button>
           </div>
         </div>

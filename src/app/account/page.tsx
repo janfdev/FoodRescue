@@ -14,7 +14,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   Building2,
-  Ticket,
+  Receipt,
   LogOut,
   ShoppingBag,
   User,
@@ -148,12 +148,12 @@ export default function AccountPage() {
           {/* Menu Navigasi Akun */}
           <Card className="p-2 border-border/80 rounded-2xl shadow-2xs space-y-1 bg-card text-xs">
             <Link
-              href="/tickets"
+              href="/history"
               className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted font-semibold text-foreground transition-colors"
             >
               <div className="flex items-center gap-2.5">
-                <Ticket className="size-4 text-emerald-700" />
-                <span>Tiket & Riwayat Pesanan Saya</span>
+                <Receipt className="size-4 text-emerald-700" />
+                <span>Riwayat Pesanan Saya</span>
               </div>
               <div className="flex items-center gap-1.5">
                 {myOrdersCount > 0 && (
@@ -240,11 +240,11 @@ export default function AccountPage() {
           </Link>
 
           <Link
-            href="/tickets"
+            href="/history"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <Ticket className="size-5" />
-            <span className="text-[10px] font-bold">Tiket Saya</span>
+            <Receipt className="size-5" />
+            <span className="text-[10px] font-bold">Riwayat</span>
           </Link>
 
           <Link
