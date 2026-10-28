@@ -56,6 +56,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Dialog,
   DialogContent,
@@ -253,9 +254,17 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             {currentUser ? (
               <Popover>
                 <PopoverTrigger className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl border border-border bg-card hover:bg-muted/50 text-xs font-bold transition-colors shadow-2xs">
-                  <div className="size-6 rounded-full bg-emerald-700 text-white text-[11px] font-black flex items-center justify-center">
-                    {currentUser.name.charAt(0)}
-                  </div>
+                  <Avatar size="sm" className="size-6 rounded-full border border-border">
+                    <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
+                    <AvatarFallback className="bg-emerald-700 text-white font-black text-[10px]">
+                      {currentUser.name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
                   <span className="max-w-[110px] truncate hidden sm:inline text-foreground">
                     {currentUser.name}
                   </span>

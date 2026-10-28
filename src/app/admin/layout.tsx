@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Shield,
   LayoutDashboard,
@@ -11,13 +11,20 @@ import {
   Wallet,
   Users,
   Settings,
-  ArrowLeft
+  ArrowLeft,
+  ChevronDown,
+  LogOut,
+  UserCheck
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { storeService } from "@/services/storeService";
+import { SEED_USERS } from "@/services/seedData";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState(storeService.getState());
 
@@ -27,6 +34,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     });
     return unsub;
   }, []);
+
+  const adminUser =
+    state.currentUser?.role === "super_admin"
+      ? state.currentUser
+      : SEED_USERS.find((u) => u.role === "super_admin") || SEED_USERS[0];
+
+  const initials = adminUser.name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const handleLogout = () => {
+    storeService.logoutUser();
+    router.push("/login");
+  };
 
   const pendingStoresCount = state.stores.filter((s) => s.status === "PENDING_APPROVAL").length;
   const pendingWdCount = state.withdrawals.filter((w) => w.status === "PENDING").length;
@@ -155,17 +179,76 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
 
-        {/* User Card */}
+        {/* Interactive Profile Card with Popover & Dicebear Avatar */}
         <div className="pt-4 border-t border-border/80">
-          <div className="flex items-center gap-3 p-2 bg-muted/30 rounded-xl">
-            <div className="size-8 rounded-full bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
-              A
-            </div>
-            <div className="min-w-0 flex-1">
-              <span className="text-xs font-bold text-foreground block truncate">Ahmad Fauzi</span>
-              <span className="text-[10px] text-muted-foreground block truncate">Head of Ops Cirebon</span>
-            </div>
-          </div>
+          <Popover>
+            <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Avatar size="sm" className="size-8 rounded-full border border-border">
+                  <AvatarImage src={adminUser.avatarUrl} alt={adminUser.name} />
+                  <AvatarFallback className="bg-purple-700 text-white font-bold text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-bold text-foreground block truncate">
+                    {adminUser.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block truncate font-mono">
+                    Super Admin
+                  </span>
+                </div>
+              </div>
+              <ChevronDown className="size-3.5 text-muted-foreground shrink-0 ml-1" />
+            </PopoverTrigger>
+
+            <PopoverContent align="start" side="top" className="w-60 p-3 space-y-2.5 bg-card border border-border shadow-lg">
+              {/* Profile Header */}
+              <div className="space-y-1 pb-2 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-foreground text-xs block truncate">
+                    {adminUser.name}
+                  </span>
+                  <Badge variant="default" className="text-[9px] bg-purple-700 text-white font-mono">
+                    Admin
+                  </Badge>
+                </div>
+                <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                  {adminUser.email}
+                </span>
+              </div>
+
+              {/* Quick Links */}
+              <div className="space-y-1">
+                <Link
+                  href="/admin/users"
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <Users className="size-3.5 text-purple-600" />
+                  <span>Manajemen User</span>
+                </Link>
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <ArrowLeft className="size-3.5 text-emerald-600" />
+                  <span>Kembali ke Beranda</span>
+                </Link>
+              </div>
+
+              <Separator />
+
+              {/* Logout Button */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors text-left"
+              >
+                <LogOut className="size-3.5" />
+                <span>Keluar Akun (Logout)</span>
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </aside>
 

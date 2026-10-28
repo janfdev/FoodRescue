@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Store as StoreIcon,
   QrCode,
@@ -11,29 +11,38 @@ import {
   Box,
   Wallet,
   ArrowLeft,
-  DollarSign
+  DollarSign,
+  ChevronDown,
+  LogOut,
+  ShoppingBag
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { storeService } from "@/services/storeService";
+import { SEED_USERS } from "@/services/seedData";
 import { Store } from "@/types/domain";
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [storesList, setStoresList] = useState<Store[]>([]);
   const [selectedStoreId, setSelectedStoreId] = useState<string>("store-ruby-bakery");
   const [store, setStore] = useState<Store | null>(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
+  const [state, setState] = useState(storeService.getState());
 
   const syncData = () => {
-    const state = storeService.getState();
-    const activeStores = state.stores.filter((s) => s.status === "ACTIVE");
+    const currentState = storeService.getState();
+    setState(currentState);
+    const activeStores = currentState.stores.filter((s) => s.status === "ACTIVE");
     setStoresList(activeStores);
     const current = activeStores.find((s) => s.id === selectedStoreId) || activeStores[0];
     setStore(current);
     if (current) {
-      const pending = state.orders.filter(
+      const pending = currentState.orders.filter(
         (o) => o.storeId === current.id && (o.status === "PAID" || o.status === "READY_FOR_PICKUP")
       );
       setPendingOrdersCount(pending.length);
@@ -47,6 +56,25 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   }, [selectedStoreId]);
 
   if (!store) return null;
+
+  const sellerUser =
+    state.currentUser?.role === "seller"
+      ? state.currentUser
+      : SEED_USERS.find((u) => u.storeId === store.id) ||
+        SEED_USERS.find((u) => u.role === "seller") ||
+        SEED_USERS[0];
+
+  const initials = sellerUser.name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
+  const handleLogout = () => {
+    storeService.logoutUser();
+    router.push("/login");
+  };
 
   const isBoxLow = store.currentBoxStock < 10 || store.boxesSoldTotal % 50 >= 40;
 
@@ -182,8 +210,8 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </div>
         </div>
 
-        {/* Box Stock Alert at Bottom Sidebar */}
-        <div className="pt-4 border-t border-border/80 space-y-2">
+        {/* Box Stock Alert & Interactive Profile Card with Popover */}
+        <div className="pt-4 border-t border-border/80 space-y-3">
           <div className="p-3 bg-muted/40 rounded-xl space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground font-semibold">Stok Rescue Box:</span>
@@ -200,6 +228,76 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               <span className="font-bold text-foreground">{store.boxComplianceRate}%</span>
             </div>
           </div>
+
+          {/* Interactive Profile Popover */}
+          <Popover>
+            <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <Avatar size="sm" className="size-8 rounded-full border border-border">
+                  <AvatarImage src={sellerUser.avatarUrl} alt={sellerUser.name} />
+                  <AvatarFallback className="bg-orange-600 text-white font-bold text-xs">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <span className="text-xs font-bold text-foreground block truncate">
+                    {sellerUser.name}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block truncate font-mono">
+                    Mitra Toko
+                  </span>
+                </div>
+              </div>
+              <ChevronDown className="size-3.5 text-muted-foreground shrink-0 ml-1" />
+            </PopoverTrigger>
+
+            <PopoverContent align="start" side="top" className="w-60 p-3 space-y-2.5 bg-card border border-border shadow-lg">
+              {/* Profile Header */}
+              <div className="space-y-1 pb-2 border-b border-border">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-foreground text-xs block truncate">
+                    {sellerUser.name}
+                  </span>
+                  <Badge variant="secondary" className="text-[9px] bg-orange-600 text-white font-mono">
+                    Mitra
+                  </Badge>
+                </div>
+                <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                  {sellerUser.email}
+                </span>
+              </div>
+
+              {/* Quick Links */}
+              <div className="space-y-1">
+                <Link
+                  href="/seller/finance"
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <Wallet className="size-3.5 text-emerald-600" />
+                  <span>Saldo & Rekening</span>
+                </Link>
+                <Link
+                  href="/"
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                >
+                  <ArrowLeft className="size-3.5 text-emerald-600" />
+                  <span>Kembali ke Beranda</span>
+                </Link>
+              </div>
+
+              <Separator />
+
+              {/* Logout Button */}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors text-left"
+              >
+                <LogOut className="size-3.5" />
+                <span>Keluar Akun (Logout)</span>
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </aside>
 

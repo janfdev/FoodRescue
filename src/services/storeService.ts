@@ -319,8 +319,12 @@ class StoreService {
   }
 
   // =====================
-  // PHYSICAL PICKUP & ESCROW RELEASE
+  // PHYSICAL PICKUP & ESCROW RELEASE (1-CLICK CASHIER HANDOVER)
   // =====================
+  public confirmOrderHandover(orderId: string): { success: boolean; message: string; order?: Order } {
+    return this.verifyPickup(orderId);
+  }
+
   public verifyPickup(pickupCodeOrQr: string): { success: boolean; message: string; order?: Order } {
     let code = pickupCodeOrQr.trim();
     if (code.startsWith("RESCUE_ORDER:")) {

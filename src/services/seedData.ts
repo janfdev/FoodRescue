@@ -17,7 +17,7 @@ export const SEED_USERS: User[] = [
     role: "super_admin",
     phone: "082111222333",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=AhmadFauzi&backgroundColor=d1d4f9",
     createdAt: "2026-01-15T08:00:00Z"
   },
   {
@@ -27,7 +27,7 @@ export const SEED_USERS: User[] = [
     role: "super_admin",
     phone: "082111222334",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=DewiSartika&backgroundColor=ffd5dc",
     createdAt: "2026-01-20T09:30:00Z"
   },
   // Mitra Toko (Sellers)
@@ -38,7 +38,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654321",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=SitiRahma&backgroundColor=ffdfbf",
     storeId: "store-ruby-bakery",
     createdAt: "2026-02-10T10:00:00Z"
   },
@@ -49,7 +49,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654322",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=BambangPratama&backgroundColor=b6e3f4",
     storeId: "store-kopi-nako",
     createdAt: "2026-02-12T11:00:00Z"
   },
@@ -60,7 +60,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654323",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=MangDul&backgroundColor=c0aede",
     storeId: "store-jamblang-dul",
     createdAt: "2026-02-15T14:20:00Z"
   },
@@ -71,7 +71,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654324",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=HApud&backgroundColor=b6e3f4",
     storeId: "store-empal-apud",
     createdAt: "2026-02-18T16:00:00Z"
   },
@@ -82,7 +82,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654325",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=KevinSanjaya&backgroundColor=ffdfbf",
     storeId: "store-martabak-sanfran",
     createdAt: "2026-02-22T13:45:00Z"
   },
@@ -93,7 +93,7 @@ export const SEED_USERS: User[] = [
     role: "seller",
     phone: "081987654326",
     status: "SUSPENDED",
-    avatarUrl: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=HendraGunawan&backgroundColor=ffd5dc",
     storeId: "store-dapur-ciremai",
     createdAt: "2026-10-27T08:30:00Z"
   },
@@ -105,7 +105,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567890",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=FauzanRizqi&backgroundColor=d1d4f9",
     createdAt: "2026-03-01T10:00:00Z"
   },
   {
@@ -115,7 +115,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567891",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=BudiSantoso&backgroundColor=b6e3f4",
     createdAt: "2026-03-05T11:30:00Z"
   },
   {
@@ -125,7 +125,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567892",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=AnisaNur&backgroundColor=ffd5dc",
     createdAt: "2026-03-08T15:10:00Z"
   },
   {
@@ -135,7 +135,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567893",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=DimasAng&backgroundColor=ffdfbf",
     createdAt: "2026-03-12T09:20:00Z"
   },
   {
@@ -145,7 +145,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567894",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=RinaKartika&backgroundColor=c0aede",
     createdAt: "2026-03-16T14:00:00Z"
   },
   {
@@ -155,7 +155,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567895",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=EkoPras&backgroundColor=d1d4f9",
     createdAt: "2026-03-20T17:40:00Z"
   },
   {
@@ -165,7 +165,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567896",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=MegaUtami&backgroundColor=ffd5dc",
     createdAt: "2026-03-25T12:15:00Z"
   },
   {
@@ -175,7 +175,7 @@ export const SEED_USERS: User[] = [
     role: "buyer",
     phone: "081234567897",
     status: "ACTIVE",
-    avatarUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150",
+    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=RezaPrat&backgroundColor=ffdfbf",
     createdAt: "2026-03-28T16:50:00Z"
   }
 ];
