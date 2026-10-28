@@ -619,6 +619,21 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                         className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
                         loading="lazy"
                       />
+                      {/* Urgency Badge: Quota & Pickup Urgency */}
+                      <div className="absolute top-2.5 left-2.5">
+                        {bag.quotaRemaining <= 3 ? (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xs flex items-center gap-1">
+                            <Clock className="size-3" />
+                            <span>Sisa {bag.quotaRemaining} paket</span>
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-800/90 backdrop-blur-xs text-white shadow-xs flex items-center gap-1">
+                            <Clock className="size-3" />
+                            <span>Ambil Sore Ini</span>
+                          </span>
+                        )}
+                      </div>
+
                       <div className="absolute top-2.5 right-2.5">
                         <Badge variant="secondary" className="font-bold text-[10px] bg-background/90 backdrop-blur-xs text-amber-700 dark:text-amber-400 shadow-2xs">
                           Hemat {discountPct}%
@@ -647,19 +662,24 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                   </CardHeader>
 
                   <CardContent className="p-4 pt-1 space-y-3">
-                    <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50 text-[11px] space-y-1">
+                    <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50 text-[11px] space-y-1.5">
                       <div className="flex items-center justify-between text-muted-foreground">
                         <span className="flex items-center gap-1">
                           <MapPin className="size-3 text-muted-foreground" />
                           <span>{store?.area || "Cirebon Kota"}</span>
                         </span>
-                        <span className="font-bold text-foreground">
+                        <span className={`font-bold tabular-nums ${bag.quotaRemaining <= 3 ? "text-amber-700 dark:text-amber-400" : "text-foreground"}`}>
                           Sisa {bag.quotaRemaining} paket
                         </span>
                       </div>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Clock className="size-3 text-amber-600" />
-                        <span>Jam Ambil: {bag.pickupWindow}</span>
+                      <div className="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]">
+                        <span className="flex items-center gap-1 text-amber-700 dark:text-amber-400 font-semibold">
+                          <Clock className="size-3 text-amber-600 shrink-0" />
+                          <span>Ambil: {bag.pickupWindow}</span>
+                        </span>
+                        <span className="text-muted-foreground font-mono">
+                          Hari ini
+                        </span>
                       </div>
                     </div>
 

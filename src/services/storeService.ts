@@ -245,6 +245,17 @@ class StoreService {
     this.persist();
   }
 
+  public addSurpriseBag(bagData: Omit<SurpriseBag, "id">): SurpriseBag {
+    const newId = `bag-${Date.now()}`;
+    const newBag: SurpriseBag = {
+      ...bagData,
+      id: newId,
+    };
+    this.state.surpriseBags.unshift(newBag);
+    this.persist();
+    return newBag;
+  }
+
   // =====================
   // BUYER ORDER & ESCROW
   // =====================
