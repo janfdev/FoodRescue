@@ -181,8 +181,12 @@ export default function AccountPage() {
             className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/80 hover:bg-muted/70 transition-colors cursor-pointer text-xs"
           >
             <div className="flex items-center gap-2.5">
-              <div className="size-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Image src="/icons/icon-144x144.png" alt="Rerasa PWA Icon" width={24} height={24} className="size-6 object-contain" />
+              <div className="size-9 rounded-xl overflow-hidden shadow-2xs shrink-0 border border-border">
+                <img
+                  src="/icons/icon-96x96.png"
+                  alt="Rerasa PWA Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <span className="font-extrabold text-foreground block">
