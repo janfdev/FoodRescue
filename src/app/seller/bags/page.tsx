@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Plus, Upload, Image as ImageIcon } from "lucide-react";
+import { Clock, Plus, Upload, Image as ImageIcon, Zap } from "lucide-react";
 
 export default function SellerBagsPage() {
   const [surpriseBags, setSurpriseBags] = useState<SurpriseBag[]>([]);
@@ -45,6 +45,11 @@ export default function SellerBagsPage() {
 
   const handleQuotaChange = (bagId: string, newQuota: number, isActive: boolean) => {
     storeService.updateBagQuota(bagId, newQuota, isActive);
+    syncData();
+  };
+
+  const handleToggleFlashSale = (bagId: string, isLastCall: boolean) => {
+    storeService.toggleBagFlashSale(bagId, isLastCall);
     syncData();
   };
 
@@ -137,6 +142,7 @@ export default function SellerBagsPage() {
                 <th className="p-3.5">Jadwal Pengambilan</th>
                 <th className="p-3.5">Harga Normal & Diskon</th>
                 <th className="p-3.5">Atur Sisa Kuota</th>
+                <th className="p-3.5">Flash Sale</th>
                 <th className="p-3.5">Status Penjualan</th>
               </tr>
             </thead>
@@ -221,6 +227,21 @@ export default function SellerBagsPage() {
                         +
                       </Button>
                     </div>
+                  </td>
+                  <td className="p-3.5">
+                    <Button
+                      size="sm"
+                      variant={bag.isLastCall ? "default" : "outline"}
+                      onClick={() => handleToggleFlashSale(bag.id, !bag.isLastCall)}
+                      className={`text-[11px] font-bold h-7 gap-1 cursor-pointer ${
+                        bag.isLastCall
+                          ? "bg-amber-600 hover:bg-amber-700 text-white"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Zap className="size-3" />
+                      {bag.isLastCall ? "Flash Sale Aktif" : "Buka Flash Sale"}
+                    </Button>
                   </td>
                   <td className="p-3.5">
                     <Button

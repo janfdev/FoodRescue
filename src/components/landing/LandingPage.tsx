@@ -392,18 +392,32 @@ export function LandingPage() {
                   const discountPct = Math.round(
                     ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
                   );
+                  const isSoldOut = bag.quotaRemaining <= 0;
 
                   return (
                     <div
                       key={`flash-${bag.id}`}
-                      className="w-56 p-2.5 rounded-2xl bg-gradient-to-br from-amber-500/10 via-card to-background border border-amber-500/30 flex flex-col justify-between shrink-0 shadow-2xs hover:border-amber-500/60 transition-all"
+                      className={`w-56 p-2.5 rounded-2xl border flex flex-col justify-between shrink-0 shadow-2xs transition-all ${
+                        isSoldOut
+                          ? "bg-muted/40 border-border opacity-75 grayscale"
+                          : "bg-gradient-to-br from-amber-500/10 via-card to-background border-amber-500/30 hover:border-amber-500/60"
+                      }`}
                     >
                       <div className="flex items-start gap-2">
-                        <img
-                          src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
-                          alt={bag.title}
-                          className="size-16 rounded-xl object-cover border border-border/80 shrink-0"
-                        />
+                        <div className="relative size-16 rounded-xl overflow-hidden border border-border/80 shrink-0 bg-muted">
+                          <img
+                            src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
+                            alt={bag.title}
+                            className="size-full object-cover"
+                          />
+                          {isSoldOut && (
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                              <span className="text-[8px] font-black uppercase text-white bg-zinc-950/90 px-1 py-0.5 rounded border border-white/20">
+                                Habis
+                              </span>
+                            </div>
+                          )}
+                        </div>
                         <div className="flex-1 min-w-0 space-y-0.5">
                           <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
                             {store?.name}
@@ -428,19 +442,25 @@ export function LandingPage() {
                               Rp {bag.originalPrice.toLocaleString("id-ID")}
                             </span>
                           </div>
-                          <span className="text-[8px] font-bold text-amber-800 dark:text-amber-300">
-                            Sisa {bag.quotaRemaining} porsi
+                          <span className={`text-[8px] font-bold ${isSoldOut ? "text-rose-600 dark:text-rose-400" : "text-amber-800 dark:text-amber-300"}`}>
+                            {isSoldOut ? "Stok Habis" : `Sisa ${bag.quotaRemaining} porsi`}
                           </span>
                         </div>
 
-                        <Button
-                          size="sm"
-                          onClick={(e) => handleAddToCart(e, bag)}
-                          className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
-                        >
-                          <Plus className="size-3" />
-                          <span>Cart</span>
-                        </Button>
+                        {isSoldOut ? (
+                          <span className="h-6 text-[9px] font-bold text-muted-foreground bg-muted border border-border rounded-lg px-2 flex items-center justify-center select-none">
+                            Habis
+                          </span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            onClick={(e) => handleAddToCart(e, bag)}
+                            className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
+                          >
+                            <Plus className="size-3" />
+                            <span>Cart</span>
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );
@@ -628,11 +648,14 @@ export function LandingPage() {
                   const discountPct = Math.round(
                     ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
                   );
+                  const isSoldOut = bag.quotaRemaining <= 0;
 
                   return (
                     <Card
                       key={bag.id}
-                      className="border-border/80 rounded-xl shadow-2xs overflow-hidden flex flex-col justify-between hover:border-emerald-600/40 transition-all group bg-card"
+                      className={`border-border/80 rounded-xl shadow-2xs overflow-hidden flex flex-col justify-between transition-all group bg-card ${
+                        isSoldOut ? "opacity-80 grayscale hover:border-border" : "hover:border-emerald-600/40"
+                      }`}
                     >
                       {/* Compact Photo */}
                       <div className="relative h-24 sm:h-28 w-full overflow-hidden bg-muted">
@@ -643,8 +666,17 @@ export function LandingPage() {
                           loading="lazy"
                         />
 
+                        {/* Sold Out Dark Overlay */}
+                        {isSoldOut && (
+                          <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                            <span className="px-2 py-0.5 rounded bg-zinc-950/95 text-zinc-100 border border-white/20 text-[9px] font-black tracking-wider uppercase shadow-md">
+                              Habis Terjual
+                            </span>
+                          </div>
+                        )}
+
                         {/* Top Overlay Badges */}
-                        <div className="absolute top-1 left-1 flex flex-col gap-0.5 items-start">
+                        <div className="absolute top-1 left-1 flex flex-col gap-0.5 items-start z-10">
                           <span className="px-1 py-0.5 rounded text-[8px] font-black bg-amber-600 text-white shadow-2xs leading-none">
                             -{discountPct}%
                           </span>
@@ -656,9 +688,15 @@ export function LandingPage() {
                         </div>
 
                         {/* Quota Indicator */}
-                        <div className="absolute bottom-1 left-1">
-                          <span className="px-1 py-0.5 rounded text-[8px] font-bold bg-background/90 backdrop-blur-xs text-foreground shadow-2xs leading-none">
-                            Sisa {bag.quotaRemaining}
+                        <div className="absolute bottom-1 left-1 z-10">
+                          <span
+                            className={`px-1 py-0.5 rounded text-[8px] font-bold shadow-2xs leading-none ${
+                              isSoldOut
+                                ? "bg-rose-500/20 text-rose-700 dark:text-rose-300 font-black border border-rose-500/30"
+                                : "bg-background/90 backdrop-blur-xs text-foreground"
+                            }`}
+                          >
+                            {isSoldOut ? "Habis" : `Sisa ${bag.quotaRemaining}`}
                           </span>
                         </div>
                       </div>
@@ -689,23 +727,29 @@ export function LandingPage() {
                             </span>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-1">
-                            <button
-                              type="button"
-                              onClick={(e) => handleAddToCart(e, bag)}
-                              className="h-6 flex items-center justify-center gap-0.5 rounded-md bg-muted/80 hover:bg-muted text-foreground text-[9px] font-bold border border-border/70 transition-colors cursor-pointer"
-                            >
-                              <Plus className="size-2.5" />
-                              <span>Cart</span>
-                            </button>
+                          {isSoldOut ? (
+                            <div className="w-full h-6 flex items-center justify-center rounded-md bg-muted text-muted-foreground text-[9px] font-bold border border-border select-none">
+                              Stok Habis Hari Ini
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-1">
+                              <button
+                                type="button"
+                                onClick={(e) => handleAddToCart(e, bag)}
+                                className="h-6 flex items-center justify-center gap-0.5 rounded-md bg-muted/80 hover:bg-muted text-foreground text-[9px] font-bold border border-border/70 transition-colors cursor-pointer"
+                              >
+                                <Plus className="size-2.5" />
+                                <span>Cart</span>
+                              </button>
 
-                            <Link
-                              href={`/checkout?bagId=${bag.id}`}
-                              className="h-6 flex items-center justify-center rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[9px] font-black shadow-2xs transition-colors"
-                            >
-                              Beli
-                            </Link>
-                          </div>
+                              <Link
+                                href={`/checkout?bagId=${bag.id}`}
+                                className="h-6 flex items-center justify-center rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[9px] font-black shadow-2xs transition-colors"
+                              >
+                                Beli
+                              </Link>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </Card>

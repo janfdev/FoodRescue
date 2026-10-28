@@ -228,12 +228,17 @@ export function BuyerAppView() {
                   const discountPct = Math.round(
                     ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
                   );
+                  const isSoldOut = bag.quotaRemaining <= 0;
 
                   return (
                     <div
                       key={bag.id}
-                      onClick={() => setSelectedBagForDetail(bag)}
-                      className="bg-card border border-border rounded-2xl p-4 shadow-xs hover:border-emerald-500/50 transition-all cursor-pointer space-y-3"
+                      onClick={() => !isSoldOut && setSelectedBagForDetail(bag)}
+                      className={`border rounded-2xl p-4 shadow-xs transition-all space-y-3 ${
+                        isSoldOut
+                          ? "bg-muted/40 border-border opacity-75 grayscale cursor-not-allowed"
+                          : "bg-card border-border hover:border-emerald-500/50 cursor-pointer"
+                      }`}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
@@ -248,9 +253,15 @@ export function BuyerAppView() {
                             {bag.title}
                           </h4>
                         </div>
-                        <span className="bg-red-500/10 text-red-600 dark:text-red-400 font-extrabold text-[11px] px-2 py-0.5 rounded-md shrink-0">
-                          Hemat {discountPct}%
-                        </span>
+                        {isSoldOut ? (
+                          <span className="bg-zinc-900/90 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-md shrink-0 uppercase border border-white/20">
+                            Habis
+                          </span>
+                        ) : (
+                          <span className="bg-red-500/10 text-red-600 dark:text-red-400 font-extrabold text-[11px] px-2 py-0.5 rounded-md shrink-0">
+                            Hemat {discountPct}%
+                          </span>
+                        )}
                       </div>
 
                       {/* Jam Ambil & Kuota */}
@@ -259,8 +270,8 @@ export function BuyerAppView() {
                           <Clock className="size-3.5 text-amber-500" />
                           <span>Ambil: {bag.pickupWindow}</span>
                         </div>
-                        <span className="font-bold text-foreground">
-                          Sisa {bag.quotaRemaining} paket
+                        <span className={`font-bold ${isSoldOut ? "text-rose-600 dark:text-rose-400" : "text-foreground"}`}>
+                          {isSoldOut ? "Stok Habis" : `Sisa ${bag.quotaRemaining} paket`}
                         </span>
                       </div>
 
@@ -275,13 +286,19 @@ export function BuyerAppView() {
                           </span>
                         </div>
 
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
-                        >
-                          Pesan
-                        </Button>
+                        {isSoldOut ? (
+                          <span className="px-3 py-1.5 bg-muted text-muted-foreground text-xs font-bold rounded-lg border border-border select-none">
+                            Habis
+                          </span>
+                        ) : (
+                          <Button
+                            type="button"
+                            size="sm"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs cursor-pointer"
+                          >
+                            Pesan
+                          </Button>
+                        )}
                       </div>
                     </div>
                   );

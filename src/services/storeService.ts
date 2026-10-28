@@ -316,6 +316,19 @@ class StoreService {
     this.persist();
   }
 
+  public toggleBagFlashSale(bagId: string, isLastCall?: boolean) {
+    this.state.surpriseBags = this.state.surpriseBags.map((b) => {
+      if (b.id === bagId) {
+        return {
+          ...b,
+          isLastCall: isLastCall !== undefined ? isLastCall : !b.isLastCall,
+        };
+      }
+      return b;
+    });
+    this.persist();
+  }
+
   public addSurpriseBag(bagData: Omit<SurpriseBag, "id">): SurpriseBag {
     const newId = `bag-${Date.now()}`;
     const newBag: SurpriseBag = {
