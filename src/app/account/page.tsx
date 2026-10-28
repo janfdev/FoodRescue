@@ -23,11 +23,13 @@ import {
   Pencil,
 } from "lucide-react";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
+import { usePwa } from "@/components/pwa/PwaProvider";
 
 export default function AccountPage() {
   const router = useRouter();
   const [state, setState] = useState(storeService.getState());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { isInstalled, isStandalone, openInstallGuide } = usePwa();
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -170,6 +172,38 @@ export default function AccountPage() {
               <ChevronRight className="size-4 text-muted-foreground" />
             </Link>
           )}
+
+          {/* PWA Application Status Card */}
+          <div
+            onClick={openInstallGuide}
+            className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/80 hover:bg-muted/70 transition-colors cursor-pointer text-xs"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="size-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Sparkles className="size-4" />
+              </div>
+              <div>
+                <span className="font-extrabold text-foreground block">
+                  Aplikasi Rerasa (PWA)
+                </span>
+                <span className="text-[10px] text-muted-foreground block">
+                  {isStandalone || isInstalled
+                    ? "Sudah Terpasang di Perangkat ✓"
+                    : "Klik untuk pasang atau panduan instalasi"}
+                </span>
+              </div>
+            </div>
+            <Badge
+              variant={isStandalone || isInstalled ? "default" : "outline"}
+              className={`text-[9px] font-bold ${
+                isStandalone || isInstalled
+                  ? "bg-emerald-600 text-white"
+                  : "border-emerald-600 text-emerald-700 dark:text-emerald-400"
+              }`}
+            >
+              {isStandalone || isInstalled ? "Terpasang ✓" : "Pasang App"}
+            </Badge>
+          </div>
 
           {/* Menu Navigasi Akun */}
           <Card className="p-2 border-border/80 rounded-2xl shadow-2xs space-y-1 bg-card text-xs">

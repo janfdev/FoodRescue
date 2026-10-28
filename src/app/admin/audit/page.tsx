@@ -18,7 +18,7 @@ export default function AdminAuditPage() {
   }, []);
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div>
         <h2 className="text-xl font-black text-foreground tracking-tight">
           Audit Kepatuhan Kemasan & Resolusi Sengketa

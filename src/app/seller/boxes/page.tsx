@@ -39,7 +39,7 @@ export default function SellerBoxesPage() {
   if (!store) return null;
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div>
         <h2 className="text-xl font-black text-foreground tracking-tight">
           Toko Suplai Kemasan Resmi Rescue Box B2B

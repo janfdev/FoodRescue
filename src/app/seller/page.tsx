@@ -45,7 +45,7 @@ export default function SellerPosPage() {
   );
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 w-full">
       <div>
         <h2 className="text-xl font-black text-foreground tracking-tight">
           Kasir POS & Verifikasi PIN Pengambilan
