@@ -220,26 +220,36 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             </div>
           </div>
 
-          {/* Header Actions: Tiket Saya & Dynamic User Profile Popover */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Button Tiket Saya */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTicketsDrawer(true)}
-              className="text-xs font-bold gap-1.5 border-emerald-600/30 text-emerald-800 dark:text-emerald-400"
+          {/* Center Nav Links (Anti-Slop Content-Driven Navigation) */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a
+              href="#katalog"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Ticket className="size-3.5 text-emerald-600" />
-              <span>Tiket Saya</span>
-              {activeMyOrders.length > 0 && (
-                <Badge variant="default" className="bg-emerald-700 text-white text-[10px] px-1.5 py-0 font-mono ml-0.5">
-                  {activeMyOrders.length}
-                </Badge>
-              )}
-            </Button>
+              Jelajah Katalog
+            </a>
+            <a
+              href="#cara-kerja"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Cara Kerja
+            </a>
+            <a
+              href="#mitra"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Mitra Kuliner
+            </a>
+            <a
+              href="#dampak"
+              className="text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Dampak Pangan
+            </a>
+          </nav>
 
-            {/* Profile Popover or Login Button */}
+          {/* Header Right: Profile Popover or Login Button */}
+          <div className="flex items-center gap-3">
             {currentUser ? (
               <Popover>
                 <PopoverTrigger className="flex items-center gap-2 p-1.5 px-2.5 rounded-xl border border-border bg-card hover:bg-muted/50 text-xs font-bold transition-colors shadow-2xs">
@@ -311,10 +321,17 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
                     <button
                       type="button"
                       onClick={() => setShowTicketsDrawer(true)}
-                      className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
+                      className="flex items-center justify-between w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
                     >
-                      <Receipt className="size-4 text-emerald-600" />
-                      <span>Tiket & Riwayat Pesanan</span>
+                      <div className="flex items-center gap-2">
+                        <Receipt className="size-4 text-emerald-600" />
+                        <span>Tiket & Riwayat Pesanan</span>
+                      </div>
+                      {activeMyOrders.length > 0 && (
+                        <Badge variant="default" className="bg-emerald-700 text-white text-[10px] px-1.5 py-0 font-mono">
+                          {activeMyOrders.length}
+                        </Badge>
+                      )}
                     </button>
                   </div>
 
@@ -397,7 +414,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
             </div>
 
             {/* Verifiable Impact Ledger */}
-            <div className="grid grid-cols-3 gap-3 pt-4">
+            <div id="dampak" className="grid grid-cols-3 gap-3 pt-4 scroll-mt-24">
               <div className="p-3.5 rounded-xl border border-border bg-card shadow-2xs space-y-0.5">
                 <span className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums block">
                   {metrics.totalMealsSaved}+
@@ -426,7 +443,7 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
           </div>
 
           {/* Right Hero Card: Transparansi Escrow & Jaminan Kualitas */}
-          <div className="lg:col-span-5">
+          <div id="cara-kerja" className="lg:col-span-5 scroll-mt-24">
             <Card className="border-border shadow-md bg-card">
               <CardHeader className="p-5 pb-3">
                 <div className="flex items-center justify-between">
@@ -664,8 +681,8 @@ export function LandingPage({ initialShowTickets = false }: { initialShowTickets
         </div>
       </section>
 
-      {/* Edukasi Konsep: Mengapa Food Rescue Terjadi di Cirebon? */}
-      <section className="py-12 border-t border-border bg-card">
+      {/* Edukasi Konsep & Mitra Kuliner Cirebon */}
+      <section id="mitra" className="py-12 border-t border-border bg-card scroll-mt-24">
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-3">
             <span className="text-xs font-bold uppercase tracking-wider text-amber-700 dark:text-amber-500">
