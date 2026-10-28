@@ -215,7 +215,11 @@ class StoreService {
   // =====================
   // BUYER ORDER & ESCROW
   // =====================
-  public createOrder(bagId: string, paymentMethod: Order["paymentMethod"]): Order {
+  public createOrder(
+    bagId: string,
+    paymentMethod: Order["paymentMethod"],
+    guestDetails?: { name: string; phone: string }
+  ): Order {
     const bag = this.state.surpriseBags.find((b) => b.id === bagId);
     if (!bag) throw new Error("Paket tidak ditemukan");
     if (bag.quotaRemaining <= 0) throw new Error("Kuota paket sudah habis hari ini");
@@ -233,11 +237,14 @@ class StoreService {
     const platformFee = Math.round(bag.discountedPrice * 0.12); // 12% take-rate
     const sellerEarning = bag.discountedPrice - platformFee;
 
+    const buyerName = guestDetails?.name || this.state.currentUser.name;
+    const buyerPhone = guestDetails?.phone || this.state.currentUser.phone;
+
     const newOrder: Order = {
       id: orderId,
-      buyerId: this.state.currentUser.id,
-      buyerName: this.state.currentUser.name,
-      buyerPhone: this.state.currentUser.phone,
+      buyerId: guestDetails ? `guest-${Date.now()}` : this.state.currentUser.id,
+      buyerName,
+      buyerPhone,
       storeId: store.id,
       storeName: store.name,
       bagId: bag.id,

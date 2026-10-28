@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import {
   Leaf,
@@ -22,7 +22,13 @@ import {
   HelpCircle,
   TrendingDown,
   Building2,
-  CalendarClock
+  CalendarClock,
+  Receipt,
+  MessageSquare,
+  Phone,
+  User,
+  ShoppingBag,
+  Ticket
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,17 +46,70 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { QRCodeSVG } from "qrcode.react";
 import { storeService } from "@/services/storeService";
+import { ChatModal } from "@/components/shared/ChatModal";
+import { SurpriseBag, Order } from "@/types/domain";
 
-export function LandingPage() {
-  const state = storeService.getState();
+export function LandingPage({ initialShowTickets = false }: { initialShowTickets?: boolean }) {
+  const [state, setState] = useState(storeService.getState());
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Guest Checkout State
+  const [selectedCheckoutBag, setSelectedCheckoutBag] = useState<SurpriseBag | null>(null);
+  const [guestName, setGuestName] = useState<string>("");
+  const [guestPhone, setGuestPhone] = useState<string>("");
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState<boolean>(false);
+
+  // Active Ticket Modal State
+  const [activeTicketOrder, setActiveTicketOrder] = useState<Order | null>(null);
+  const [showTicketsDrawer, setShowTicketsDrawer] = useState<boolean>(initialShowTickets);
+  const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
+
+  // Sync state & LocalStorage Session
+  useEffect(() => {
+    const unsub = storeService.subscribe(() => {
+      setState(storeService.getState());
+    });
+
+    try {
+      const savedName = localStorage.getItem("foodrescue_guest_name");
+      const savedPhone = localStorage.getItem("foodrescue_guest_phone");
+      if (savedName) setGuestName(savedName);
+      if (savedPhone) setGuestPhone(savedPhone);
+    } catch {
+      // ignore
+    }
+
+    return unsub;
+  }, []);
+
   const stores = state.stores.filter((s) => s.status === "ACTIVE");
   const bags = state.surpriseBags.filter((b) => b.isActive);
   const metrics = storeService.getImpactMetrics();
+
+  // Active guest orders
+  const myOrders = useMemo(() => {
+    return state.orders.filter(
+      (o) =>
+        (guestPhone && o.buyerPhone === guestPhone) ||
+        (guestName && o.buyerName.toLowerCase() === guestName.toLowerCase()) ||
+        o.buyerId === state.currentUser.id
+    );
+  }, [state.orders, guestPhone, guestName, state.currentUser]);
+
+  const activeMyOrders = myOrders.filter(
+    (o) => o.status === "PAID" || o.status === "READY_FOR_PICKUP"
+  );
 
   const areas = ["Semua", "Tuparev", "Kesambi", "Pekiringan", "Karanggetas", "Siliwangi"];
 
@@ -71,6 +130,31 @@ export function LandingPage() {
     });
   }, [bags, stores, selectedArea, selectedCategory, searchQuery]);
 
+  // Handle Instant Guest Checkout
+  const handleConfirmOrder = () => {
+    if (!selectedCheckoutBag) return;
+    const finalName = guestName.trim() || "Warga Cirebon";
+    const finalPhone = guestPhone.trim() || "081234567890";
+
+    try {
+      setIsSubmittingOrder(true);
+      localStorage.setItem("foodrescue_guest_name", finalName);
+      localStorage.setItem("foodrescue_guest_phone", finalPhone);
+
+      const order = storeService.createOrder(selectedCheckoutBag.id, "QRIS", {
+        name: finalName,
+        phone: finalPhone,
+      });
+
+      setSelectedCheckoutBag(null);
+      setActiveTicketOrder(order);
+    } catch (e: any) {
+      alert(e?.message || "Gagal memproses pesanan");
+    } finally {
+      setIsSubmittingOrder(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-stone-50/60 dark:bg-zinc-950 text-foreground flex flex-col font-sans selection:bg-emerald-500/20">
       {/* Top Navbar */}
@@ -90,40 +174,46 @@ export function LandingPage() {
             </div>
           </div>
 
-          {/* Quick Access Links */}
+          {/* Quick Access Links & Guest Ticket Access */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Button Tiket Saya (Frictionless Guest Access) */}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTicketsDrawer(true)}
+              className="text-xs font-bold gap-1.5 border-emerald-600/30 text-emerald-800 dark:text-emerald-400"
+            >
+              <Ticket className="size-3.5 text-emerald-600" />
+              <span>Tiket Saya</span>
+              {activeMyOrders.length > 0 && (
+                <Badge variant="default" className="bg-emerald-700 text-white text-[10px] px-1.5 py-0 font-mono ml-0.5">
+                  {activeMyOrders.length}
+                </Badge>
+              )}
+            </Button>
+
             <Link
               href="/seller"
               className={buttonVariants({
                 variant: "ghost",
                 size: "sm",
-                className: "text-xs font-semibold gap-1.5",
+                className: "text-xs font-semibold gap-1.5 hidden sm:flex",
               })}
             >
-              <Store className="size-3.5 text-emerald-700 dark:text-emerald-400" />
-              <span className="hidden sm:inline">Portal Mitra</span>
+              <Store className="size-3.5 text-orange-600" />
+              <span>Portal Mitra</span>
             </Link>
             <Link
               href="/admin"
               className={buttonVariants({
                 variant: "ghost",
                 size: "sm",
-                className: "text-xs font-semibold gap-1.5",
+                className: "text-xs font-semibold gap-1.5 hidden sm:flex",
               })}
             >
               <ShieldCheck className="size-3.5 text-purple-600" />
-              <span className="hidden sm:inline">Super Admin</span>
-            </Link>
-            <Link
-              href="/buyer"
-              className={buttonVariants({
-                size: "sm",
-                className:
-                  "bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs gap-1.5",
-              })}
-            >
-              <span>Aplikasi Pembeli</span>
-              <ArrowRight className="size-3.5" />
+              <span>Super Admin</span>
             </Link>
           </div>
         </div>
@@ -152,20 +242,20 @@ export function LandingPage() {
             </h1>
 
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
-              Setiap sore dan malam, toko roti, resto empal gentong, dan kafe di Cirebon mengemas porsi surplus segar dalam Surprise Bag. Dapatkan diskon 50% hingga 70% dengan proteksi rekening penjamin platform.
+              Setiap sore dan malam, toko roti, resto empal gentong, dan kafe di Cirebon mengemas porsi surplus segar dalam Surprise Bag. Dapatkan diskon 50% hingga 70% dengan proteksi rekening penjamin platform tanpa perlu registrasi berbelit.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Link
-                href="/buyer"
+              <a
+                href="#katalog"
                 className={buttonVariants({
                   size: "lg",
                   className: "bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow-sm gap-2",
                 })}
               >
-                <span>Buka Katalog Makanan Hari Ini</span>
+                <span>Beli Surprise Bag Sekarang</span>
                 <ArrowRight className="size-4" />
-              </Link>
+              </a>
               <Link
                 href="/seller"
                 className={buttonVariants({
@@ -221,7 +311,7 @@ export function LandingPage() {
                   Kepastian Serah Terima Fisik di Kasir
                 </CardTitle>
                 <CardDescription className="text-xs leading-relaxed">
-                  Dana pembayaran Anda aman tertahan di rekening penjamin platform sampai Anda datang ke toko dan memverifikasi pesanan.
+                  Dana pembayaran Anda aman tertahan di rekening penjamin platform sampai Anda datang ke toko dan kasir memvalidasi PIN 4-digit Anda.
                 </CardDescription>
               </CardHeader>
 
@@ -253,14 +343,14 @@ export function LandingPage() {
                 </div>
 
                 <div className="pt-2">
-                  <Link
-                    href="/buyer"
+                  <a
+                    href="#katalog"
                     className={buttonVariants({
                       className: "w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs text-center justify-center",
                     })}
                   >
                     Mulai Selamatkan Makanan Sekarang
-                  </Link>
+                  </a>
                 </div>
               </CardContent>
             </Card>
@@ -269,14 +359,14 @@ export function LandingPage() {
       </section>
 
       {/* Live Interactive Explorer Directly on Landing Page */}
-      <section className="py-12 max-w-6xl mx-auto px-4 w-full space-y-6">
+      <section id="katalog" className="py-12 max-w-6xl mx-auto px-4 w-full space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h2 className="text-2xl font-black text-foreground tracking-tight">
               Katalog Surprise Bag Hari Ini di Cirebon
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-              Pilih area dan jenis makanan untuk melihat paket surplus yang siap diambil sore/malam ini
+              Pilih area dan jenis makanan untuk memesan langsung tanpa antre dan tanpa registrasi rumit
             </p>
           </div>
 
@@ -411,15 +501,14 @@ export function LandingPage() {
                         </span>
                       </div>
 
-                      <Link
-                        href={`/buyer?bag=${bag.id}`}
-                        className={buttonVariants({
-                          size: "sm",
-                          className: "bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs",
-                        })}
+                      {/* Instant Guest Checkout Button */}
+                      <Button
+                        size="sm"
+                        onClick={() => setSelectedCheckoutBag(bag)}
+                        className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
                       >
                         Pesan
-                      </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -477,9 +566,13 @@ export function LandingPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/buyer" className="hover:text-emerald-700 transition-colors">
-              Aplikasi Pembeli
-            </Link>
+            <button
+              type="button"
+              onClick={() => setShowTicketsDrawer(true)}
+              className="hover:text-emerald-700 transition-colors font-medium"
+            >
+              Tiket Saya
+            </button>
             <Link href="/seller" className="hover:text-emerald-700 transition-colors">
               Portal Mitra
             </Link>
@@ -489,6 +582,275 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ─── MODAL DIALOG GUEST CHECKOUT (TANPA LOGIN WAJIB) ──────────────────── */}
+      <Dialog
+        open={!!selectedCheckoutBag}
+        onOpenChange={(open) => !open && setSelectedCheckoutBag(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Pesan Surprise Bag (Guest Checkout)</DialogTitle>
+            <DialogDescription>
+              {selectedCheckoutBag?.title} • Jam Ambil: {selectedCheckoutBag?.pickupWindow} WIB
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedCheckoutBag && (
+            <div className="space-y-4 pt-2 text-xs">
+              <div className="p-3 bg-muted/40 rounded-xl space-y-1">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Harga Normal:</span>
+                  <span className="line-through text-muted-foreground tabular-nums">
+                    Rp {selectedCheckoutBag.originalPrice.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span className="text-foreground">Total Pembayaran:</span>
+                  <span className="text-emerald-700 dark:text-emerald-400 text-sm font-black tabular-nums">
+                    Rp {selectedCheckoutBag.discountedPrice.toLocaleString("id-ID")}
+                  </span>
+                </div>
+              </div>
+
+              {/* Data Identitas Cepat Tanpa Password */}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-bold text-muted-foreground block mb-1">
+                    Nama Pembeli (untuk tiket kasir)
+                  </label>
+                  <div className="relative">
+                    <User className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Contoh: Fauzan / Rizqi"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      className="pl-9 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-bold text-muted-foreground block mb-1">
+                    Nomor WhatsApp / HP (akses tiket pickup)
+                  </label>
+                  <div className="relative">
+                    <Phone className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="tel"
+                      placeholder="08xxxxxxxxxx"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
+                      className="pl-9 text-xs"
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    PIN 4-digit tiket akan langsung muncul di layar dan tersimpan otomatis di sesi Anda.
+                  </p>
+                </div>
+
+                <div className="p-3 border border-emerald-500/30 bg-emerald-500/5 rounded-xl space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-emerald-800 dark:text-emerald-300">
+                    <ShieldCheck className="size-4" />
+                    <span>Rekening Penjamin (Escrow) Aktif</span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                    Dana pembayaran Anda ditahan aman di sistem sampai Anda mengambil makanan di toko dan kasir memvalidasi PIN Anda.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedCheckoutBag(null)}
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={isSubmittingOrder}
+                  onClick={handleConfirmOrder}
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold"
+                >
+                  Bayar & Dapatkan Tiket
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── MODAL TIKET RESMI PENJEMPUTAN (PICKUP VOUCHER) ────────────────────── */}
+      <Dialog
+        open={!!activeTicketOrder}
+        onOpenChange={(open) => !open && setActiveTicketOrder(null)}
+      >
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader>
+            <DialogTitle className="text-center">Tiket Pengambilan Resmi</DialogTitle>
+            <DialogDescription className="text-center">
+              Tunjukkan PIN 4-digit atau QR Code ini kepada kasir saat mengambil paket
+            </DialogDescription>
+          </DialogHeader>
+
+          {activeTicketOrder && (
+            <div className="space-y-4 pt-2 text-xs">
+              {/* Box PIN 4-Digit Besar */}
+              <div className="p-4 bg-muted/60 border border-border rounded-2xl space-y-1">
+                <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider block">
+                  PIN Pengambilan Kasir
+                </span>
+                <span className="text-4xl font-black font-mono tracking-widest text-emerald-700 dark:text-emerald-400 block tabular-nums">
+                  {activeTicketOrder.pickupCode}
+                </span>
+                <span className="text-[10px] text-muted-foreground block font-mono">
+                  Order ID: {activeTicketOrder.id}
+                </span>
+              </div>
+
+              {/* Dynamic QR Code */}
+              <div className="flex justify-center p-3 bg-white rounded-xl border border-border/80 w-fit mx-auto shadow-2xs">
+                <QRCodeSVG
+                  value={activeTicketOrder.pickupQrData}
+                  size={140}
+                  level="M"
+                />
+              </div>
+
+              {/* Detail Toko */}
+              <div className="p-3 bg-muted/30 rounded-xl text-left space-y-1">
+                <span className="font-extrabold text-foreground block">{activeTicketOrder.storeName}</span>
+                <p className="text-[11px] text-muted-foreground">{activeTicketOrder.bagTitle}</p>
+                <p className="text-[10px] text-emerald-600 font-semibold pt-1">
+                  Status: Menunggu Pengambilan di Toko
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const ord = activeTicketOrder;
+                    setActiveTicketOrder(null);
+                    setActiveChatOrder(ord);
+                  }}
+                  className="w-full text-xs font-bold gap-1.5"
+                >
+                  <MessageSquare className="size-3.5 text-purple-600" />
+                  <span>Chat dengan Kasir Toko</span>
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => setActiveTicketOrder(null)}
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
+                >
+                  Simpan & Tutup Tiket
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* ─── DRAWER / MODAL DAFTAR TIKET SAYA ─────────────────────────────────── */}
+      <Dialog open={showTicketsDrawer} onOpenChange={setShowTicketsDrawer}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Tiket & Riwayat Pesanan Saya</DialogTitle>
+            <DialogDescription>
+              Daftar pesanan aktif dan riwayat penyelamatan makanan Anda di Cirebon
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 pt-2 text-xs max-h-[60vh] overflow-y-auto">
+            {myOrders.length === 0 ? (
+              <div className="p-8 text-center bg-muted/30 border border-dashed border-border rounded-2xl space-y-2">
+                <ShoppingBag className="size-8 mx-auto text-muted-foreground/60" />
+                <p className="font-bold text-foreground">Belum ada pesanan</p>
+                <p className="text-muted-foreground text-[11px]">
+                  Pilih paket Surprise Bag pada katalog di beranda untuk memulai!
+                </p>
+              </div>
+            ) : (
+              myOrders.map((ord) => (
+                <Card key={ord.id} className="border-border shadow-xs">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-black text-foreground text-sm">{ord.storeName}</span>
+                          <Badge
+                            variant={ord.status === "COMPLETED" ? "default" : "secondary"}
+                            className={`text-[10px] font-bold ${
+                              ord.status === "COMPLETED" ? "bg-emerald-600" : "bg-amber-500 text-white"
+                            }`}
+                          >
+                            {ord.status === "COMPLETED" ? "Selesai" : "Siap Diambil"}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{ord.bagTitle}</p>
+                      </div>
+
+                      <span className="font-black text-emerald-700 dark:text-emerald-400 tabular-nums text-sm">
+                        Rp {ord.totalPrice.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-muted/40 rounded-xl">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">PIN Pengambilan:</span>
+                        <span className="font-mono font-black text-base text-foreground tracking-wider">
+                          {ord.pickupCode}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            setShowTicketsDrawer(false);
+                            setActiveChatOrder(ord);
+                          }}
+                          className="size-8 p-0 text-muted-foreground hover:text-foreground"
+                          title="Chat Toko"
+                        >
+                          <MessageSquare className="size-4 text-purple-600" />
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setShowTicketsDrawer(false);
+                            setActiveTicketOrder(ord);
+                          }}
+                          className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold h-8"
+                        >
+                          Buka Tiket
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Chat Modal */}
+      {activeChatOrder && (
+        <ChatModal
+          order={activeChatOrder}
+          onClose={() => setActiveChatOrder(null)}
+        />
+      )}
     </div>
   );
 }

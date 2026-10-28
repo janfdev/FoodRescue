@@ -51,6 +51,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  AreaChart,
+  Area,
+} from "recharts";
 
 type SellerTab = "pos" | "bags" | "orders" | "boxes" | "finance";
 
@@ -664,9 +675,133 @@ export function SellerAppView() {
             </div>
           )}
 
-          {/* 3. TAB RIWAYAT PESANAN */}
+          {/* 3. TAB RIWAYAT PESANAN & ANALITIK */}
           {activeTab === "orders" && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Dua Chart Analitik Toko */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Chart 1: Omzet Harian Toko */}
+                <Card className="lg:col-span-7 border-border shadow-xs">
+                  <CardHeader className="p-4 px-5 pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-sm font-black">
+                          Tren Omzet & Pendapatan Bersih (Net)
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Pendapatan toko 7 hari terakhir setelah potongan fee 12%
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] font-mono border-orange-500/40 text-orange-700">
+                        Minggu Ini
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2">
+                    <div className="h-56 w-full text-xs">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                          data={[
+                            { day: "Sen", net: 180000 },
+                            { day: "Sel", net: 220000 },
+                            { day: "Rab", net: 310000 },
+                            { day: "Kam", net: 290000 },
+                            { day: "Jum", net: 450000 },
+                            { day: "Sab", net: 580000 },
+                            { day: "Min", net: 490000 },
+                          ]}
+                          margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+                        >
+                          <defs>
+                            <linearGradient id="colorNet" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#ea580c" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#ea580c" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                          <XAxis dataKey="day" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 10 }} />
+                          <RechartsTooltip
+                            formatter={(value: any) => [
+                              `Rp ${Number(value).toLocaleString("id-ID")}`,
+                              "Net Earning",
+                            ]}
+                            contentStyle={{
+                              backgroundColor: "var(--card)",
+                              borderColor: "var(--border)",
+                              borderRadius: "0.75rem",
+                              fontSize: "12px",
+                            }}
+                          />
+                          <Area
+                            type="monotone"
+                            dataKey="net"
+                            stroke="#ea580c"
+                            strokeWidth={2}
+                            fillOpacity={1}
+                            fill="url(#colorNet)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Chart 2: Distribusi Jam Sibuk Pengambilan */}
+                <Card className="lg:col-span-5 border-border shadow-xs">
+                  <CardHeader className="p-4 px-5 pb-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-sm font-black">
+                          Jam Sibuk Pengambilan (Pickup)
+                        </CardTitle>
+                        <CardDescription className="text-xs">
+                          Frekuensi penjemputan paket oleh pembeli
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] font-mono border-blue-500/40 text-blue-700">
+                        WIB
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-2">
+                    <div className="h-56 w-full text-xs">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={[
+                            { jam: "17:00", porsi: 3 },
+                            { jam: "18:00", porsi: 8 },
+                            { jam: "19:00", porsi: 19 },
+                            { jam: "20:00", porsi: 26 },
+                            { jam: "21:00", porsi: 12 },
+                          ]}
+                          margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                          <XAxis dataKey="jam" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 10 }} />
+                          <RechartsTooltip
+                            formatter={(value: any) => [`${value} Porsi`, "Porsi Diambil"]}
+                            contentStyle={{
+                              backgroundColor: "var(--card)",
+                              borderColor: "var(--border)",
+                              borderRadius: "0.75rem",
+                              fontSize: "12px",
+                            }}
+                          />
+                          <Bar
+                            dataKey="porsi"
+                            fill="#0284c7"
+                            radius={[6, 6, 0, 0]}
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tabel Pesanan */}
               <Card className="border-border shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
