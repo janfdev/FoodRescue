@@ -1,17 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Order } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
-import { ChatModal } from "@/components/shared/ChatModal";
+import { MessageSquare, ExternalLink } from "lucide-react";
 
 export default function AdminTransaksiPage() {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [inspectedChatOrder, setInspectedChatOrder] = useState<Order | null>(null);
 
   const syncData = () => {
     setOrders(storeService.getState().orders);
@@ -93,11 +92,13 @@ export default function AdminTransaksiPage() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => setInspectedChatOrder(ord)}
+                      asChild
                       className="text-xs font-semibold gap-1.5 text-purple-600 hover:text-purple-700"
                     >
-                      <MessageSquare className="size-3.5" />
-                      <span>Log Chat</span>
+                      <Link href={`/admin/transaksi/${ord.id}/chat`}>
+                        <MessageSquare className="size-3.5" />
+                        <span>Log Chat</span>
+                      </Link>
                     </Button>
                   </td>
                 </tr>
@@ -106,14 +107,6 @@ export default function AdminTransaksiPage() {
           </table>
         </div>
       </Card>
-
-      {/* Chat Inspector Modal */}
-      {inspectedChatOrder && (
-        <ChatModal
-          order={inspectedChatOrder}
-          onClose={() => setInspectedChatOrder(null)}
-        />
-      )}
     </div>
   );
 }

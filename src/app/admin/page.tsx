@@ -30,9 +30,34 @@ export default function AdminOverviewPage() {
   }, []);
 
   const stores = state.stores;
+  const orders = state.orders || [];
   const pendingKycStores = stores.filter((s) => s.status === "PENDING_APPROVAL");
   const pendingDisbursements = (state.withdrawals || []).filter((d) => d.status === "PENDING");
   const lowBoxStores = stores.filter((s) => (s.currentBoxStock || 0) < 10);
+
+  // Kalkulasi data chart murni dari orders riil 7 hari terakhir
+  const weeklyGmvData = (() => {
+    const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const now = new Date();
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dayName = days[d.getDay()];
+      const dateStr = d.toISOString().split("T")[0];
+
+      const dayOrders = orders.filter((o) => {
+        if (!o.createdAt) return false;
+        return o.createdAt.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
+      });
+
+      const dayGmv = dayOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+      const dayPorsi = dayOrders.reduce((sum, o) => sum + (o.quantity || 0), 0);
+
+      result.push({ day: dayName, gmv: dayGmv, porsi: dayPorsi });
+    }
+    return result;
+  })();
 
   return (
     <div className="space-y-6 w-full">
@@ -195,15 +220,7 @@ export default function AdminOverviewPage() {
             <div className="h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={[
-                    { day: "Sen", porsi: 38, gmv: 950000 },
-                    { day: "Sel", porsi: 45, gmv: 1125000 },
-                    { day: "Rab", porsi: 52, gmv: 1300000 },
-                    { day: "Kam", porsi: 61, gmv: 1525000 },
-                    { day: "Jum", porsi: 78, gmv: 1950000 },
-                    { day: "Sab", porsi: 94, gmv: 2350000 },
-                    { day: "Min", porsi: 84, gmv: 2100000 },
-                  ]}
+                  data={weeklyGmvData}
                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                 >
                   <defs>
@@ -262,36 +279,42 @@ export default function AdminOverviewPage() {
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-2">
-            <div className="h-64 w-full text-xs">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={stores.slice(0, 6).map((s) => ({
-                    name: s.name.split(" ")[0],
-                    compliance: s.boxComplianceRate,
-                  }))}
-                  margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[80, 100]} tick={{ fontSize: 10 }} />
-                  <RechartsTooltip
-                    formatter={(value: any) => [`${value}%`, "Kepatuhan Box"]}
-                    contentStyle={{
-                      backgroundColor: "var(--card)",
-                      borderColor: "var(--border)",
-                      borderRadius: "0.75rem",
-                      fontSize: "12px",
-                    }}
-                  />
-                  <Bar
-                    dataKey="compliance"
-                    fill="#7c3aed"
-                    radius={[6, 6, 0, 0]}
-                    name="compliance"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {stores.length === 0 ? (
+              <div className="h-64 w-full flex flex-col items-center justify-center text-muted-foreground text-xs">
+                <span>Belum ada data toko terdaftar untuk audit kepatuhan wadah.</span>
+              </div>
+            ) : (
+              <div className="h-64 w-full text-xs">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={stores.slice(0, 6).map((s) => ({
+                      name: s.name.split(" ")[0],
+                      compliance: s.boxComplianceRate,
+                    }))}
+                    margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis domain={[80, 100]} tick={{ fontSize: 10 }} />
+                    <RechartsTooltip
+                      formatter={(value: any) => [`${value}%`, "Kepatuhan Box"]}
+                      contentStyle={{
+                        backgroundColor: "var(--card)",
+                        borderColor: "var(--border)",
+                        borderRadius: "0.75rem",
+                        fontSize: "12px",
+                      }}
+                    />
+                    <Bar
+                      dataKey="compliance"
+                      fill="#7c3aed"
+                      radius={[6, 6, 0, 0]}
+                      name="compliance"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -696,6 +696,23 @@ class StoreService {
     return newBoxOrder;
   }
 
+  public updateRescueBoxOrderStatus(
+    orderId: string,
+    status: RescueBoxOrder["status"],
+    trackingNumber?: string
+  ) {
+    const orderIndex = this.state.boxOrders.findIndex((b) => b.id === orderId);
+    if (orderIndex !== -1) {
+      this.state.boxOrders[orderIndex] = {
+        ...this.state.boxOrders[orderIndex],
+        status,
+        ...(trackingNumber ? { trackingNumber } : {}),
+      };
+      this.state.boxOrders = [...this.state.boxOrders];
+      this.persist();
+    }
+  }
+
   // =====================
   // REVIEWS & COMPLIANCE
   // =====================

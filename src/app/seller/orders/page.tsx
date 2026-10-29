@@ -25,7 +25,12 @@ export default function SellerOrdersPage() {
   const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
 
   const syncData = () => {
-    setOrders(storeService.getState().orders);
+    const state = storeService.getState();
+    const activeStoreId = state.currentUser?.storeId;
+    const storeOrders = activeStoreId
+      ? state.orders.filter((o) => o.storeId === activeStoreId)
+      : state.orders;
+    setOrders(storeOrders);
   };
 
   useEffect(() => {
@@ -33,6 +38,49 @@ export default function SellerOrdersPage() {
     const unsub = storeService.subscribe(syncData);
     return unsub;
   }, []);
+
+  // Kalkulasi data chart murni dari riwayat pesanan riil toko
+  const weeklyEarningsData = (() => {
+    const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+    const now = new Date();
+    const result = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dayName = days[d.getDay()];
+      const dateStr = d.toISOString().split("T")[0];
+
+      const dayOrders = orders.filter((o) => {
+        if (!o.createdAt) return false;
+        return o.createdAt.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
+      });
+
+      // Net pendapatan seller = 88% dari subtotal
+      const dayNet = dayOrders.reduce(
+        (sum, o) => sum + (o.totalPrice - (o.platformFee || Math.round(o.totalPrice * 0.12))),
+        0
+      );
+
+      result.push({ day: dayName, net: dayNet });
+    }
+    return result;
+  })();
+
+  const pickupTimeData = (() => {
+    const timeSlots = ["17:00", "18:00", "19:00", "20:00", "21:00"];
+    return timeSlots.map((slot) => {
+      const hour = parseInt(slot.split(":")[0], 10);
+      const porsiCount = orders
+        .filter((o) => {
+          if (!o.createdAt) return false;
+          const orderHour = new Date(o.createdAt).getHours();
+          return orderHour === hour && (o.status === "COMPLETED" || o.status === "READY_FOR_PICKUP");
+        })
+        .reduce((sum, o) => sum + (o.quantity || 1), 0);
+
+      return { jam: slot, porsi: porsiCount };
+    });
+  })();
 
   return (
     <div className="space-y-6 w-full">
@@ -68,15 +116,7 @@ export default function SellerOrdersPage() {
             <div className="h-56 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart
-                  data={[
-                    { day: "Sen", net: 180000 },
-                    { day: "Sel", net: 220000 },
-                    { day: "Rab", net: 310000 },
-                    { day: "Kam", net: 290000 },
-                    { day: "Jum", net: 450000 },
-                    { day: "Sab", net: 580000 },
-                    { day: "Min", net: 490000 },
-                  ]}
+                  data={weeklyEarningsData}
                   margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
                 >
                   <defs>
@@ -135,13 +175,7 @@ export default function SellerOrdersPage() {
             <div className="h-56 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={[
-                    { jam: "17:00", porsi: 3 },
-                    { jam: "18:00", porsi: 8 },
-                    { jam: "19:00", porsi: 19 },
-                    { jam: "20:00", porsi: 26 },
-                    { jam: "21:00", porsi: 12 },
-                  ]}
+                  data={pickupTimeData}
                   margin={{ top: 10, right: 10, left: -25, bottom: 0 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" opacity={0.15} />

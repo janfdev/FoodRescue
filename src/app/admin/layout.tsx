@@ -10,6 +10,7 @@ import {
   Receipt,
   Wallet,
   Users,
+  Boxes,
   Settings,
   ArrowLeft,
   ChevronDown,
@@ -102,6 +103,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       label: "Manajemen User",
       icon: Users,
       badge: null,
+      exact: false,
+    },
+    {
+      href: "/admin/boxes",
+      label: "Manajemen Rescue Box",
+      icon: Boxes,
+      badge: state.boxOrders.filter((b) => b.status === "PENDING" || b.status === "PROCESSING").length || null,
+      badgeColor: "bg-blue-600 text-white",
       exact: false,
     },
     {
