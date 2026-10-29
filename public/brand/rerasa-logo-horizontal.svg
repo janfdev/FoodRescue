@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 220" width="720" height="220">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800;900&amp;display=swap');
+      .brand-title {
+        font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 900;
+        font-size: 64px;
+        fill: #065f46;
+        letter-spacing: -1.5px;
+      }
+      .brand-tagline {
+        font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 800;
+        font-size: 14px;
+        fill: #d97706;
+        letter-spacing: 3px;
+      }
+    </style>
+  </defs>
+
+  <!-- Left Icon Tile (Squircle with Mascot R Duck) -->
+  <g transform="translate(36, 26)">
+    <!-- Squircle Card -->
+    <rect width="168" height="168" rx="38" fill="#0c2e29" />
+    
+    <!-- Scaled inner mascot (168/512 = 0.328) optically centered -->
+    <g transform="translate(-4, 0) scale(0.328)">
+      <!-- Left Vertical Stem of P/R -->
+      <rect x="96" y="96" width="86" height="308" rx="43" fill="#139668" />
+      <!-- Main Green Bowl / Head Profile (P-Loop) -->
+      <path
+        d="M 139 96 L 290 96 C 386 96 450 148 450 236 C 450 324 386 356 290 356 L 139 356 Z"
+        fill="#0f855b"
+      />
+      <!-- Overlap on Left Stem -->
+      <rect x="96" y="96" width="86" height="260" rx="43" fill="#139668" />
+      <!-- Negative Space Face Profile -->
+      <path
+        d="M 218 156 L 282 156 C 342 156 376 186 376 236 C 376 286 342 298 282 298 L 218 298 C 202 298 190 286 190 270 L 190 184 C 190 168 202 156 218 156 Z"
+        fill="#0c2e29"
+      />
+      <!-- Eyes -->
+      <circle cx="298" cy="216" r="16" fill="#fff1c8" />
+      <circle cx="348" cy="202" r="12" fill="#fff1c8" />
+      <!-- Orange Beak / R-Leg -->
+      <path
+        d="M 278 356 L 354 356 L 424 406 C 430 411 427 421 418 421 L 384 421 C 376 421 368 416 362 409 L 278 356 Z"
+        fill="#e58318"
+      />
+    </g>
+  </g>
+
+  <!-- Wordmark & Subtitle optically vertically centered -->
+  <g transform="translate(228, 80)">
+    <text x="0" y="52" class="brand-title">Rerasa</text>
+    <text x="2" y="86" class="brand-tagline">FOOD RESCUE CIREBON</text>
+  </g>
+</svg>

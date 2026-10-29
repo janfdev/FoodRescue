@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@800;900&amp;display=swap');
+      .brand-title {
+        font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 900;
+        font-size: 60px;
+        fill: #065f46;
+        letter-spacing: -1px;
+        text-anchor: middle;
+      }
+      .brand-tagline {
+        font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 800;
+        font-size: 13px;
+        fill: #d97706;
+        letter-spacing: 3.5px;
+        text-anchor: middle;
+      }
+    </style>
+  </defs>
+
+  <!-- Centered Mascot Tile with optical shift -->
+  <g transform="translate(136, 56)">
+    <rect width="240" height="240" rx="54" fill="#0c2e29" />
+    <g transform="translate(-8, 0) scale(0.46875)">
+      <!-- Left Stem -->
+      <rect x="96" y="96" width="86" height="308" rx="43" fill="#139668" />
+      <!-- Head Loop -->
+      <path
+        d="M 139 96 L 290 96 C 386 96 450 148 450 236 C 450 324 386 356 290 356 L 139 356 Z"
+        fill="#0f855b"
+      />
+      <rect x="96" y="96" width="86" height="260" rx="43" fill="#139668" />
+      <!-- Counter -->
+      <path
+        d="M 218 156 L 282 156 C 342 156 376 186 376 236 C 376 286 342 298 282 298 L 218 298 C 202 298 190 286 190 270 L 190 184 C 190 168 202 156 218 156 Z"
+        fill="#0c2e29"
+      />
+      <!-- Eyes -->
+      <circle cx="298" cy="216" r="16" fill="#fff1c8" />
+      <circle cx="348" cy="202" r="12" fill="#fff1c8" />
+      <!-- Beak -->
+      <path
+        d="M 278 356 L 354 356 L 424 406 C 430 411 427 421 418 421 L 384 421 C 376 421 368 416 362 409 L 278 356 Z"
+        fill="#e58318"
+      />
+    </g>
+  </g>
+
+  <!-- Typography Centered with tight gap -->
+  <text x="256" y="362" class="brand-title">Rerasa</text>
+  <text x="256" y="394" class="brand-tagline">FOOD RESCUE CIREBON</text>
+</svg>
