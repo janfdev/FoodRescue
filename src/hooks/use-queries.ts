@@ -77,27 +77,38 @@ export function useOrders(filter?: { buyerId?: string; storeId?: string }) {
 }
 
 export function useLocations() {
-  const { data, error, isLoading } = useSWR<string[]>(
+  const { data, error, isLoading, mutate } = useSWR<string[]>(
     "/api/locations",
     fetcher,
     {
-      revalidateOnFocus: false,
-      dedupingInterval: 60000,
+      revalidateOnFocus: true,
+      dedupingInterval: 5000,
     }
   );
 
   return {
-    locations: data || [
-      "Semua Lokasi",
-      "Tuparev",
-      "Kartini",
-      "Siliwangi",
-      "Kesambi",
-      "Harjamukti",
-      "Kedawung",
-    ],
+    locations: data || ["Semua Lokasi"],
     isLoading,
     isError: Boolean(error),
+    mutate,
+  };
+}
+
+export function useCategories() {
+  const { data, error, isLoading, mutate } = useSWR<string[]>(
+    "/api/categories",
+    fetcher,
+    {
+      revalidateOnFocus: true,
+      dedupingInterval: 5000,
+    }
+  );
+
+  return {
+    categories: data || ["Semua"],
+    isLoading,
+    isError: Boolean(error),
+    mutate,
   };
 }
 

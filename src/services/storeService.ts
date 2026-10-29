@@ -300,6 +300,16 @@ class StoreService {
   // =====================
   // STORES & SURPRISE BAGS
   // =====================
+  public setStores(stores: Store[]) {
+    this.state.stores = stores;
+    this.notify();
+  }
+
+  public setSurpriseBags(bags: SurpriseBag[]) {
+    this.state.surpriseBags = bags;
+    this.notify();
+  }
+
   public getStores(): Store[] {
     return this.state.stores;
   }

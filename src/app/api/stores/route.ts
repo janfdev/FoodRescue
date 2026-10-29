@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores } from "@/db/schema";
-import { SEED_STORES } from "@/services/seedData";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -9,36 +8,30 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
 
-    // Coba baca dari DB jika terkoneksi
+    // Ambil data toko aktif langsung dari PostgreSQL database
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
         const rows = await db.select().from(stores).where(eq(stores.status, "ACTIVE"));
         let filtered = rows;
-        if (category) {
+        if (category && category !== "Semua") {
           filtered = filtered.filter((s) => s.category === category);
         }
-        if (filtered.length > 0) {
-          return NextResponse.json({
-            success: true,
-            source: "database",
-            data: filtered,
-          });
-        }
+        return NextResponse.json({
+          success: true,
+          source: "database",
+          total: filtered.length,
+          data: filtered,
+        });
       } catch (dbErr) {
-        console.warn("DB offline, fallback ke storeService:", dbErr);
+        console.warn("DB query error for stores:", dbErr);
       }
-    }
-
-    // Fallback ke SEED_STORES jika DB offline/kosong
-    let list = SEED_STORES.filter((s) => s.status === "ACTIVE");
-    if (category) {
-      list = list.filter((s) => s.category === category);
     }
 
     return NextResponse.json({
       success: true,
-      source: "simulation",
-      data: list,
+      source: "empty",
+      total: 0,
+      data: [],
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server";

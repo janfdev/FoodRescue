@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { surpriseBags, stores } from "@/db/schema";
-import { SEED_SURPRISE_BAGS } from "@/services/seedData";
+import { surpriseBags } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -9,36 +8,33 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const storeId = searchParams.get("storeId");
 
-    // Coba baca dari DB jika terkoneksi
+    // Ambil data surprise bags aktif langsung dari PostgreSQL database
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
-        const rows = await db.select().from(surpriseBags).where(eq(surpriseBags.isActive, true));
+        const rows = await db
+          .select()
+          .from(surpriseBags)
+          .where(eq(surpriseBags.isActive, true));
         let filtered = rows;
         if (storeId) {
           filtered = filtered.filter((b) => b.storeId === storeId);
         }
-        if (filtered.length > 0) {
-          return NextResponse.json({
-            success: true,
-            source: "database",
-            data: filtered,
-          });
-        }
+        return NextResponse.json({
+          success: true,
+          source: "database",
+          total: filtered.length,
+          data: filtered,
+        });
       } catch (dbErr) {
-        console.warn("DB offline, fallback ke storeService:", dbErr);
+        console.warn("DB query error for surpriseBags:", dbErr);
       }
-    }
-
-    // Fallback ke SEED_SURPRISE_BAGS jika DB offline/kosong
-    let list = SEED_SURPRISE_BAGS.filter((b) => b.isActive);
-    if (storeId) {
-      list = list.filter((b) => b.storeId === storeId);
     }
 
     return NextResponse.json({
       success: true,
-      source: "simulation",
-      data: list,
+      source: "empty",
+      total: 0,
+      data: [],
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server";

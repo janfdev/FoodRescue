@@ -20,9 +20,7 @@ import {
   User,
   Plus,
   Flame,
-  Sparkles,
   Store as StoreIcon,
-  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,10 +39,15 @@ import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { useSession } from "@/lib/auth-client";
 import { User as UserType, SurpriseBag } from "@/types/domain";
+import {
+  useStores,
+  useBags,
+  useLocations,
+  useCategories,
+} from "@/hooks/use-queries";
 
 export function LandingPage() {
   const [state, setState] = useState(DEFAULT_INITIAL_STATE);
-  const [mounted, setMounted] = useState(false);
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
@@ -52,26 +55,19 @@ export function LandingPage() {
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);
   const [areaSearchQuery, setAreaSearchQuery] = useState<string>("");
-  const [availableAreas, setAvailableAreas] = useState<string[]>([
-    "Semua",
-    "Tuparev",
-    "Kesambi",
-    "Pekiringan",
-    "Karanggetas",
-    "Kejaksan",
-    "Siliwangi",
-    "Kartini",
-    "Harjamukti",
-    "Kedawung",
-  ]);
   const [flyingDot, setFlyingDot] = useState<{ id: string; startX: number; startY: number } | null>(null);
+
+  // SWR hooks strictly reading from database via API
+  const { stores: dbStores, isLoading: isStoresLoading } = useStores();
+  const { bags: dbBags, isLoading: isBagsLoading } = useBags();
+  const { locations: dbLocations, isLoading: isLocationsLoading } = useLocations();
+  const { categories: dbCategories, isLoading: isCategoriesLoading } = useCategories();
 
   const flashSaleRef = useHorizontalScroll<HTMLDivElement>();
   const storesRef = useHorizontalScroll<HTMLDivElement>();
   const categoriesRef = useHorizontalScroll<HTMLDivElement>();
 
   useEffect(() => {
-    setMounted(true);
     setState(storeService.getState());
     const unsub = storeService.subscribe(() => {
       setState(storeService.getState());
@@ -79,26 +75,34 @@ export function LandingPage() {
     return unsub;
   }, []);
 
-  // Fetch dynamic locations from database / API
+  // Sync DB data into storeService for seamless cart & checkout support
   useEffect(() => {
-    fetch("/api/locations")
-      .then((res) => res.json())
-      .then((json) => {
-        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
-          const list = json.data.map((item: string) =>
-            item.toLowerCase() === "semua lokasi" ? "Semua" : item
-          );
-          setAvailableAreas(Array.from(new Set(["Semua", ...list])));
-        }
-      })
-      .catch((err) => {
-        console.warn("Fallback to preset areas:", err);
-      });
-  }, []);
+    if (dbStores.length > 0) {
+      storeService.setStores(dbStores);
+    }
+  }, [dbStores]);
+
+  useEffect(() => {
+    if (dbBags.length > 0) {
+      storeService.setSurpriseBags(dbBags);
+    }
+  }, [dbBags]);
+
+  // Dynamic available areas strictly derived from PostgreSQL database
+  const availableAreas = useMemo(() => {
+    if (!dbLocations || dbLocations.length === 0) return ["Semua"];
+    const list = dbLocations.map((item) =>
+      item.toLowerCase() === "semua lokasi" ? "Semua" : item
+    );
+    return Array.from(new Set(["Semua", ...list]));
+  }, [dbLocations]);
 
   const { data: session } = useSession();
+  const { orders } = state;
 
-  const { surpriseBags: bags, stores, orders } = state;
+  // Use database entities as single source of truth
+  const stores = dbStores;
+  const bags = dbBags;
 
   // Resolusi Pengguna: Prioritas Session Login Riil (Google/Auth)
   const currentUser: UserType = useMemo(() => {
@@ -107,8 +111,8 @@ export function LandingPage() {
         id: session.user.id,
         name: session.user.name || "Pengguna",
         email: session.user.email || "",
-        phone: (session.user as Record<string, unknown>).phone as string || state.currentUser.phone || "",
-        role: ((session.user as Record<string, unknown>).role as UserType["role"]) || state.currentUser.role || "buyer",
+        phone: ((session.user as Record<string, unknown>).phone as string) || state.currentUser.phone || "",
+        role: (((session.user as Record<string, unknown>).role as UserType["role"])) || state.currentUser.role || "buyer",
         avatarUrl:
           session.user.image ||
           ((session.user as Record<string, unknown>).avatarUrl as string) ||
@@ -150,7 +154,7 @@ export function LandingPage() {
     );
   }, [availableAreas, areaSearchQuery]);
 
-  // Filtering live catalog
+  // Filtering live catalog from DB
   const filteredBags = useMemo(() => {
     return bags.filter((bag) => {
       const store = stores.find((s) => s.id === bag.storeId);
@@ -170,10 +174,21 @@ export function LandingPage() {
     });
   }, [bags, stores, selectedArea, selectedStoreId, selectedCategory, searchQuery, isLastCallOnly]);
 
-  // Flash Sale / Last Call Items for the Top Promo Carousel
+  // Flash Sale / Last Call Items from DB
   const flashSaleBags = useMemo(() => {
     return bags.filter((b) => b.isLastCall || b.quotaRemaining <= 3);
   }, [bags]);
+
+  // Dynamic impact metrics calculated from real data
+  const impactMetrics = useMemo(() => {
+    const totalOrders = orders.filter((o) => o.status === "COMPLETED" || o.status === "PAID").length;
+    const count = totalOrders > 0 ? totalOrders : bags.reduce((acc, b) => acc + (b.quotaToday - b.quotaRemaining), 0);
+    const kg = Math.round(count * 0.8 * 10) / 10;
+    return {
+      meals: count > 0 ? `${count}+ Porsi` : "Tersedia",
+      kg: kg > 0 ? `-${kg} Kg CO2` : "Pencegahan Food Waste",
+    };
+  }, [orders, bags]);
 
   const handleAddToCart = (e: React.MouseEvent, bag: SurpriseBag) => {
     const store = stores.find((s) => s.id === bag.storeId);
@@ -196,6 +211,15 @@ export function LandingPage() {
     }, 550);
   };
 
+  // Icon mapper helper based on category name
+  const getCategoryIcon = (catName: string) => {
+    const lower = catName.toLowerCase();
+    if (lower.includes("bakery") || lower.includes("roti") || lower.includes("pastry")) return Wheat;
+    if (lower.includes("kafe") || lower.includes("kopi") || lower.includes("minuman") || lower.includes("coffee")) return Coffee;
+    if (lower.includes("buah") || lower.includes("swalayan") || lower.includes("segar")) return Apple;
+    return Utensils;
+  };
+
   return (
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex justify-center py-0 sm:py-6 selection:bg-emerald-500/20">
       {/* Centered Mobile App Container */}
@@ -210,7 +234,7 @@ export function LandingPage() {
               <PopoverTrigger className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/60 hover:bg-muted text-xs font-bold text-foreground border border-border/60 transition-colors shrink-0 max-w-[240px]">
                 <MapPin className="size-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                 <span className="truncate">
-                  {selectedArea === "Semua" ? "Cirebon Kota (Semua Area)" : selectedArea}
+                  {selectedArea === "Semua" ? "Semua Lokasi Mitra" : selectedArea}
                 </span>
                 <ChevronDown className="size-3 text-muted-foreground shrink-0" />
               </PopoverTrigger>
@@ -221,16 +245,20 @@ export function LandingPage() {
                 <div className="relative px-0.5">
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
                   <Input
-                    placeholder="Cari nama area Cirebon..."
+                    placeholder="Cari lokasi mitra di database..."
                     value={areaSearchQuery}
                     onChange={(e) => setAreaSearchQuery(e.target.value)}
                     className="pl-7.5 h-8 text-xs bg-muted/40"
                   />
                 </div>
                 <div className="max-h-52 overflow-y-auto space-y-0.5 px-0.5">
-                  {filteredAreas.length === 0 ? (
+                  {isLocationsLoading && availableAreas.length <= 1 ? (
                     <div className="py-3 text-center text-xs text-muted-foreground">
-                      Wilayah tidak ditemukan.
+                      Memuat lokasi dari database...
+                    </div>
+                  ) : filteredAreas.length === 0 ? (
+                    <div className="py-3 text-center text-xs text-muted-foreground">
+                      Wilayah tidak ditemukan di database.
                     </div>
                   ) : (
                     filteredAreas.map((area) => (
@@ -248,7 +276,7 @@ export function LandingPage() {
                             : "hover:bg-muted text-foreground"
                         }`}
                       >
-                        <span>{area === "Semua" ? "Semua Wilayah Cirebon" : area}</span>
+                        <span>{area === "Semua" ? "Semua Wilayah Toko" : area}</span>
                         {selectedArea === area && <Check className="size-3.5" />}
                       </button>
                     ))
@@ -364,16 +392,16 @@ export function LandingPage() {
               <div className="flex items-center gap-2 min-w-0">
                 <span className="size-2 rounded-full bg-emerald-600 animate-pulse shrink-0" />
                 <span className="text-[11px] font-bold text-emerald-950 dark:text-emerald-200 truncate">
-                  Dampak Cirebon: <strong className="font-black tabular-nums">1.420+ Porsi</strong> Diselamatkan
+                  Dampak Makanan: <strong className="font-black tabular-nums">{impactMetrics.meals}</strong> Terselamatkan
                 </span>
               </div>
               <Badge variant="outline" className="text-[9px] font-black border-emerald-600/40 text-emerald-800 dark:text-emerald-300 shrink-0">
-                -2,8 Ton CO2
+                {impactMetrics.kg}
               </Badge>
             </div>
           </div>
 
-          {/* 2. Urgent Flash Sale Carousel (Horizontal Cards) */}
+          {/* 2. Urgent Flash Sale Carousel (Horizontal Cards dari Database) */}
           <section className="space-y-1.5">
             <div className="px-3 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -382,7 +410,7 @@ export function LandingPage() {
                   Segera Habis Malam Ini
                 </h3>
                 <Badge className="bg-amber-600 text-white text-[9px] font-black px-1 py-0">
-                  s/d -70%
+                  Diskon s/d 70%
                 </Badge>
               </div>
               <span className="text-[10px] text-muted-foreground">Sebelum toko tutup</span>
@@ -393,100 +421,109 @@ export function LandingPage() {
               className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
             >
               <div className="flex items-stretch gap-2.5 w-max">
-                {flashSaleBags.map((bag) => {
-                  const store = stores.find((s) => s.id === bag.storeId);
-                  const discountPct = Math.round(
-                    ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
-                  );
-                  const isSoldOut = bag.quotaRemaining <= 0;
+                {isBagsLoading && bags.length === 0 ? (
+                  <div className="flex items-center gap-2 py-4">
+                    {[1, 2].map((n) => (
+                      <div key={n} className="w-56 h-32 rounded-2xl bg-muted/60 animate-pulse border border-border/50" />
+                    ))}
+                  </div>
+                ) : flashSaleBags.length === 0 ? (
+                  <div className="py-4 px-2 text-xs text-muted-foreground italic">
+                    Belum ada menu last-call malam ini di database.
+                  </div>
+                ) : (
+                  flashSaleBags.map((bag) => {
+                    const store = stores.find((s) => s.id === bag.storeId);
+                    const isSoldOut = bag.quotaRemaining <= 0;
 
-                  return (
-                    <div
-                      key={`flash-${bag.id}`}
-                      className={`w-56 p-2.5 rounded-2xl border flex flex-col justify-between shrink-0 shadow-2xs transition-all ${
-                        isSoldOut
-                          ? "bg-muted/40 border-border opacity-75 grayscale"
-                          : "bg-gradient-to-br from-amber-500/10 via-card to-background border-amber-500/30 hover:border-amber-500/60"
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div className="relative size-16 rounded-xl overflow-hidden border border-border/80 shrink-0 bg-muted">
-                          <img
-                            src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
-                            alt={bag.title}
-                            className="size-full object-cover"
-                          />
-                          {isSoldOut && (
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                              <span className="text-[8px] font-black uppercase text-white bg-zinc-950/90 px-1 py-0.5 rounded border border-white/20">
-                                Habis
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0 space-y-0.5">
-                          <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
-                            {store?.name}
-                          </span>
-                          <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
-                            {bag.title}
-                          </h4>
-                          <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
-                            <Clock className="size-2.5 text-amber-600 shrink-0" />
-                            <span>{bag.pickupWindow}</span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
-                        <div>
-                          <div className="flex items-baseline gap-1">
-                            <span className="font-black text-xs text-emerald-700 dark:text-emerald-400 tabular-nums">
-                              Rp {bag.discountedPrice.toLocaleString("id-ID")}
+                    return (
+                      <div
+                        key={`flash-${bag.id}`}
+                        className={`w-56 p-2.5 rounded-2xl border flex flex-col justify-between shrink-0 shadow-2xs transition-all ${
+                          isSoldOut
+                            ? "bg-muted/40 border-border opacity-75 grayscale"
+                            : "bg-gradient-to-br from-amber-500/10 via-card to-background border-amber-500/30 hover:border-amber-500/60"
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="relative size-16 rounded-xl overflow-hidden border border-border/80 shrink-0 bg-muted">
+                            <img
+                              src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
+                              alt={bag.title}
+                              className="size-full object-cover"
+                            />
+                            {isSoldOut && (
+                              <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                                <span className="text-[8px] font-black uppercase text-white bg-zinc-950/90 px-1 py-0.5 rounded border border-white/20">
+                                  Habis
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-0.5">
+                            <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
+                              {store?.name || "Mitra Toko"}
                             </span>
-                            <span className="text-[8px] text-muted-foreground line-through tabular-nums">
-                              Rp {bag.originalPrice.toLocaleString("id-ID")}
+                            <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
+                              {bag.title}
+                            </h4>
+                            <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                              <Clock className="size-2.5 text-amber-600 shrink-0" />
+                              <span>{bag.pickupWindow}</span>
                             </span>
                           </div>
-                          <span className={`text-[8px] font-bold ${isSoldOut ? "text-rose-600 dark:text-rose-400" : "text-amber-800 dark:text-amber-300"}`}>
-                            {isSoldOut ? "Stok Habis" : `Sisa ${bag.quotaRemaining} porsi`}
-                          </span>
                         </div>
 
-                        {isSoldOut ? (
-                          <span className="h-6 text-[9px] font-bold text-muted-foreground bg-muted border border-border rounded-lg px-2 flex items-center justify-center select-none">
-                            Habis
-                          </span>
-                        ) : (
-                          <Button
-                            size="sm"
-                            onClick={(e) => handleAddToCart(e, bag)}
-                            className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
-                          >
-                            <Plus className="size-3" />
-                            <span>Cart</span>
-                          </Button>
-                        )}
+                        <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
+                          <div>
+                            <div className="flex items-baseline gap-1">
+                              <span className="font-black text-xs text-emerald-700 dark:text-emerald-400 tabular-nums">
+                                Rp {bag.discountedPrice.toLocaleString("id-ID")}
+                              </span>
+                              <span className="text-[8px] text-muted-foreground line-through tabular-nums">
+                                Rp {bag.originalPrice.toLocaleString("id-ID")}
+                              </span>
+                            </div>
+                            <span className={`text-[8px] font-bold ${isSoldOut ? "text-rose-600 dark:text-rose-400" : "text-amber-800 dark:text-amber-300"}`}>
+                              {isSoldOut ? "Stok Habis" : `Sisa ${bag.quotaRemaining} porsi`}
+                            </span>
+                          </div>
+
+                          {isSoldOut ? (
+                            <span className="h-6 text-[9px] font-bold text-muted-foreground bg-muted border border-border rounded-lg px-2 flex items-center justify-center select-none">
+                              Habis
+                            </span>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={(e) => handleAddToCart(e, bag)}
+                              className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
+                            >
+                              <Plus className="size-3" />
+                              <span>Cart</span>
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
           </section>
 
-          {/* 3. Popular Store Quick Bubbles (Mitra Cirebon) */}
+          {/* 3. Popular Store Quick Bubbles (Mitra Aktif Langsung dari Database) */}
           <section className="space-y-1.5">
             <div className="px-3 flex items-center justify-between">
               <span className="font-black text-xs text-foreground flex items-center gap-1.5">
                 <StoreIcon className="size-3 text-emerald-700" />
-                <span>Mitra Kuliner Populer</span>
+                <span>Mitra Kuliner Aktif</span>
               </span>
               {selectedStoreId && (
                 <button
                   type="button"
                   onClick={() => setSelectedStoreId(null)}
-                  className="text-[10px] font-bold text-emerald-700 hover:underline"
+                  className="text-[10px] font-bold text-emerald-700 hover:underline cursor-pointer"
                 >
                   Lihat Semua Toko
                 </button>
@@ -498,72 +535,91 @@ export function LandingPage() {
               className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
             >
               <div className="flex items-center gap-2 w-max">
-                {stores.slice(0, 5).map((st) => {
-                  const isSelected = selectedStoreId === st.id;
-                  return (
-                    <button
-                      key={st.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedStoreId(isSelected ? null : st.id)
-                      }
-                      className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all shrink-0 cursor-grab active:cursor-grabbing ${
-                        isSelected
-                          ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
-                          : "bg-muted/50 hover:bg-muted text-foreground border-border/70"
-                      }`}
-                    >
-                      <Avatar className="size-6 shrink-0">
-                        <AvatarFallback className="text-[9px] font-black bg-emerald-800 text-white">
-                          {st.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="text-left">
-                        <span className="text-[11px] font-extrabold block leading-none truncate max-w-[110px]">
-                          {st.name}
-                        </span>
-                        <span className={`text-[8px] leading-tight block truncate ${isSelected ? "text-emerald-100" : "text-muted-foreground"}`}>
-                          {st.area}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                {isStoresLoading && stores.length === 0 ? (
+                  <div className="flex items-center gap-2 py-1">
+                    {[1, 2, 3].map((n) => (
+                      <div
+                        key={n}
+                        className="h-8 w-28 rounded-full bg-muted/60 animate-pulse border border-border/40"
+                      />
+                    ))}
+                  </div>
+                ) : stores.length === 0 ? (
+                  <span className="text-[11px] text-muted-foreground py-1 px-2">
+                    Belum ada mitra toko terdaftar di database.
+                  </span>
+                ) : (
+                  stores.map((st) => {
+                    const isSelected = selectedStoreId === st.id;
+                    return (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedStoreId(isSelected ? null : st.id)
+                        }
+                        className={`flex items-center gap-2 p-1.5 pr-3 rounded-full border transition-all shrink-0 cursor-grab active:cursor-grabbing ${
+                          isSelected
+                            ? "bg-emerald-700 text-white border-emerald-700 shadow-2xs"
+                            : "bg-muted/50 hover:bg-muted text-foreground border-border/70"
+                        }`}
+                      >
+                        <Avatar className="size-6 shrink-0">
+                          {st.logoUrl && <AvatarImage src={st.logoUrl} alt={st.name} />}
+                          <AvatarFallback className="text-[9px] font-black bg-emerald-800 text-white">
+                            {st.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="text-left">
+                          <span className="text-[11px] font-extrabold block leading-none truncate max-w-[120px]">
+                            {st.name}
+                          </span>
+                          <span className={`text-[8px] leading-tight block truncate ${isSelected ? "text-emerald-100" : "text-muted-foreground"}`}>
+                            {st.area}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
               </div>
             </div>
           </section>
 
-          {/* 4. Quick Category Bubbles */}
+          {/* 4. Quick Category Bubbles (Langsung Dinamis dari Database) */}
           <div
             ref={categoriesRef}
             className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
           >
             <div className="flex items-center gap-1.5 w-max">
-              {[
-                { id: "Semua", label: "Semua Kategori", icon: Utensils },
-                { id: "Bakery & Pastry", label: "Roti & Pastry", icon: Wheat },
-                { id: "Makanan Berat", label: "Makanan Berat", icon: Utensils },
-                { id: "Kafe & Minuman", label: "Kafe & Kopi", icon: Coffee },
-                { id: "Swalayan & Buah", label: "Bahan Segar", icon: Apple },
-              ].map((cat) => {
-                const Icon = cat.icon;
-                const isSelected = selectedCategory === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition-colors cursor-grab active:cursor-grabbing ${
-                      isSelected
-                        ? "bg-emerald-700 text-white shadow-2xs"
-                        : "bg-muted/50 hover:bg-muted text-muted-foreground border border-border/50"
-                    }`}
-                  >
-                    <Icon className="size-3" />
-                    <span>{cat.label}</span>
-                  </button>
-                );
-              })}
+              {isCategoriesLoading && dbCategories.length <= 1 ? (
+                <div className="flex items-center gap-1 py-1">
+                  {[1, 2, 3].map((n) => (
+                    <div key={n} className="h-6 w-20 rounded-full bg-muted/60 animate-pulse border border-border/40" />
+                  ))}
+                </div>
+              ) : (
+                dbCategories.map((catName) => {
+                  const Icon = getCategoryIcon(catName);
+                  const isSelected = selectedCategory === catName;
+                  const label = catName === "Semua" ? "Semua Kategori" : catName;
+                  return (
+                    <button
+                      key={catName}
+                      type="button"
+                      onClick={() => setSelectedCategory(catName)}
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 transition-colors cursor-grab active:cursor-grabbing ${
+                        isSelected
+                          ? "bg-emerald-700 text-white shadow-2xs"
+                          : "bg-muted/50 hover:bg-muted text-muted-foreground border border-border/50"
+                      }`}
+                    >
+                      <Icon className="size-3" />
+                      <span>{label}</span>
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
@@ -625,12 +681,18 @@ export function LandingPage() {
 
           {/* 7. 2-Column Marketplace Product Grid (Dense & Actionable) */}
           <div className="px-3">
-            {filteredBags.length === 0 ? (
+            {isBagsLoading && bags.length === 0 ? (
+              <div className="grid grid-cols-2 gap-2 py-4">
+                {[1, 2, 3, 4].map((n) => (
+                  <div key={n} className="h-44 rounded-xl bg-muted/60 animate-pulse border border-border/50" />
+                ))}
+              </div>
+            ) : filteredBags.length === 0 ? (
               <div className="py-12 text-center space-y-2">
                 <ShoppingBag className="size-8 text-muted-foreground mx-auto stroke-1" />
                 <p className="text-xs font-bold text-foreground">Tidak ada paket makanan aktif</p>
                 <p className="text-[11px] text-muted-foreground max-w-xs mx-auto">
-                  Coba ubah filter kategori atau pilih wilayah Cirebon lainnya
+                  Coba sesuaikan filter kategori atau pilih wilayah lainnya
                 </p>
                 <Button
                   size="sm"
@@ -642,7 +704,7 @@ export function LandingPage() {
                     setSearchQuery("");
                     setIsLastCallOnly(false);
                   }}
-                  className="text-xs font-semibold"
+                  className="text-xs font-semibold cursor-pointer"
                 >
                   Reset Semua Filter
                 </Button>
@@ -711,7 +773,7 @@ export function LandingPage() {
                       <div className="p-2 space-y-1 flex-1 flex flex-col justify-between">
                         <div className="space-y-0.5">
                           <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
-                            {store?.name || "Mitra Cirebon"}
+                            {store?.name || "Mitra Kuliner"}
                           </span>
                           <h4 className="font-extrabold text-[10px] text-foreground leading-tight line-clamp-2 min-h-[24px]">
                             {bag.title}

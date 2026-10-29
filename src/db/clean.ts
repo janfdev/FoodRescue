@@ -13,6 +13,7 @@ async function runClean() {
       console.log("-> Truncating all tables with CASCADE...");
       await client.query(`
         TRUNCATE TABLE 
+          audit_logs,
           dispute_tickets,
           withdrawal_requests,
           reviews,
@@ -23,6 +24,9 @@ async function runClean() {
           orders,
           surprise_bags,
           stores,
+          sessions,
+          accounts,
+          verifications,
           users
         CASCADE;
       `);

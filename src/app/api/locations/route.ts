@@ -1,56 +1,35 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores } from "@/db/schema";
-import { SEED_STORES } from "@/services/seedData";
+import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
     const locationsSet = new Set<string>();
 
-    // 1. Ambil dari database PostgreSQL jika aktif
+    // Ambil distinct area hanya dari toko aktif di database PostgreSQL
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
-        const rows = await db.select({ area: stores.area }).from(stores);
+        const rows = await db
+          .select({ area: stores.area })
+          .from(stores)
+          .where(eq(stores.status, "ACTIVE"));
         for (const r of rows) {
-          if (r.area) locationsSet.add(r.area.trim());
+          if (r.area && r.area.trim()) {
+            locationsSet.add(r.area.trim());
+          }
         }
       } catch (dbErr) {
-        console.warn("DB query error for stores area, fallback ke data seed:", dbErr);
+        console.warn("DB query error for stores area:", dbErr);
       }
     }
 
-    // 2. Ambil dari SEED_STORES jika DB kosong / offline
-    for (const s of SEED_STORES) {
-      if (s.area) locationsSet.add(s.area.trim());
-    }
-
-    // Default curated area Cirebon Raya
-    const defaultAreas = [
-      "Semua Lokasi",
-      "Tuparev",
-      "Kartini",
-      "Siliwangi",
-      "Kesambi",
-      "Harjamukti",
-      "Kedawung",
-      "Plered",
-      "Sumber",
-      "Pekiringan",
-      "Karanggetas",
-      "Kejaksan",
-    ];
-
-    for (const a of defaultAreas) {
-      if (a !== "Semua Lokasi") {
-        locationsSet.add(a);
-      }
-    }
-
-    const sortedList = Array.from(locationsSet).sort();
+    const sortedList = Array.from(locationsSet).sort((a, b) => a.localeCompare(b, "id"));
     const finalLocations = ["Semua Lokasi", ...sortedList];
 
     return NextResponse.json({
       success: true,
+      source: "database",
       total: finalLocations.length,
       data: finalLocations,
     });
