@@ -41,12 +41,12 @@ interface AppState {
 
 export const DEFAULT_INITIAL_STATE: AppState = {
   currentUser: null,
-  stores: [],
-  surpriseBags: [],
-  orders: [],
-  boxPackages: [],
-  boxOrders: [],
-  reviews: [],
+  stores: SEED_STORES,
+  surpriseBags: SEED_SURPRISE_BAGS,
+  orders: SEED_ORDERS,
+  boxPackages: SEED_BOX_PACKAGES,
+  boxOrders: SEED_BOX_ORDERS,
+  reviews: SEED_REVIEWS,
   chatMessages: {},
   withdrawals: [],
   disputes: [],
@@ -82,6 +82,12 @@ class StoreService {
             }
           } else {
             parsed.currentUser = null;
+          }
+          if (!parsed.stores || parsed.stores.length === 0) {
+            parsed.stores = SEED_STORES;
+          }
+          if (!parsed.surpriseBags || parsed.surpriseBags.length === 0) {
+            parsed.surpriseBags = SEED_SURPRISE_BAGS;
           }
           this.state = parsed;
         } else {
