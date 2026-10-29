@@ -62,16 +62,20 @@ export default function LoginPage() {
     setErrorMsg("");
     try {
       // Panggil Better-Auth Google OAuth
-      await authClient.signIn.social({
+      const res = await authClient.signIn.social({
         provider: "google",
         callbackURL: "/",
       });
+      if (res?.error) {
+        if (res.error.code === "PROVIDER_NOT_FOUND" || res.error.status === 404) {
+          setErrorMsg("Google OAuth belum dikonfigurasi di server. Silakan gunakan formulir email & kata sandi di bawah.");
+          return;
+        }
+        setErrorMsg(res.error.message || "Gagal masuk dengan Google");
+      }
     } catch (err: unknown) {
-      console.warn("Google OAuth backend belum aktif, menggunakan fallback simulasi:", err);
-      // Fallback ke profil buyer default jika OAuth env belum diatur
-      const googleUser = SEED_USERS.find((u) => u.email === "fauzan@gmail.com") || SEED_USERS[0];
-      storeService.loginWithEmail(googleUser.email);
-      router.push("/");
+      console.warn("Google OAuth backend belum aktif:", err);
+      setErrorMsg("Koneksi OAuth tidak tersedia. Silakan gunakan login email & kata sandi.");
     } finally {
       setIsLoading(false);
     }

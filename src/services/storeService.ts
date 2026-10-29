@@ -39,7 +39,7 @@ interface AppState {
   disputes: DisputeTicket[];
 }
 
-const DEFAULT_INITIAL_STATE: AppState = {
+export const DEFAULT_INITIAL_STATE: AppState = {
   currentUser: SEED_USERS[0], // default: Budi (Buyer)
   stores: SEED_STORES,
   surpriseBags: SEED_SURPRISE_BAGS,

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { storeService } from "@/services/storeService";
+import { storeService, DEFAULT_INITIAL_STATE } from "@/services/storeService";
 import { User as UserType } from "@/types/domain";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +30,8 @@ import { requestNotificationPermission, sendLocalNotification } from "@/lib/noti
 
 export default function AccountPage() {
   const router = useRouter();
-  const [state, setState] = useState(storeService.getState());
+  const [state, setState] = useState(DEFAULT_INITIAL_STATE);
+  const [mounted, setMounted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { isInstalled, isStandalone, openInstallGuide } = usePwa();
   const { data: session } = useSession();
@@ -53,6 +54,8 @@ export default function AccountPage() {
   };
 
   useEffect(() => {
+    setMounted(true);
+    setState(storeService.getState());
     const unsub = storeService.subscribe(() => {
       setState(storeService.getState());
     });

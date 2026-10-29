@@ -34,7 +34,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { storeService } from "@/services/storeService";
+import { storeService, DEFAULT_INITIAL_STATE } from "@/services/storeService";
 import { cartService } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
@@ -42,7 +42,8 @@ import { resolveUserAvatar } from "@/lib/avatar";
 import { User as UserType, SurpriseBag } from "@/types/domain";
 
 export function LandingPage() {
-  const [state, setState] = useState(storeService.getState());
+  const [state, setState] = useState(DEFAULT_INITIAL_STATE);
+  const [mounted, setMounted] = useState(false);
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
@@ -69,6 +70,8 @@ export function LandingPage() {
   const categoriesRef = useHorizontalScroll<HTMLDivElement>();
 
   useEffect(() => {
+    setMounted(true);
+    setState(storeService.getState());
     const unsub = storeService.subscribe(() => {
       setState(storeService.getState());
     });

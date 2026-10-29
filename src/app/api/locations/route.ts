@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores } from "@/db/schema";
-import { storeService } from "@/services/storeService";
+import { SEED_STORES } from "@/services/seedData";
 
 export async function GET() {
   try {
@@ -15,13 +15,12 @@ export async function GET() {
           if (r.area) locationsSet.add(r.area.trim());
         }
       } catch (dbErr) {
-        console.warn("DB offline, fallback ke storeService:", dbErr);
+        console.warn("DB query error for stores area, fallback ke data seed:", dbErr);
       }
     }
 
-    // 2. Ambil dari storeService
-    const currentStores = storeService.getState().stores;
-    for (const s of currentStores) {
+    // 2. Ambil dari SEED_STORES jika DB kosong / offline
+    for (const s of SEED_STORES) {
       if (s.area) locationsSet.add(s.area.trim());
     }
 

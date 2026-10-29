@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores } from "@/db/schema";
-import { storeService } from "@/services/storeService";
+import { SEED_STORES } from "@/services/seedData";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fallback ke storeService state
-    let list = storeService.getState().stores.filter((s) => s.status === "ACTIVE");
+    // Fallback ke SEED_STORES jika DB offline/kosong
+    let list = SEED_STORES.filter((s) => s.status === "ACTIVE");
     if (category) {
       list = list.filter((s) => s.category === category);
     }

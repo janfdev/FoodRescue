@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { surpriseBags } from "@/db/schema";
-import { storeService } from "@/services/storeService";
+import { surpriseBags, stores } from "@/db/schema";
+import { SEED_SURPRISE_BAGS } from "@/services/seedData";
 import { eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Fallback ke storeService state
-    let list = storeService.getState().surpriseBags.filter((b) => b.isActive);
+    // Fallback ke SEED_SURPRISE_BAGS jika DB offline/kosong
+    let list = SEED_SURPRISE_BAGS.filter((b) => b.isActive);
     if (storeId) {
       list = list.filter((b) => b.storeId === storeId);
     }
