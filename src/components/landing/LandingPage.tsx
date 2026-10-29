@@ -37,6 +37,7 @@ import { storeService, DEFAULT_INITIAL_STATE } from "@/services/storeService";
 import { cartService, CartItem } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { LandingDetailModal } from "@/components/landing/LandingDetailModal";
+import { FlashSaleSection } from "@/components/landing/FlashSaleSection";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { useSession } from "@/lib/auth-client";
@@ -494,146 +495,15 @@ export function LandingPage() {
           </div>
 
           {/* 2. Urgent Flash Sale Carousel (Horizontal Cards dari Database) */}
-          <section className="space-y-1.5">
-            <div className="px-3 flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Flame className="size-3.5 text-amber-600 fill-amber-600" />
-                <h3 className="font-black text-xs text-foreground">
-                  Segera Habis Malam Ini
-                </h3>
-                <Badge className="bg-amber-600 text-white text-[9px] font-black px-1 py-0">
-                  Diskon s/d 70%
-                </Badge>
-              </div>
-              <span className="text-[10px] text-muted-foreground">Sebelum toko tutup</span>
-            </div>
-
-            <div
-              ref={flashSaleRef}
-              className="w-full overflow-x-auto pb-1 px-3 scrollbar-none scroll-smooth cursor-grab active:cursor-grabbing select-none [&_*]:cursor-grab [&_*]:active:cursor-grabbing"
-            >
-              <div className="flex items-stretch gap-2.5 w-max">
-                {isBagsLoading && bags.length === 0 ? (
-                  <div className="flex items-center gap-2 py-4">
-                    {[1, 2].map((n) => (
-                      <div key={n} className="w-56 h-32 rounded-2xl bg-muted/60 animate-pulse border border-border/50" />
-                    ))}
-                  </div>
-                ) : flashSaleBags.length === 0 ? (
-                  <div className="py-4 px-2 text-xs text-muted-foreground italic">
-                    Belum ada menu last-call malam ini di database.
-                  </div>
-                ) : (
-                  flashSaleBags.map((bag) => {
-                    const store = stores.find((s) => s.id === bag.storeId);
-                    const isSoldOut = bag.quotaRemaining <= 0;
-                    const inCartQty = cartItems.find((i) => i.bag.id === bag.id)?.quantity || 0;
-
-                    return (
-                      <div
-                        key={`flash-${bag.id}`}
-                        onClick={() => setSelectedBagForModal(bag)}
-                        className={`w-56 p-2.5 rounded-2xl border flex flex-col justify-between shrink-0 shadow-2xs transition-all cursor-pointer ${
-                          isSoldOut
-                            ? "bg-muted/40 border-border opacity-75 grayscale"
-                            : "bg-gradient-to-br from-amber-500/10 via-card to-background border-amber-500/30 hover:border-amber-500/60"
-                        }`}
-                      >
-                        <div className="flex items-start gap-2">
-                          <div className="relative size-16 rounded-xl overflow-hidden border border-border/80 shrink-0 bg-muted">
-                            <img
-                              src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400"}
-                              alt={bag.title}
-                              className="size-full object-cover"
-                            />
-                            {isSoldOut && (
-                              <div className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                                <span className="text-[8px] font-black uppercase text-white bg-zinc-950/90 px-1 py-0.5 rounded border border-white/20">
-                                  Habis
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-0.5">
-                            <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
-                              {store?.name || "Mitra Toko"}
-                            </span>
-                            <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
-                              {bag.title}
-                            </h4>
-                            <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
-                              <Clock className="size-2.5 text-amber-600 shrink-0" />
-                              <span>{bag.pickupWindow}</span>
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="mt-2 pt-2 border-t border-border/50 flex items-center justify-between">
-                          <div>
-                            <div className="flex items-baseline gap-1">
-                              <span className="font-black text-xs text-emerald-700 dark:text-emerald-400 tabular-nums">
-                                Rp {bag.discountedPrice.toLocaleString("id-ID")}
-                              </span>
-                              <span className="text-[8px] text-muted-foreground line-through tabular-nums">
-                                Rp {bag.originalPrice.toLocaleString("id-ID")}
-                              </span>
-                            </div>
-                            <span className={`text-[8px] font-bold ${isSoldOut ? "text-rose-600 dark:text-rose-400" : "text-amber-800 dark:text-amber-300"}`}>
-                              {isSoldOut ? "Stok Habis" : `Sisa ${bag.quotaRemaining} porsi`}
-                            </span>
-                          </div>
-
-                          {isSoldOut ? (
-                            <span className="h-6 text-[9px] font-bold text-muted-foreground bg-muted border border-border rounded-lg px-2 flex items-center justify-center select-none">
-                              Habis
-                            </span>
-                          ) : inCartQty > 0 ? (
-                            <div className="flex items-center gap-1 bg-amber-500/15 border border-amber-500/40 rounded-lg p-0.5 h-6">
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  cartService.updateQuantity(bag.id, inCartQty - 1);
-                                }}
-                                className="size-5 rounded flex items-center justify-center font-black text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-500/20 cursor-pointer"
-                                aria-label="Kurangi jumlah"
-                              >
-                                -
-                              </button>
-                              <span className="text-[10px] font-black tabular-nums text-amber-950 dark:text-amber-100 px-1">
-                                {inCartQty}
-                              </span>
-                              <button
-                                type="button"
-                                disabled={inCartQty >= bag.quotaRemaining}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleAddToCart(e, bag);
-                                }}
-                                className="size-5 rounded flex items-center justify-center font-black text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-500/20 cursor-pointer disabled:opacity-30"
-                                aria-label="Tambah jumlah"
-                              >
-                                +
-                              </button>
-                            </div>
-                          ) : (
-                            <Button
-                              size="sm"
-                              onClick={(e) => handleAddToCart(e, bag)}
-                              className="h-6 text-[10px] font-black bg-amber-600 hover:bg-amber-700 text-white rounded-lg px-2 gap-1 shadow-2xs cursor-pointer"
-                            >
-                              <Plus className="size-3" />
-                              <span>Cart</span>
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </section>
+          <FlashSaleSection
+            bags={flashSaleBags}
+            stores={stores}
+            cartItems={cartItems}
+            isLoading={isBagsLoading}
+            scrollRef={flashSaleRef}
+            onSelectBag={setSelectedBagForModal}
+            onAddToCart={handleAddToCart}
+          />
 
           {/* 3. Popular Store Quick Bubbles (Mitra Aktif Langsung dari Database) */}
           <section className="space-y-1.5">
