@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -23,12 +23,12 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { storeService } from "@/services/storeService";
-import { SEED_USERS } from "@/services/seedData";
+import { SEED_USERS, SEED_STORES } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { Store } from "@/types/domain";
 
-export default function SellerLayout({ children }: { children: React.ReactNode }) {
+const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [storesList, setStoresList] = useState<Store[]>([]);
@@ -45,7 +45,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     const activeStores = currentState.stores.filter((s) => s.status === "ACTIVE");
     setStoresList(activeStores);
     const current = activeStores.find((s) => s.id === selectedStoreId) || activeStores[0];
-    setStore(current);
+    setStore(current || currentState.stores[0]);
     if (current) {
       const pending = currentState.orders.filter(
         (o) => o.storeId === current.id && (o.status === "PAID" || o.status === "READY_FOR_PICKUP")
@@ -65,12 +65,13 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  if (!store) return null;
+  const fallbackStore = state.stores[0] || SEED_STORES[0];
+  const activeStore = store || fallbackStore;
 
   const sellerUser =
     state.currentUser?.role === "seller"
       ? state.currentUser
-      : SEED_USERS.find((u) => u.storeId === store.id) ||
+      : SEED_USERS.find((u) => u.storeId === activeStore?.id) ||
         SEED_USERS.find((u) => u.role === "seller") ||
         SEED_USERS[0];
 
@@ -86,7 +87,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     router.push("/login");
   };
 
-  const isBoxLow = store.currentBoxStock < 10 || store.boxesSoldTotal % 50 >= 40;
+  const isBoxLow = (activeStore?.currentBoxStock || 0) < 10 || (activeStore?.boxesSoldTotal || 0) % 50 >= 40;
 
   const navItems = [
     {
@@ -121,10 +122,17 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
     },
     {
       href: "/seller/finance",
-      label: "Saldo & Rekening",
+      label: "Keuangan & Rekening",
       icon: Wallet,
       badge: null,
-      exact: false,
+      badgeColor: "",
+    },
+    {
+      href: "/seller/profile",
+      label: "Pengaturan & Profil",
+      icon: Settings,
+      badge: null,
+      badgeColor: "",
     },
   ];
 
@@ -134,7 +142,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="w-full min-h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans">
-      
+
       {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
       <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -144,14 +152,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-xs text-foreground truncate max-w-[120px]">
-                {store.name}
+                {activeStore.name}
               </span>
               <Badge variant="outline" className="text-[9px] font-bold px-1 py-0 border-orange-500/30 text-orange-700 dark:text-orange-300">
                 {activeNavItem.label}
               </Badge>
             </div>
             <span className="text-[9px] text-muted-foreground block truncate">
-              {store.area} • Mitra Aktif
+              {activeStore.area} • Mitra Aktif
             </span>
           </div>
         </div>
@@ -162,7 +170,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
             className="flex items-center gap-1 text-[11px] font-black tabular-nums py-1 px-2 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
           >
             <Wallet className="size-3 shrink-0" />
-            <span>Rp {store.walletBalance.toLocaleString("id-ID")}</span>
+            <span>Rp {activeStore.walletBalance.toLocaleString("id-ID")}</span>
           </Link>
 
           <button
@@ -246,29 +254,28 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               <span className="text-muted-foreground font-semibold">Stok Kemasan Box:</span>
               <strong
                 className={`tabular-nums font-black ${
-                  store.currentBoxStock < 10 ? "text-red-600" : "text-emerald-600"
+                  activeStore.currentBoxStock < 10 ? "text-red-600" : "text-emerald-600"
                 }`}
               >
-                {store.currentBoxStock} pcs
+                {activeStore.currentBoxStock} pcs
               </strong>
             </div>
             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span>Kepatuhan Box Standar:</span>
-              <span className="font-bold text-foreground">{store.boxComplianceRate}%</span>
+              <span className="font-bold text-foreground">{activeStore.boxComplianceRate}%</span>
             </div>
           </div>
 
           <Separator />
 
           <div className="flex items-center justify-between text-xs pt-1">
-            <button
-              type="button"
-              onClick={() => setIsEditProfileOpen(true)}
+            <Link
+              href="/seller/profile"
               className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
             >
               <Settings className="size-3.5 text-orange-600" />
               <span>Profil Gerai</span>
-            </button>
+            </Link>
 
             <Link
               href="/"
@@ -301,10 +308,10 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               </Link>
               <div className="min-w-0 flex-1">
                 <span className="font-extrabold text-sm text-foreground block truncate">
-                  {store.name}
+                  {activeStore.name}
                 </span>
                 <span className="text-[10px] font-mono text-muted-foreground uppercase block truncate">
-                  {store.area} • Mitra Aktif
+                  {activeStore.area} • Mitra Aktif
                 </span>
               </div>
             </div>
@@ -367,17 +374,6 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           </nav>
 
           <Separator />
-
-          {/* Clean Quick Link ke Beranda */}
-          <div className="px-1">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground p-2 rounded-xl hover:bg-muted/50 transition-colors"
-            >
-              <ArrowLeft className="size-3.5" />
-              <span>Kembali ke Beranda</span>
-            </Link>
-          </div>
         </div>
 
         {/* Box Stock Alert & Interactive Profile Card with Popover */}
@@ -387,15 +383,15 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               <span className="text-muted-foreground font-semibold">Stok Rescue Box:</span>
               <strong
                 className={`tabular-nums font-black ${
-                  store.currentBoxStock < 10 ? "text-red-600" : "text-emerald-600"
+                  activeStore.currentBoxStock < 10 ? "text-red-600" : "text-emerald-600"
                 }`}
               >
-                {store.currentBoxStock} pcs
+                {activeStore.currentBoxStock} pcs
               </strong>
             </div>
             <div className="flex items-center justify-between text-[11px] text-muted-foreground">
               <span>Kepatuhan Box:</span>
-              <span className="font-bold text-foreground">{store.boxComplianceRate}%</span>
+              <span className="font-bold text-foreground">{activeStore.boxComplianceRate}%</span>
             </div>
           </div>
 
@@ -444,14 +440,13 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                   <Wallet className="size-3.5 text-emerald-600" />
                   <span>Saldo & Rekening</span>
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => setIsEditProfileOpen(true)}
+                <Link
+                  href="/seller/profile"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
                 >
                   <Settings className="size-3.5 text-orange-600" />
                   <span>Profil & Toko</span>
-                </button>
+                </Link>
                 <Link
                   href="/"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
@@ -485,7 +480,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               Portal Operasional Mitra
             </h1>
             <p className="text-[11px] text-muted-foreground -mt-0.5">
-              {store.name} • Wilayah {store.area}
+              {activeStore.name} • Wilayah {activeStore.area}
             </p>
           </div>
 
@@ -495,7 +490,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
               className="inline-flex items-center gap-1.5 text-xs font-bold p-1 px-3 rounded-lg border border-border bg-card hover:bg-muted/50"
             >
               <Wallet className="size-3.5 text-emerald-600" />
-              <span>Rp {store.walletBalance.toLocaleString("id-ID")}</span>
+              <span>Rp {activeStore.walletBalance.toLocaleString("id-ID")}</span>
             </Link>
           </div>
         </header>
@@ -509,9 +504,23 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           isOpen={isEditProfileOpen}
           onClose={() => setIsEditProfileOpen(false)}
           user={sellerUser}
-          store={store}
+          store={activeStore}
         />
       )}
     </div>
+  );
+};
+
+export default function SellerLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="size-6 border-2 border-orange-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <SellerLayoutContent>{children}</SellerLayoutContent>
+    </Suspense>
   );
 }

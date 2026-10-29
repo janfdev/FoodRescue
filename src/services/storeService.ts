@@ -180,6 +180,7 @@ class StoreService {
     this.state.currentUser = user;
     if (typeof window !== "undefined") {
       localStorage.setItem("foodrescue_auth_user", JSON.stringify(user));
+      document.cookie = `rerasa_user_role=${user.role}; path=/; max-age=2592000; SameSite=Lax`;
     }
     this.persist();
   }
@@ -202,6 +203,7 @@ class StoreService {
       localStorage.setItem("foodrescue_auth_user", JSON.stringify(user));
       localStorage.setItem("foodrescue_guest_name", user.name);
       localStorage.setItem("foodrescue_guest_phone", user.phone);
+      document.cookie = `rerasa_user_role=${user.role}; path=/; max-age=2592000; SameSite=Lax`;
     }
     this.persist();
     return user;
@@ -211,6 +213,7 @@ class StoreService {
     this.state.currentUser = null;
     if (typeof window !== "undefined") {
       localStorage.removeItem("foodrescue_auth_user");
+      document.cookie = `rerasa_user_role=; path=/; max-age=0; SameSite=Lax`;
     }
     this.persist();
   }
@@ -408,6 +411,22 @@ class StoreService {
     this.state.surpriseBags.unshift(newBag);
     this.persist();
     return newBag;
+  }
+
+  public updateSurpriseBag(bagId: string, partialData: Partial<SurpriseBag>): SurpriseBag {
+    const bagIndex = this.state.surpriseBags.findIndex((b) => b.id === bagId);
+    if (bagIndex === -1) {
+      throw new Error(`Surprise bag dengan ID '${bagId}' tidak ditemukan.`);
+    }
+
+    const updatedBag = {
+      ...this.state.surpriseBags[bagIndex],
+      ...partialData,
+    };
+
+    this.state.surpriseBags[bagIndex] = updatedBag;
+    this.persist();
+    return updatedBag;
   }
 
   // =====================

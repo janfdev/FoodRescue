@@ -14,7 +14,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Plus, Upload, Image as ImageIcon, Zap } from "lucide-react";
+import { Clock, Plus, Upload, Image as ImageIcon, Zap, Pencil } from "lucide-react";
+import Link from "next/link";
 
 export default function SellerBagsPage() {
   const [surpriseBags, setSurpriseBags] = useState<SurpriseBag[]>([]);
@@ -298,22 +299,31 @@ export default function SellerBagsPage() {
                     </Button>
                   </td>
                   <td className="p-3.5">
-                    <Button
-                      size="sm"
-                      variant={bag.isActive ? "default" : "secondary"}
-                      onClick={() =>
-                        handleQuotaChange(
-                          bag.id,
-                          bag.quotaRemaining,
-                          !bag.isActive
-                        )
-                      }
-                      className={`text-xs font-bold ${
-                        bag.isActive ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""
-                      }`}
-                    >
-                      {bag.isActive ? "Aktif Dijual" : "Nonaktif"}
-                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <Button
+                        size="sm"
+                        variant={bag.isActive ? "default" : "secondary"}
+                        onClick={() =>
+                          handleQuotaChange(
+                            bag.id,
+                            bag.quotaRemaining,
+                            !bag.isActive
+                          )
+                        }
+                        className={`text-xs font-bold ${
+                          bag.isActive ? "bg-emerald-600 hover:bg-emerald-700 text-white" : ""
+                        }`}
+                      >
+                        {bag.isActive ? "Aktif Dijual" : "Nonaktif"}
+                      </Button>
+                      <Link
+                        href={`/seller/bags/${bag.id}/edit`}
+                        className="inline-flex items-center gap-1 text-xs font-bold h-8 px-2.5 rounded-md border border-border bg-background hover:bg-muted text-foreground transition-colors"
+                      >
+                        <Pencil className="size-3 text-orange-600" />
+                        <span>Edit</span>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -115,10 +115,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     },
     {
       href: "/admin/audit-logs",
-      label: "Audit Log Aktivitas",
+      label: "Audit Trail System",
       icon: History,
       badge: null,
-      exact: false,
+      exact: true,
+    },
+    {
+      href: "/admin/profile",
+      label: "Profil & Pengaturan",
+      icon: Settings,
+      badge: null,
+      exact: true,
     },
   ];
 
@@ -211,14 +218,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Separator />
 
           <div className="flex items-center justify-between text-xs pt-1">
-            <button
-              type="button"
-              onClick={() => setIsEditProfileOpen(true)}
+            <Link
+              href="/admin/profile"
               className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
             >
               <Settings className="size-3.5 text-purple-600" />
               <span>Profil Admin</span>
-            </button>
+            </Link>
             <button
               type="button"
               onClick={handleLogout}
@@ -341,14 +347,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Users className="size-3.5 text-purple-600" />
                   <span>Manajemen User</span>
                 </Link>
-                <button
-                  type="button"
-                  onClick={() => setIsEditProfileOpen(true)}
+                <Link
+                  href="/admin/profile"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
                 >
                   <Settings className="size-3.5 text-purple-600" />
                   <span>Profil & Pengaturan</span>
-                </button>
+                </Link>
                 <Link
                   href="/"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
