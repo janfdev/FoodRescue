@@ -14,7 +14,7 @@ export type OrderStatus =
 
 export type EscrowStatus = "HELD" | "RELEASED_TO_SELLER" | "REFUNDED_TO_BUYER";
 
-export type RescueBoxPackageId = "box-50" | "box-100" | "box-200";
+export type RescueBoxPackageId = "box-50" | "box-100" | "box-200" | string;
 
 export type BoxOrderStatus = "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED";
 
@@ -109,6 +109,8 @@ export interface Order {
   pickupCode: string; // Order Code e.g. "RB-8492"
   pickupPin?: string; // 4-digit PIN e.g. "4829"
   pickupQrData: string;
+  storeAddress?: string;
+  createdAt?: string;
   completedAt?: string;
   isChatLocked: boolean; // locked 24h after completion
 }

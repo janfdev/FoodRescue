@@ -89,17 +89,13 @@ export default function AdminTransaksiPage() {
                     </Badge>
                   </td>
                   <td className="p-3.5 text-right">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      asChild
-                      className="text-xs font-semibold gap-1.5 text-purple-600 hover:text-purple-700"
+                    <Link
+                      href={`/admin/transaksi/${ord.id}/chat`}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-md text-purple-600 hover:text-purple-700 hover:bg-muted transition-colors cursor-pointer"
                     >
-                      <Link href={`/admin/transaksi/${ord.id}/chat`}>
-                        <MessageSquare className="size-3.5" />
-                        <span>Log Chat</span>
-                      </Link>
-                    </Button>
+                      <MessageSquare className="size-3.5" />
+                      <span>Log Chat</span>
+                    </Link>
                   </td>
                 </tr>
               ))}

@@ -37,28 +37,24 @@ export function DropdownSelect({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={disabled}
-          className={cn(
-            "h-8 px-2.5 justify-between font-semibold text-xs border-border bg-background hover:bg-muted/30 focus-visible:ring-1 focus-visible:ring-purple-600 cursor-pointer",
-            buttonClassName
+      <PopoverTrigger
+        disabled={disabled}
+        className={cn(
+          "inline-flex shrink-0 items-center justify-between rounded-lg border border-border bg-background px-2.5 h-8 font-semibold text-xs text-foreground hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-purple-600 cursor-pointer disabled:pointer-events-none disabled:opacity-50",
+          buttonClassName
+        )}
+      >
+        <span className="truncate flex items-center gap-1.5 text-foreground">
+          {selectedOption ? (
+            <>
+              {selectedOption.icon}
+              <span>{selectedOption.label}</span>
+            </>
+          ) : (
+            <span className="text-muted-foreground">{placeholder}</span>
           )}
-        >
-          <span className="truncate flex items-center gap-1.5 text-foreground">
-            {selectedOption ? (
-              <>
-                {selectedOption.icon}
-                <span>{selectedOption.label}</span>
-              </>
-            ) : (
-              <span className="text-muted-foreground">{placeholder}</span>
-            )}
-          </span>
-          <ChevronDown className="size-3.5 opacity-60 ml-2 shrink-0" />
-        </Button>
+        </span>
+        <ChevronDown className="size-3.5 opacity-60 ml-2 shrink-0" />
       </PopoverTrigger>
       <PopoverContent
         align="start"
