@@ -9,7 +9,8 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { resolveUserAvatar } from "@/lib/avatar";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, UserCheck, ShieldAlert, Store as StoreIcon } from "lucide-react";
+import { DropdownSelect } from "@/components/ui/dropdown-select";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
@@ -197,17 +198,33 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="p-3.5">
-                        <select
+                        <DropdownSelect
                           value={u.role}
-                          onChange={(e) =>
-                            handleChangeUserRole(u.id, e.target.value as "admin" | "seller" | "buyer")
+                          onValueChange={(val) =>
+                            handleChangeUserRole(u.id, val as "admin" | "seller" | "buyer")
                           }
-                          className="text-[11px] font-bold rounded-lg border border-border bg-background px-2.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-purple-600 cursor-pointer"
-                        >
-                          <option value="admin">Admin</option>
-                          <option value="seller">Mitra Toko</option>
-                          <option value="buyer">Pelanggan</option>
-                        </select>
+                          options={[
+                            {
+                              value: "admin",
+                              label: "Admin",
+                              description: "Akses Super Admin",
+                              icon: <ShieldAlert className="size-3 text-red-500 shrink-0" />,
+                            },
+                            {
+                              value: "seller",
+                              label: "Mitra Toko",
+                              description: "Portal Penjual",
+                              icon: <StoreIcon className="size-3 text-emerald-600 shrink-0" />,
+                            },
+                            {
+                              value: "buyer",
+                              label: "Pelanggan",
+                              description: "Aplikasi Pembeli",
+                              icon: <UserCheck className="size-3 text-purple-600 shrink-0" />,
+                            },
+                          ]}
+                          buttonClassName="h-7 text-[11px] font-bold min-w-[125px]"
+                        />
                       </td>
                       <td className="p-3.5 font-mono text-muted-foreground">
                         {u.phone || "-"}

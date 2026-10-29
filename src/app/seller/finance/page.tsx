@@ -44,7 +44,32 @@ export default function SellerFinancePage() {
     }
   };
 
-  if (!store) return null;
+  if (!store) {
+    return (
+      <div className="space-y-6 w-full">
+        <div>
+          <h2 className="text-xl font-black text-foreground tracking-tight">
+            Saldo Dompet & Penarikan Dana
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Kelola saldo pendapatan dari pesanan fisik yang telah divalidasi dan ajukan pencairan ke rekening bank
+          </p>
+        </div>
+
+        <Card className="border-border p-8 text-center space-y-3 bg-muted/20">
+          <div className="size-12 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center mx-auto">
+            <CheckCircle2 className="size-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-foreground">Data Keuangan Gerai Belum Tersedia</h3>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              Akun Anda belum memiliki gerai aktif yang terdaftar. Saldo dompet dan riwayat penarikan dana akan muncul setelah toko Anda diverifikasi dan menyelesaikan pesanan.
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full">

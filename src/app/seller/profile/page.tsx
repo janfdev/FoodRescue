@@ -156,7 +156,32 @@ export default function SellerProfilePage() {
     }
   };
 
-  if (!store || !user) return null;
+  if (!user) {
+    return (
+      <div className="space-y-6 w-full">
+        <div>
+          <h2 className="text-xl font-black text-foreground tracking-tight">
+            Profil & Pengaturan Mitra Toko
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Kelola identitas pemilik, informasi gerai fisik, dan preferensi operasional
+          </p>
+        </div>
+
+        <Card className="border-border p-8 text-center space-y-3 bg-muted/20">
+          <div className="size-12 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+            <Building2 className="size-6" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-foreground">Sesi Login Tidak Ditemukan</h3>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              Silakan login sebagai akun Mitra Toko untuk melihat dan mengelola profil operasional gerai Anda.
+            </p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12 font-sans">

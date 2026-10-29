@@ -668,6 +668,37 @@ class StoreService {
   // =====================
   // B2B RESCUE BOX STORE
   // =====================
+  public addBoxPackage(pkg: Omit<RescueBoxPackage, "id"> & { id?: string }): RescueBoxPackage {
+    const newPkg: RescueBoxPackage = {
+      id: pkg.id || `box-${pkg.quantityPcs}-${Date.now().toString().slice(-4)}`,
+      name: pkg.name,
+      quantityPcs: pkg.quantityPcs,
+      price: pkg.price,
+      description: pkg.description,
+      dimensions: pkg.dimensions,
+    };
+    this.state.boxPackages.push(newPkg);
+    this.persist();
+    return newPkg;
+  }
+
+  public updateBoxPackage(id: string, updates: Partial<RescueBoxPackage>): void {
+    const idx = this.state.boxPackages.findIndex((p) => p.id === id);
+    if (idx !== -1) {
+      this.state.boxPackages[idx] = {
+        ...this.state.boxPackages[idx],
+        ...updates,
+      };
+      this.state.boxPackages = [...this.state.boxPackages];
+      this.persist();
+    }
+  }
+
+  public deleteBoxPackage(id: string): void {
+    this.state.boxPackages = this.state.boxPackages.filter((p) => p.id !== id);
+    this.persist();
+  }
+
   public orderRescueBoxes(storeId: string, packageId: RescueBoxPackage["id"], address: string): RescueBoxOrder {
     const pkg = this.state.boxPackages.find((p) => p.id === packageId);
     if (!pkg) throw new Error("Paket kemasan tidak ditemukan");

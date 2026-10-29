@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { TableToolbar } from "@/components/common/TableToolbar";
 import showToast from "@/lib/toast";
 import {
@@ -21,6 +22,9 @@ import {
   Search,
   Check,
   AlertCircle,
+  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 export default function AdminBoxesPage() {
@@ -29,6 +33,15 @@ export default function AdminBoxesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [editingResi, setEditingResi] = useState<{ id: string; trackingNumber: string } | null>(null);
+
+  // Modal Package Management
+  const [isPkgModalOpen, setIsPkgModalOpen] = useState(false);
+  const [editingPkg, setEditingPkg] = useState<RescueBoxPackage | null>(null);
+  const [pkgName, setPkgName] = useState("");
+  const [pkgQuantity, setPkgQuantity] = useState(100);
+  const [pkgPrice, setPkgPrice] = useState(140000);
+  const [pkgDimensions, setPkgDimensions] = useState("20 x 20 x 8 cm");
+  const [pkgDescription, setPkgDescription] = useState("");
 
   const syncData = () => {
     const state = storeService.getState();
@@ -41,6 +54,65 @@ export default function AdminBoxesPage() {
     const unsub = storeService.subscribe(syncData);
     return unsub;
   }, []);
+
+  const openAddPkgModal = () => {
+    setEditingPkg(null);
+    setPkgName("");
+    setPkgQuantity(100);
+    setPkgPrice(140000);
+    setPkgDimensions("20 x 20 x 8 cm");
+    setPkgDescription("Bahan kraft anti-minyak ramah lingkungan food grade");
+    setIsPkgModalOpen(true);
+  };
+
+  const openEditPkgModal = (pkg: RescueBoxPackage) => {
+    setEditingPkg(pkg);
+    setPkgName(pkg.name);
+    setPkgQuantity(pkg.quantityPcs);
+    setPkgPrice(pkg.price);
+    setPkgDimensions(pkg.dimensions);
+    setPkgDescription(pkg.description);
+    setIsPkgModalOpen(true);
+  };
+
+  const handleSavePackage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pkgName.trim() || pkgQuantity <= 0 || pkgPrice <= 0) {
+      showToast.error("Nama, kuantitas, dan harga wajib diisi dengan benar.");
+      return;
+    }
+
+    if (editingPkg) {
+      storeService.updateBoxPackage(editingPkg.id, {
+        name: pkgName.trim(),
+        quantityPcs: pkgQuantity,
+        price: pkgPrice,
+        dimensions: pkgDimensions.trim(),
+        description: pkgDescription.trim(),
+      });
+      showToast.success("Paket kemasan berhasil diperbarui!");
+    } else {
+      storeService.addBoxPackage({
+        name: pkgName.trim(),
+        quantityPcs: pkgQuantity,
+        price: pkgPrice,
+        dimensions: pkgDimensions.trim(),
+        description: pkgDescription.trim(),
+      });
+      showToast.success("Paket kemasan baru berhasil ditambahkan!");
+    }
+
+    setIsPkgModalOpen(false);
+    syncData();
+  };
+
+  const handleDeletePackage = (pkgId: string) => {
+    if (confirm("Apakah Anda yakin ingin menghapus paket kemasan ini?")) {
+      storeService.deleteBoxPackage(pkgId);
+      showToast.success("Paket kemasan berhasil dihapus.");
+      syncData();
+    }
+  };
 
   const handleUpdateStatus = (orderId: string, newStatus: RescueBoxOrder["status"]) => {
     storeService.updateRescueBoxOrderStatus(orderId, newStatus);
@@ -119,27 +191,96 @@ export default function AdminBoxesPage() {
 
         <Card className="border-border shadow-xs p-4 space-y-1">
           <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-            Dalam Pengiriman Ekspedisi
+            Perlu Pengiriman (Pending)
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-blue-600 tabular-nums">
-              {shippedCount}
+            <span className="text-2xl font-black text-amber-600 tabular-nums">
+              {pendingCount}
             </span>
-            <span className="text-xs text-muted-foreground font-semibold">Pesanan Aktif</span>
+            <span className="text-xs text-muted-foreground font-semibold">Menunggu Resi</span>
           </div>
         </Card>
 
         <Card className="border-border shadow-xs p-4 space-y-1">
           <span className="text-[10px] uppercase font-bold text-muted-foreground block">
-            Terkirim & Diterima Mitra
+            Selesai Terkirim
           </span>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-black text-foreground tabular-nums">
+            <span className="text-2xl font-black text-blue-600 tabular-nums">
               {deliveredCount}
             </span>
-            <span className="text-xs text-muted-foreground font-semibold">Selesai</span>
+            <span className="text-xs text-muted-foreground font-semibold">Tiba di Mitra</span>
           </div>
         </Card>
+      </div>
+
+      {/* Bagian Manajemen Paket Box B2B (Create/Manage Harga & Paket) */}
+      <div className="space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
+              <Package className="size-4 text-emerald-600" />
+              <span>Katalog Paket Suplai Kemasan Resmi (B2B)</span>
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Atur kuantitas (misal 50, 100, 200, 500 pcs) dan harga per paket kemasan yang dapat dibeli oleh mitra penjual.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={openAddPkgModal}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs h-8 px-3 rounded-lg shrink-0 cursor-pointer shadow-xs"
+          >
+            <Plus className="size-3.5 mr-1.5" />
+            <span>Tambah Paket Box</span>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {boxPackages.map((pkg) => (
+            <Card key={pkg.id} className="border-border shadow-xs p-4 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Badge variant="outline" className="font-mono text-[10px] border-emerald-500/40 text-emerald-700">
+                    {pkg.quantityPcs} Pcs
+                  </Badge>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => openEditPkgModal(pkg)}
+                      className="p-1 text-muted-foreground hover:text-purple-600 cursor-pointer"
+                      title="Edit paket"
+                    >
+                      <Pencil className="size-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePackage(pkg.id)}
+                      className="p-1 text-muted-foreground hover:text-red-600 cursor-pointer"
+                      title="Hapus paket"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-black text-foreground">{pkg.name}</h4>
+                  <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">
+                    {pkg.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-border/60 mt-3 flex items-baseline justify-between">
+                <span className="text-[10px] text-muted-foreground font-mono">{pkg.dimensions}</span>
+                <span className="text-sm font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+                  Rp {pkg.price.toLocaleString("id-ID")}
+                </span>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* Toolbar & Filter */}
@@ -295,6 +436,109 @@ export default function AdminBoxesPage() {
           </div>
         </Card>
       </div>
+
+      {/* Modal Tambah / Edit Paket Box */}
+      <Dialog open={isPkgModalOpen} onOpenChange={setIsPkgModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base font-black">
+              {editingPkg ? "Edit Paket Rescue Box" : "Tambah Paket Rescue Box"}
+            </DialogTitle>
+            <DialogDescription className="text-xs">
+              Tentukan kuantitas box dan harga paket grosir B2B untuk mitra toko.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSavePackage} className="space-y-3.5 py-2">
+            <div>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                Nama Paket
+              </label>
+              <Input
+                value={pkgName}
+                onChange={(e) => setPkgName(e.target.value)}
+                placeholder="Contoh: Paket Jumbo 500 Pcs"
+                className="h-8 text-xs font-semibold"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                  Kuantitas (Pcs)
+                </label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={pkgQuantity}
+                  onChange={(e) => setPkgQuantity(parseInt(e.target.value, 10) || 0)}
+                  className="h-8 text-xs font-mono font-bold"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                  Harga B2B (Rp)
+                </label>
+                <Input
+                  type="number"
+                  min={1000}
+                  step={1000}
+                  value={pkgPrice}
+                  onChange={(e) => setPkgPrice(parseInt(e.target.value, 10) || 0)}
+                  className="h-8 text-xs font-mono font-bold"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                Dimensi Ukuran
+              </label>
+              <Input
+                value={pkgDimensions}
+                onChange={(e) => setPkgDimensions(e.target.value)}
+                placeholder="Contoh: 20 x 20 x 8 cm"
+                className="h-8 text-xs font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                Deskripsi & Spesifikasi Bahan
+              </label>
+              <Input
+                value={pkgDescription}
+                onChange={(e) => setPkgDescription(e.target.value)}
+                placeholder="Contoh: Bahan kraft anti-minyak ramah lingkungan food grade"
+                className="h-8 text-xs"
+              />
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsPkgModalOpen(false)}
+                className="h-8 text-xs"
+              >
+                Batal
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+              >
+                {editingPkg ? "Simpan Perubahan" : "Terbitkan Paket"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

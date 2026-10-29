@@ -3,21 +3,26 @@ import { db } from "@/db";
 import { orders, escrowAccounts } from "@/db/schema";
 import { storeService } from "@/services/storeService";
 import { recordAuditLog } from "@/lib/audit";
-import { desc } from "drizzle-orm";
+import { desc, and, eq, gte, lte, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const buyerId = searchParams.get("buyerId");
     const storeId = searchParams.get("storeId");
+    const role = searchParams.get("role"); // role=admin bypasses storeId requirement
+    const status = searchParams.get("status");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    const aggregate = searchParams.get("aggregate"); // "weekly" | "analytics"
 
     // Security Gate (OWASP BOLA Protection):
-    // Melarang pemanggilan tanpa filter scope identitas untuk mencegah dump/kebocoran seluruh data order
-    if (!buyerId && !storeId) {
+    // Melarang pemanggilan tanpa filter scope identitas untuk mencegah dump data, kecuali role=admin
+    if (!buyerId && !storeId && role !== "admin") {
       return NextResponse.json(
         {
           success: false,
-          error: "Akses ditolak: Parameter 'buyerId' atau 'storeId' wajib disertakan untuk mengakses daftar pesanan.",
+          error: "Akses ditolak: Parameter 'buyerId', 'storeId', atau 'role=admin' wajib disertakan.",
         },
         { status: 403 }
       );
@@ -26,29 +31,89 @@ export async function GET(req: NextRequest) {
     // Coba baca dari DB jika terkoneksi
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
-        const rows = await db.select().from(orders).orderBy(desc(orders.createdAt));
-        let filtered = rows;
-        if (buyerId) {
-          filtered = filtered.filter((o) => o.buyerId === buyerId);
+        const conditions = [];
+        if (buyerId) conditions.push(eq(orders.buyerId, buyerId));
+        if (storeId) conditions.push(eq(orders.storeId, storeId));
+        if (status) conditions.push(eq(orders.status, status as any));
+        if (startDate) conditions.push(gte(orders.createdAt, new Date(startDate)));
+        if (endDate) conditions.push(lte(orders.createdAt, new Date(endDate)));
+
+        const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+        // Mode Agregasi Analitik Backend
+        if (aggregate === "analytics") {
+          const rows = await db
+            .select()
+            .from(orders)
+            .where(whereClause)
+            .orderBy(desc(orders.createdAt));
+
+          const totalGmv = rows.reduce((acc, curr) => acc + (curr.totalPrice || 0), 0);
+          const totalPortions = rows.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
+          const totalOrders = rows.length;
+
+          // Hitung distribusi 7 hari terakhir
+          const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+          const now = new Date();
+          const weeklyTrend = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(now);
+            d.setDate(d.getDate() - i);
+            const dayName = days[d.getDay()];
+            const dateStr = d.toISOString().split("T")[0];
+
+            const dayOrders = rows.filter((o) => {
+              if (!o.createdAt) return false;
+              const oDate = new Date(o.createdAt).toISOString().split("T")[0];
+              return oDate === dateStr && (o.status === "COMPLETED" || o.status === "PAID");
+            });
+
+            const dayGmv = dayOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+            const dayPortions = dayOrders.reduce((sum, o) => sum + (o.quantity || 0), 0);
+
+            weeklyTrend.push({ day: dayName, date: dateStr, gmv: dayGmv, portions: dayPortions });
+          }
+
+          return NextResponse.json({
+            success: true,
+            source: "database",
+            analytics: {
+              totalOrders,
+              totalGmv,
+              totalPortions,
+              weeklyTrend,
+            },
+          });
         }
-        if (storeId) {
-          filtered = filtered.filter((o) => o.storeId === storeId);
-        }
+
+        const rows = await db
+          .select()
+          .from(orders)
+          .where(whereClause)
+          .orderBy(desc(orders.createdAt));
 
         return NextResponse.json({
           success: true,
           source: "database",
-          data: filtered,
+          total: rows.length,
+          data: rows,
         });
       } catch (dbErr) {
         console.warn("DB offline saat ambil orders:", dbErr);
       }
     }
 
+    // Fallback storeService jika DB offline
+    let memoryOrders = storeService.getState().orders || [];
+    if (buyerId) memoryOrders = memoryOrders.filter((o) => o.buyerId === buyerId);
+    if (storeId) memoryOrders = memoryOrders.filter((o) => o.storeId === storeId);
+    if (status) memoryOrders = memoryOrders.filter((o) => o.status === status);
+
     return NextResponse.json({
       success: true,
-      source: "empty",
-      data: [],
+      source: "storeService",
+      total: memoryOrders.length,
+      data: memoryOrders,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server";
