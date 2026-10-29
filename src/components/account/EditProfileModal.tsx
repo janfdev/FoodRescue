@@ -33,6 +33,17 @@ interface EditProfileModalProps {
   store?: Store | null;
 }
 
+const RESTAURANT_CHAIN_LOGOS = [
+  { name: "Burger King", url: "/images/restaurant-chains/burger-king/burger-king-preview.png" },
+  { name: "KFC", url: "/images/restaurant-chains/kfc/kfc-preview.png" },
+  { name: "McDonald's", url: "/images/restaurant-chains/mcdonalds/mcdonalds-preview.png" },
+  { name: "Pizza Hut", url: "/images/restaurant-chains/pizza-hut/pizza-hut-preview.png" },
+  { name: "Wendy's", url: "/images/restaurant-chains/wendys/wendys-preview.png" },
+  { name: "Yoshinoya", url: "/images/restaurant-chains/yoshinoya/yoshinoya-preview.png" },
+  { name: "Domino's", url: "/images/restaurant-chains/dominos/dominos-preview.png" },
+  { name: "Popeyes", url: "/images/restaurant-chains/popeyes/popeyes-preview.png" },
+];
+
 export function EditProfileModal({
   isOpen,
   onClose,
@@ -210,8 +221,39 @@ export function EditProfileModal({
                 {isSeller ? "Logo Gerai & Avatar" : "Foto Profil"}
               </span>
               <span className="text-[10px] text-muted-foreground block leading-tight mt-0.5">
-                Format PNG atau JPG. Tersimpan aman di cloud storage Dahono S3.
+                Unggah gambar atau pilih logo restoran ZonaLogo di bawah ini.
               </span>
+            </div>
+          </div>
+
+          {/* Quick Preset ZonaLogo Restaurant Chains */}
+          <div className="space-y-1.5 p-2.5 rounded-2xl bg-muted/30 border border-border/50">
+            <span className="text-[10px] font-bold text-muted-foreground block uppercase tracking-wider">
+              Pilihan Cepat Logo Restoran (ZonaLogo)
+            </span>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              {RESTAURANT_CHAIN_LOGOS.map((brand) => {
+                const isSelected = avatarUrl === brand.url;
+                return (
+                  <button
+                    key={brand.name}
+                    type="button"
+                    onClick={() => setAvatarUrl(brand.url)}
+                    title={brand.name}
+                    className={`relative size-10 shrink-0 rounded-xl p-1 border transition-all ${
+                      isSelected
+                        ? "border-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 ring-2 ring-emerald-600/30 scale-105"
+                        : "border-border/70 hover:border-emerald-600/50 bg-background"
+                    }`}
+                  >
+                    <img
+                      src={brand.url}
+                      alt={brand.name}
+                      className="size-full object-contain"
+                    />
+                  </button>
+                );
+              })}
             </div>
           </div>
 

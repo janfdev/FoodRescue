@@ -73,13 +73,8 @@ export async function uploadToS3(
     })
   );
 
-  const endpoint =
-    process.env.DAHONO_S3_ENDPOINT ||
-    process.env.S3_ENDPOINT_URL ||
-    process.env.ENDPOINT_URL ||
-    "https://s3.dahono.com";
-
-  const publicUrl = `${endpoint.replace(/\/$/, "")}/${bucket}/${key}`;
+  // Gunakan endpoint proxy stream lokal agar tidak terkena 403 AccessDenied Dahono S3
+  const publicUrl = `/api/media?key=${encodeURIComponent(key)}`;
 
   return {
     url: publicUrl,
