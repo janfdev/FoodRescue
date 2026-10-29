@@ -8,13 +8,34 @@ import { eq } from "drizzle-orm";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { orderId, pin } = body;
+    const { orderId, pin, sellerStoreId } = body;
     const target = (orderId || pin || "").trim();
 
     if (!target) {
       return NextResponse.json(
         { success: false, error: "Field orderId wajib disertakan" },
         { status: 400 }
+      );
+    }
+
+    // Security Gate: Verifikasi bahwa seller berhak atas order tersebut jika storeId dikirim
+    const currentOrder = storeService
+      .getState()
+      .orders.find((o) => o.id === target || o.pickupCode === target);
+    if (!currentOrder) {
+      return NextResponse.json(
+        { success: false, error: "Pesanan tidak ditemukan" },
+        { status: 404 }
+      );
+    }
+
+    if (sellerStoreId && currentOrder.storeId !== sellerStoreId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Akses ditolak: Anda tidak memiliki wewenang memverifikasi pesanan dari gerai lain.",
+        },
+        { status: 403 }
       );
     }
 

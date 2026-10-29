@@ -11,6 +11,18 @@ export async function GET(req: NextRequest) {
     const buyerId = searchParams.get("buyerId");
     const storeId = searchParams.get("storeId");
 
+    // Security Gate (OWASP BOLA Protection):
+    // Melarang pemanggilan tanpa filter scope identitas untuk mencegah dump/kebocoran seluruh data order
+    if (!buyerId && !storeId) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Akses ditolak: Parameter 'buyerId' atau 'storeId' wajib disertakan untuk mengakses daftar pesanan.",
+        },
+        { status: 403 }
+      );
+    }
+
     // Coba baca dari DB jika terkoneksi
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {

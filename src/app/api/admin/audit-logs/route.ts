@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAuditLogs, recordAuditLog, AuditLogEntry } from "@/lib/audit";
+import { getClientIp } from "@/lib/ip";
 
 export async function GET(request: Request) {
   try {
@@ -45,15 +46,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const clientIp = getClientIp(request);
+
     const log = await recordAuditLog({
       actorId,
       actorName,
       actorRole: actorRole || "system",
-      action: action as AuditLogEntry["action"],
-      entityType: entityType as AuditLogEntry["entityType"],
+      action,
+      entityType,
       entityId,
-      details,
-      ipAddress,
+      details: details || "",
+      ipAddress: clientIp,
     });
 
     return NextResponse.json({ success: true, data: log }, { status: 201 });

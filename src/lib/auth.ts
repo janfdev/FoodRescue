@@ -17,9 +17,19 @@ export const auth = betterAuth({
     process.env.BETTER_AUTH_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000"),
-  secret:
-    process.env.BETTER_AUTH_SECRET ||
-    "foodrescue-super-secure-secret-key-32-chars-long-2026",
+  secret: (() => {
+    const s = process.env.BETTER_AUTH_SECRET;
+    if (s && s.length >= 32) return s;
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.VERCEL_ENV === "production"
+    ) {
+      throw new Error(
+        "CRITICAL SECURITY: BETTER_AUTH_SECRET harus disetel dan minimal 32 karakter di production!"
+      );
+    }
+    return "dev-only-secret-key-min-32-chars-long-local-2026";
+  })(),
   emailAndPassword: {
     enabled: true,
   },
