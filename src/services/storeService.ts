@@ -473,7 +473,7 @@ class StoreService {
     const sellerEarning = subtotalPrice - platformFee;
 
     const buyerName = guestDetails?.name || this.state.currentUser?.name || "Tamu";
-    const buyerPhone = guestDetails?.phone || this.state.currentUser?.phone || "081234567890";
+    const buyerPhone = guestDetails?.phone || this.state.currentUser?.phone || "-";
 
     const newOrder: Order = {
       id: orderId,

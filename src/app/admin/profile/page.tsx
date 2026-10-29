@@ -5,7 +5,6 @@ import showToast from "@/lib/toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { User } from "@/types/domain";
-import { SEED_USERS } from "@/services/seedData";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,19 +38,7 @@ export default function AdminProfilePage() {
       const currentState = storeService.getState();
       setState(currentState);
 
-      const currentUser =
-        currentState.currentUser?.role === "admin"
-          ? currentState.currentUser
-          : SEED_USERS.find((u) => u.role === "admin") ||
-            currentState.currentUser || {
-              id: "user-admin-1",
-              name: "Admin Rerasa (Head of Ops Cirebon)",
-              email: "admin@rerasa.com",
-              role: "admin" as const,
-              phone: "081234567890",
-              avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AdminRerasa",
-              status: "ACTIVE" as const,
-            };
+      const currentUser = currentState.currentUser || null;
       setUser(currentUser);
 
       if (currentUser) {

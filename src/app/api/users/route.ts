@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { SEED_USERS } from "@/services/seedData";
 import { desc, eq } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {

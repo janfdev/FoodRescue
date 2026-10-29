@@ -16,7 +16,8 @@ export default function SellerBoxesPage() {
 
   const syncData = () => {
     const state = storeService.getState();
-    const current = state.stores[0];
+    const activeStoreId = state.currentUser?.storeId;
+    const current = activeStoreId ? state.stores.find((s) => s.id === activeStoreId) || null : null;
     setStore(current);
     setBoxPackages(state.boxPackages);
     setBoxOrders(state.boxOrders);

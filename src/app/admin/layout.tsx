@@ -24,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { storeService } from "@/services/storeService";
-import { SEED_USERS } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 
@@ -47,17 +46,16 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const adminUser =
-    state.currentUser && state.currentUser.role === "admin"
-      ? state.currentUser
-      : SEED_USERS.find((u) => u.role === "admin") || state.currentUser || SEED_USERS[0];
+  const adminUser = state.currentUser;
 
-  const initials = adminUser.name
-    .split(" ")
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+  const initials = adminUser?.name
+    ? adminUser.name
+        .split(" ")
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "AD";
 
   const handleLogout = () => {
     storeService.logoutUser();
@@ -307,14 +305,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <PopoverTrigger className="w-full flex items-center justify-between p-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors border border-border/60 text-left cursor-pointer">
               <div className="flex items-center gap-2.5 min-w-0">
                 <Avatar className="size-8 rounded-full border border-border">
-                  <AvatarImage src={resolveUserAvatar(adminUser.avatarUrl, adminUser.name)} alt={adminUser.name} />
-                  <AvatarFallback className="bg-purple-700 text-white font-bold text-xs">
+                  <AvatarImage src={resolveUserAvatar(adminUser?.avatarUrl, adminUser?.name || "Admin")} alt={adminUser?.name || "Admin"} />
+                  <AvatarFallback className="bg-red-600 text-white font-bold text-xs">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <span className="text-xs font-bold text-foreground block truncate">
-                    {adminUser.name}
+                    {adminUser?.name || "Super Admin"}
                   </span>
                   <span className="text-[10px] text-muted-foreground block truncate font-mono">
                     Super Admin
@@ -328,14 +326,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <div className="space-y-1 pb-2 border-b border-border">
                 <div className="flex items-center justify-between">
                   <span className="font-extrabold text-foreground text-xs block truncate">
-                    {adminUser.name}
+                    {adminUser?.name || "Super Admin"}
                   </span>
-                  <Badge variant="default" className="text-[9px] bg-purple-700 text-white font-mono">
+                  <Badge variant="secondary" className="text-[9px] bg-red-600 text-white font-mono">
                     Admin
                   </Badge>
                 </div>
                 <span className="text-[10px] text-muted-foreground font-mono block truncate">
-                  {adminUser.email}
+                  {adminUser?.email || "admin@rerasa.com"}
                 </span>
               </div>
 
@@ -384,7 +382,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Edit Profile Modal for Admin */}
-      {isEditProfileOpen && (
+      {isEditProfileOpen && adminUser && (
         <EditProfileModal
           isOpen={isEditProfileOpen}
           onClose={() => setIsEditProfileOpen(false)}

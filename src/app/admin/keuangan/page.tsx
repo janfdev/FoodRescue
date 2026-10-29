@@ -65,7 +65,7 @@ export default function AdminKeuanganPage() {
   const totalPendingPayouts = withdrawals
     .filter((w) => w.status === "PENDING")
     .reduce((acc, w) => acc + w.amount, 0);
-  const totalVaultBalance = totalEscrowHold + totalPendingPayouts + 15000000;
+  const totalVaultBalance = totalEscrowHold + totalPendingPayouts;
 
   // Filtered withdrawals
   const filteredWithdrawals = useMemo(() => {

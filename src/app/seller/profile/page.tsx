@@ -5,7 +5,6 @@ import showToast from "@/lib/toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { Store, User } from "@/types/domain";
-import { SEED_USERS } from "@/services/seedData";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,23 +58,12 @@ export default function SellerProfilePage() {
     const syncState = () => {
       const currentState = storeService.getState();
       setState(currentState);
-      const activeStore = currentState.stores.find((s) => s.id === currentState.currentUser?.storeId) || currentState.stores[0];
-      setStore(activeStore || null);
+      const activeStore = currentState.currentUser?.storeId
+        ? currentState.stores.find((s) => s.id === currentState.currentUser?.storeId) || null
+        : null;
+      setStore(activeStore);
 
-      const currentUser =
-        currentState.currentUser?.role === "seller"
-          ? currentState.currentUser
-          : SEED_USERS.find((u) => u.storeId === activeStore?.id) ||
-            SEED_USERS.find((u) => u.role === "seller") ||
-            currentState.currentUser || {
-              id: "user-seller-ruby",
-              name: "Ruby Wijaya",
-              email: "ruby@rerasa.com",
-              role: "seller" as const,
-              phone: "081987654321",
-              avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RubyBakery",
-              status: "ACTIVE" as const,
-            };
+      const currentUser = currentState.currentUser || null;
       setUser(currentUser);
 
       if (currentUser) {

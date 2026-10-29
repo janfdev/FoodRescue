@@ -19,6 +19,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { sendLocalNotification } from "@/lib/notification";
+import showToast from "@/lib/toast";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -39,6 +40,7 @@ function CheckoutContent() {
   const [guestPhone, setGuestPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const currentUser = storeService.getState().currentUser;
 
   useEffect(() => {
     if (qtyParam && !isNaN(Number(qtyParam))) {
@@ -85,8 +87,19 @@ function CheckoutContent() {
   const totalSavings = totalNormal - subtotal;
 
   const handleConfirmOrder = () => {
-    const finalName = guestName.trim() || "Warga Cirebon";
-    const finalPhone = guestPhone.trim() || "081234567890";
+    if (!currentUser) {
+      if (!guestName.trim()) {
+        showToast.error("Nama pemesan wajib diisi");
+        return;
+      }
+      if (!guestPhone.trim()) {
+        showToast.error("Nomor WhatsApp wajib diisi untuk konfirmasi");
+        return;
+      }
+    }
+
+    const finalName = currentUser?.name || guestName.trim();
+    const finalPhone = currentUser?.phone || guestPhone.trim();
 
     localStorage.setItem("rerasa_guest_name", finalName);
     localStorage.setItem("rerasa_guest_phone", finalPhone);

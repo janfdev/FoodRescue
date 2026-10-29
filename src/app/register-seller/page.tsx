@@ -78,7 +78,7 @@ export default function RegisterSellerPage() {
 
   // Step 3: Verifikasi Fisik & Rekening
   const [storeFrontImage, setStoreFrontImage] = useState("");
-  const [logoUrl, setLogoUrl] = useState("/images/restaurant-chains/pizza-hut/pizza-hut-preview.png");
+  const [logoUrl, setLogoUrl] = useState("");
   const [bankName, setBankName] = useState("BCA");
   const [accountNumber, setAccountNumber] = useState("");
   const [accountHolder, setAccountHolder] = useState("");

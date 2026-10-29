@@ -16,7 +16,10 @@ export default function SellerFinancePage() {
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   const syncData = () => {
-    setStore(storeService.getState().stores[0]);
+    const state = storeService.getState();
+    const activeStoreId = state.currentUser?.storeId;
+    const currentStore = activeStoreId ? state.stores.find((s) => s.id === activeStoreId) || null : null;
+    setStore(currentStore);
   };
 
   useEffect(() => {
@@ -101,21 +104,21 @@ export default function SellerFinancePage() {
               <div className="p-3 bg-muted/40 rounded-xl space-y-1">
                 <span className="text-muted-foreground text-[11px] block">Nama Bank</span>
                 <span className="font-extrabold text-foreground text-sm block">
-                  {store.bankAccount?.bankName || "BCA Cirebon"}
+                  {store.bankAccount ? store.bankAccount.bankName : "Belum Mengisi Rekening"}
                 </span>
               </div>
 
               <div className="p-3 bg-muted/40 rounded-xl space-y-1">
                 <span className="text-muted-foreground text-[11px] block">Nomor Rekening</span>
                 <span className="font-mono font-bold text-foreground text-sm block">
-                  {store.bankAccount?.accountNumber || "134-8902-111"}
+                  {store.bankAccount ? store.bankAccount.accountNumber : "-"}
                 </span>
               </div>
 
               <div className="p-3 bg-muted/40 rounded-xl space-y-1">
                 <span className="text-muted-foreground text-[11px] block">Nama Pemilik Rekening</span>
                 <span className="font-bold text-foreground text-sm block">
-                  {store.bankAccount?.accountHolder || "Ruby Bakery & Cake"}
+                  {store.bankAccount ? store.bankAccount.accountHolder : "-"}
                 </span>
               </div>
             </CardContent>

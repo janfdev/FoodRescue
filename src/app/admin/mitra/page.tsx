@@ -297,14 +297,14 @@ export default function AdminMitraPage() {
                       <Shield className="size-10 text-purple-600/80 group-hover:scale-110 transition-transform" />
                       <div>
                         <span className="text-xs font-mono font-black text-foreground block tabular-nums">
-                          {selectedKycStore.kycDetails?.ktpNumber || "3274012903890002"}
+                          {selectedKycStore.kycDetails?.ktpNumber || "Tidak Memerlukan NIK KTP (Lightweight)"}
                         </span>
                         <span className="text-[10px] text-muted-foreground block">
-                          Atas Nama: {selectedKycStore.kycDetails?.ownerName || "Mitra Kuliner"}
+                          Atas Nama: {selectedKycStore.kycDetails?.ownerName || selectedKycStore.name}
                         </span>
                       </div>
                       <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300">
-                        Pemeriksaan Dukcapil Cocok ✓
+                        {selectedKycStore.kycDetails?.ktpNumber ? "Pemeriksaan Dukcapil Cocok ✓" : "Verifikasi Plang Fisik Gerai"}
                       </span>
                     </div>
                   </div>
@@ -370,10 +370,16 @@ export default function AdminMitraPage() {
                       <span className="text-[10px] text-muted-foreground block">Rekening Bank Pencairan Escrow</span>
                       <div className="flex items-center justify-between mt-0.5">
                         <span className="font-mono font-bold text-xs text-foreground">
-                          BCA 134-089-2182
+                          {selectedKycStore.bankAccount
+                            ? `${selectedKycStore.bankAccount.bankName} ${selectedKycStore.bankAccount.accountNumber}`
+                            : "Belum Mengisi Rekening"}
                         </span>
                         <span className="text-[10px] font-bold text-emerald-600">
-                          a.n. {selectedKycStore.kycDetails?.ownerName || selectedKycStore.name}
+                          {selectedKycStore.bankAccount?.accountHolder
+                            ? `a.n. ${selectedKycStore.bankAccount.accountHolder}`
+                            : selectedKycStore.kycDetails?.ownerName
+                            ? `a.n. ${selectedKycStore.kycDetails.ownerName}`
+                            : `a.n. ${selectedKycStore.name}`}
                         </span>
                       </div>
                     </div>

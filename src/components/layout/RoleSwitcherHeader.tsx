@@ -49,7 +49,7 @@ export function RoleSwitcherHeader({
             }`}
           >
             <User className="size-3.5 text-blue-500" />
-            <span>Pembeli (Budi)</span>
+            <span>Pembeli</span>
           </button>
 
           <button
@@ -62,7 +62,7 @@ export function RoleSwitcherHeader({
             }`}
           >
             <Store className="size-3.5 text-orange-500" />
-            <span>Mitra (Ruby Bakery)</span>
+            <span>Mitra Gerai</span>
           </button>
 
           <button

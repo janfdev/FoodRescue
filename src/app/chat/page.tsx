@@ -77,7 +77,7 @@ function ChatContent() {
     id: "guest",
     name: "Tamu",
     email: "tamu@foodrescue.id",
-    phone: "081234567890",
+    phone: "-",
     role: "buyer" as const,
     avatarUrl: getDefaultAvatar("Tamu"),
     status: "ACTIVE" as const,

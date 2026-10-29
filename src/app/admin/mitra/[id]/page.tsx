@@ -209,7 +209,9 @@ function AdminMitraVerificationContent() {
                 <Phone className="size-4 text-muted-foreground shrink-0" />
                 <div>
                   <span className="text-muted-foreground">WhatsApp PIC / Kasir: </span>
-                  <strong className="text-foreground font-mono">0812-3456-7890</strong>
+                  <strong className="text-foreground font-mono">
+                    {store.bankAccount?.accountNumber ? "Terverifikasi" : "Belum Tersedia"}
+                  </strong>
                 </div>
               </div>
             </CardContent>
@@ -231,10 +233,10 @@ function AdminMitraVerificationContent() {
                   Nama Bank & Nomor Rekening:
                 </span>
                 <p className="text-base font-black text-emerald-900 dark:text-emerald-300 font-mono tracking-wide">
-                  BCA - 8291039821
+                  {store.bankAccount ? `${store.bankAccount.bankName} - ${store.bankAccount.accountNumber}` : "Belum Didaftarkan"}
                 </p>
                 <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                  Atas Nama (Pemegang Rekening): {kyc?.ownerName || store.name}
+                  Atas Nama (Pemegang Rekening): {store.bankAccount?.accountHolder || store.kycDetails?.ownerName || store.name}
                 </p>
               </div>
 
