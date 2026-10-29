@@ -9,31 +9,29 @@ export async function GET(req: NextRequest) {
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
         const rows = await db.select().from(users).orderBy(desc(users.createdAt));
-        if (rows.length > 0) {
-          return NextResponse.json({
-            success: true,
-            source: "database",
-            data: rows.map((r) => ({
-              id: r.id,
-              name: r.name,
-              email: r.email,
-              phone: r.phone,
-              role: r.role,
-              status: r.status,
-              avatarUrl: r.avatarUrl || r.image,
-              storeId: r.storeId || undefined,
-            })),
-          });
-        }
+        return NextResponse.json({
+          success: true,
+          source: "database",
+          data: rows.map((r) => ({
+            id: r.id,
+            name: r.name,
+            email: r.email,
+            phone: r.phone,
+            role: r.role,
+            status: r.status,
+            avatarUrl: r.avatarUrl || r.image,
+            storeId: r.storeId || undefined,
+          })),
+        });
       } catch (dbErr) {
-        console.warn("DB offline saat ambil users, fallback ke SEED_USERS:", dbErr);
+        console.warn("DB offline saat ambil users:", dbErr);
       }
     }
 
     return NextResponse.json({
       success: true,
-      source: "fallback",
-      data: SEED_USERS,
+      source: "empty",
+      data: [],
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Gagal mengambil daftar pengguna";

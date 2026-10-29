@@ -25,32 +25,28 @@ export async function GET(req: NextRequest) {
           .where(eq(chatMessages.orderId, orderId))
           .orderBy(asc(chatMessages.createdAt));
 
-        if (rows.length > 0) {
-          return NextResponse.json({
-            success: true,
-            source: "database",
-            data: rows.map((r) => ({
-              id: r.id,
-              orderId: r.orderId,
-              senderRole: r.senderRole,
-              senderName: r.senderName,
-              senderAvatarUrl: r.senderAvatarUrl || undefined,
-              text: r.text,
-              timestamp: r.createdAt.toISOString(),
-            })),
-          });
-        }
+        return NextResponse.json({
+          success: true,
+          source: "database",
+          data: rows.map((r) => ({
+            id: r.id,
+            orderId: r.orderId,
+            senderRole: r.senderRole,
+            senderName: r.senderName,
+            senderAvatarUrl: r.senderAvatarUrl || undefined,
+            text: r.text,
+            timestamp: r.createdAt.toISOString(),
+          })),
+        });
       } catch (dbErr) {
-        console.warn("Koneksi DB offline, fallback ke storeService:", dbErr);
+        console.warn("Koneksi DB offline saat baca chat:", dbErr);
       }
     }
 
-    // Fallback ke storeService (in-memory / mock)
-    const fallbackMessages = storeService.getChatMessages(orderId);
     return NextResponse.json({
       success: true,
-      source: "simulation",
-      data: fallbackMessages,
+      source: "empty",
+      data: [],
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Terjadi kesalahan server";

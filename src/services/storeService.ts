@@ -24,7 +24,7 @@ import {
 } from "./seedData";
 import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
 
-const STORAGE_KEY = "sisarasa_app_state_v1";
+const STORAGE_KEY = "sisarasa_app_state_clean_v1";
 
 interface AppState {
   currentUser: User;
@@ -40,89 +40,24 @@ interface AppState {
 }
 
 export const DEFAULT_INITIAL_STATE: AppState = {
-  currentUser: SEED_USERS[0], // default: Budi (Buyer)
-  stores: SEED_STORES,
-  surpriseBags: SEED_SURPRISE_BAGS,
-  orders: SEED_ORDERS,
-  boxPackages: SEED_BOX_PACKAGES,
-  boxOrders: SEED_BOX_ORDERS,
-  reviews: SEED_REVIEWS,
-  chatMessages: {
-    "RB-7821": [
-      {
-        id: "msg-1",
-        orderId: "RB-7821",
-        senderRole: "system",
-        senderName: "Sistem Escrow",
-        text: "Pesanan telah dibayar Rp 24.000. Dana diamankan di Rekber Escrow. Silakan ambil paket pada jam 19:30 - 21:30 WIB.",
-        timestamp: "2026-10-28T18:40:05Z"
-      },
-      {
-        id: "msg-2",
-        orderId: "RB-7821",
-        senderRole: "buyer",
-        senderName: "Budi Santoso",
-        senderAvatarUrl: getDefaultAvatar("BudiSantoso"),
-        text: "Halo kak, saya otw ambil sekitar jam 20:00 ya.",
-        timestamp: "2026-10-28T18:45:00Z"
-      },
-      {
-        id: "msg-3",
-        orderId: "RB-7821",
-        senderRole: "seller",
-        senderName: "Ruby Bakery & Cake",
-        senderAvatarUrl: getDefaultAvatar("SitiRahma"),
-        text: "Baik kak Budi! Paket surprise bag sudah kami siapkan di kemasan Rescue Box resmi. Ditunggu di kasir ya.",
-        timestamp: "2026-10-28T18:46:12Z"
-      }
-    ],
-    "RB-6100": [
-      {
-        id: "msg-61-1",
-        orderId: "RB-6100",
-        senderRole: "system",
-        senderName: "Sistem Escrow",
-        text: "Pesanan telah dibayar dan diverifikasi kasir. Dana Rp 21.120 berhasil dilepas ke saldo toko.",
-        timestamp: "2026-10-25T20:10:00Z"
-      }
-    ],
-    "RB-5219": [
-      {
-        id: "msg-52-1",
-        orderId: "RB-5219",
-        senderRole: "system",
-        senderName: "Sistem Escrow",
-        text: "Pengambilan makanan di Nasi Jamblang Mang Dul berhasil diverifikasi.",
-        timestamp: "2026-10-26T21:05:00Z"
-      }
-    ]
+  currentUser: {
+    id: "user-buyer-1",
+    name: "Pengguna",
+    email: "user@foodrescue.id",
+    phone: "081234567890",
+    role: "buyer",
+    avatarUrl: getDefaultAvatar("Pengguna"),
+    status: "ACTIVE",
   },
-  withdrawals: [
-    {
-      id: "WD-101",
-      storeId: "store-ruby-bakery",
-      storeName: "Ruby Bakery & Cake",
-      amount: 500000,
-      bankName: "BCA",
-      accountNumber: "1340889211",
-      accountHolder: "Siti Rahmawati",
-      status: "APPROVED",
-      requestedAt: "2026-10-22T09:00:00Z",
-      processedAt: "2026-10-22T14:30:00Z"
-    },
-    {
-      id: "WD-102",
-      storeId: "store-jamblang-dul",
-      storeName: "Nasi Jamblang Mang Dul",
-      amount: 400000,
-      bankName: "BRI",
-      accountNumber: "010901029384501",
-      accountHolder: "Abdul Kadir Mang Dul",
-      status: "PENDING",
-      requestedAt: "2026-10-27T10:15:00Z"
-    }
-  ],
-  disputes: []
+  stores: [],
+  surpriseBags: [],
+  orders: [],
+  boxPackages: [],
+  boxOrders: [],
+  reviews: [],
+  chatMessages: {},
+  withdrawals: [],
+  disputes: [],
 };
 
 class StoreService {
@@ -180,7 +115,28 @@ class StoreService {
   }
 
   public resetToDefault() {
-    this.state = DEFAULT_INITIAL_STATE;
+    this.state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+    this.persist();
+  }
+
+  public clearAllData() {
+    this.state = JSON.parse(JSON.stringify(DEFAULT_INITIAL_STATE));
+    this.persist();
+  }
+
+  public loadSeedData() {
+    this.state = {
+      currentUser: SEED_USERS[0],
+      stores: SEED_STORES,
+      surpriseBags: SEED_SURPRISE_BAGS,
+      orders: SEED_ORDERS,
+      boxPackages: SEED_BOX_PACKAGES,
+      boxOrders: SEED_BOX_ORDERS,
+      reviews: SEED_REVIEWS,
+      chatMessages: {},
+      withdrawals: [],
+      disputes: [],
+    };
     this.persist();
   }
 

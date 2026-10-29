@@ -86,15 +86,11 @@ export function LandingPage() {
 
   // Sync DB data into storeService for seamless cart & checkout support
   useEffect(() => {
-    if (dbStores.length > 0) {
-      storeService.setStores(dbStores);
-    }
+    storeService.setStores(dbStores);
   }, [dbStores]);
 
   useEffect(() => {
-    if (dbBags.length > 0) {
-      storeService.setSurpriseBags(dbBags);
-    }
+    storeService.setSurpriseBags(dbBags);
   }, [dbBags]);
 
   // Dynamic available areas strictly derived from PostgreSQL database
@@ -198,8 +194,8 @@ export function LandingPage() {
     const count = totalOrders > 0 ? totalOrders : bags.reduce((acc, b) => acc + (b.quotaToday - b.quotaRemaining), 0);
     const kg = Math.round(count * 0.8 * 10) / 10;
     return {
-      meals: count > 0 ? `${count}+ Porsi` : "Tersedia",
-      kg: kg > 0 ? `-${kg} Kg CO2` : "Pencegahan Food Waste",
+      meals: count > 0 ? `${count}+ Porsi` : "0 Porsi",
+      kg: kg > 0 ? `-${kg} Kg CO2` : "0 Kg CO2",
     };
   }, [orders, bags]);
 

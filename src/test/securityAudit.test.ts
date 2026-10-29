@@ -33,6 +33,7 @@ console.assert(
 console.log("✓ Test 2: X-Forwarded-For first-hop extraction verified.");
 
 // 3. Test BOLA / IDOR Protection on Order Handover Verification
+storeService.loadSeedData();
 const state = storeService.getState();
 const rubyBag = state.surpriseBags.find((b) => b.storeId === "store-ruby-bakery")!;
 const order = storeService.createOrder(rubyBag.id, "QRIS");

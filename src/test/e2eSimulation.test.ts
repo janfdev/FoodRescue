@@ -9,6 +9,7 @@ async function runAllTests() {
   // ==========================================
   // SCENARIO 1: INITIAL STATE & REAL DB SEED VERIFICATION
   // ==========================================
+  storeService.loadSeedData();
   const state = storeService.getState();
   console.assert(state.stores.length >= 4, "Initial stores should be at least 4");
   console.assert(state.surpriseBags.length >= 4, "Initial surprise bags should be at least 4");
