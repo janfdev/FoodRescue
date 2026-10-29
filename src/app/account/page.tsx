@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { storeService } from "@/services/storeService";
-import { SEED_USERS } from "@/services/seedData";
 import { User as UserType } from "@/types/domain";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -20,14 +19,13 @@ import {
   ShoppingBag,
   User,
   ChevronRight,
-  Sparkles,
   Pencil,
   Bell,
 } from "lucide-react";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { usePwa } from "@/components/pwa/PwaProvider";
 import { resolveUserAvatar } from "@/lib/avatar";
-import { useSession } from "@/lib/auth-client";
+import { useSession, signOut } from "@/lib/auth-client";
 import { requestNotificationPermission, sendLocalNotification } from "@/lib/notification";
 
 export default function AccountPage() {
@@ -84,8 +82,13 @@ export default function AccountPage() {
       o.buyerPhone === currentUser.phone
   ).length;
 
-  const handleSwitchUser = (user: UserType) => {
-    storeService.setCurrentUser(user);
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      console.warn("Logout error:", err);
+    }
+    router.push("/login");
   };
 
   return (
@@ -296,67 +299,30 @@ export default function AccountPage() {
               </div>
             </Link>
 
-            <Link
-              href="/login"
-              className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted font-semibold text-foreground transition-colors"
-            >
-              <div className="flex items-center gap-2.5">
-                <LogOut className="size-4 text-muted-foreground" />
-                <span>Masuk dengan Akun Lain / Google</span>
-              </div>
-              <ChevronRight className="size-3.5 text-muted-foreground" />
-            </Link>
-          </Card>
-
-          {/* Quick Demo Role Switcher */}
-          <Card className="p-3.5 border-border/80 rounded-2xl shadow-2xs space-y-2.5 bg-muted/20">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-amber-600" />
-              <span className="font-extrabold text-xs text-foreground">
-                Ganti Akun Demo Simulasi
-              </span>
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              Beralih peran instan tanpa perlu memasukkan kata sandi
-            </p>
-
-            <div className="space-y-1.5 pt-1">
-              {SEED_USERS.map((u) => {
-                const isCurrent = currentUser.id === u.id;
-                return (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleSwitchUser(u)}
-                    className={`w-full flex items-center justify-between p-2 rounded-xl text-left transition-colors border ${
-                      isCurrent
-                        ? "bg-emerald-700 text-white border-emerald-700"
-                        : "bg-card hover:bg-muted border-border/70 text-foreground"
-                    }`}
-                  >
-                    <div className="min-w-0 pr-2">
-                      <span className="font-bold text-xs block truncate">{u.name}</span>
-                      <span className={`text-[10px] block truncate ${isCurrent ? "text-emerald-100" : "text-muted-foreground"}`}>
-                        {u.email}
-                      </span>
-                    </div>
-                    <Badge
-                      className={`text-[9px] font-bold capitalize shrink-0 ${
-                        isCurrent
-                          ? "bg-white text-emerald-800"
-                          : u.role === "super_admin"
-                          ? "bg-purple-700 text-white"
-                          : u.role === "seller"
-                          ? "bg-orange-600 text-white"
-                          : "bg-emerald-700 text-white"
-                      }`}
-                    >
-                      {u.role.replace("_", " ")}
-                    </Badge>
-                  </button>
-                );
-              })}
-            </div>
+            {session?.user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-destructive/10 text-destructive font-semibold transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-2.5">
+                  <LogOut className="size-4" />
+                  <span>Keluar dari Akun</span>
+                </div>
+                <ChevronRight className="size-3.5 text-destructive/70" />
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center justify-between p-2.5 rounded-xl hover:bg-muted font-semibold text-foreground transition-colors"
+              >
+                <div className="flex items-center gap-2.5">
+                  <LogOut className="size-4 text-muted-foreground" />
+                  <span>Masuk / Daftarkan Akun Baru</span>
+                </div>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+              </Link>
+            )}
           </Card>
         </main>
 

@@ -38,7 +38,6 @@ import { storeService } from "@/services/storeService";
 import { cartService } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
-import { SEED_USERS } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { User as UserType, SurpriseBag } from "@/types/domain";
 
@@ -110,10 +109,6 @@ export function LandingPage() {
       (o) => o.status === "PAID" || o.status === "READY_FOR_PICKUP"
     ).length;
   }, [userOrders]);
-
-  const handleSwitchUser = (user: UserType) => {
-    storeService.setCurrentUser(user);
-  };
 
   const filteredAreas = useMemo(() => {
     if (!areaSearchQuery.trim()) return availableAreas;
@@ -301,35 +296,13 @@ export function LandingPage() {
                   </Link>
                 </div>
 
-                <div className="pt-2 border-t border-border space-y-1">
-                  <span className="text-[10px] font-bold text-muted-foreground block px-1">
-                    Ganti Akun Simulasi:
-                  </span>
-                  <div className="grid grid-cols-3 gap-1">
-                    {SEED_USERS.map((u) => (
-                      <button
-                        key={u.id}
-                        type="button"
-                        onClick={() => handleSwitchUser(u)}
-                        className={`text-[10px] py-1 px-1.5 rounded-md font-bold truncate transition-colors ${
-                          currentUser.id === u.id
-                            ? "bg-emerald-700 text-white"
-                            : "bg-muted/60 hover:bg-muted text-foreground"
-                        }`}
-                      >
-                        {u.role === "super_admin" ? "Admin" : u.role === "seller" ? "Mitra" : "Buyer"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-border">
+                <div className="pt-2 border-t border-border flex flex-col gap-1">
                   <Link
-                    href="/login"
-                    className="w-full flex items-center justify-center gap-1.5 text-xs text-muted-foreground hover:text-foreground font-semibold py-1"
+                    href="/account"
+                    className="w-full flex items-center justify-center gap-1.5 text-xs text-foreground hover:bg-muted font-semibold py-1.5 rounded-lg transition-colors"
                   >
-                    <LogOut className="size-3" />
-                    <span>Halaman Masuk Dedicated</span>
+                    <User className="size-3.5 text-muted-foreground" />
+                    <span>Profil & Pengaturan Akun</span>
                   </Link>
                 </div>
               </PopoverContent>
