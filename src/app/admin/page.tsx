@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Leaf, TrendingUp, CreditCard, Box } from "lucide-react";
+import { Leaf, TrendingUp, CreditCard, Box, AlertTriangle, ArrowRight, ShieldCheck, Wallet, Sparkles } from "lucide-react";
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import {
@@ -29,6 +30,9 @@ export default function AdminOverviewPage() {
   }, []);
 
   const stores = state.stores;
+  const pendingKycStores = stores.filter((s) => s.status === "PENDING_APPROVAL");
+  const pendingDisbursements = (state.withdrawals || []).filter((d) => d.status === "PENDING");
+  const lowBoxStores = stores.filter((s) => (s.currentBoxStock || 0) < 10);
 
   return (
     <div className="space-y-6 w-full">
@@ -40,6 +44,76 @@ export default function AdminOverviewPage() {
           Konsolidasi perputaran pangan dan kesehatan ekosistem Rerasa Cirebon Raya
         </p>
       </div>
+
+      {/* Pusat Tindakan Mendesak Super Admin */}
+      {(pendingKycStores.length > 0 || pendingDisbursements.length > 0 || lowBoxStores.length > 0) && (
+        <Card className="border-amber-500/40 bg-amber-500/5 shadow-xs p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="size-4 text-amber-600" />
+              <h3 className="text-xs font-black text-foreground uppercase tracking-wider">
+                Tindakan Mendesak Menunggu Keputusan Admin
+              </h3>
+            </div>
+            <Badge className="bg-amber-600 text-white font-mono text-[10px]">
+              {pendingKycStores.length + pendingDisbursements.length + lowBoxStores.length} Butuh Aksi
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
+            {pendingKycStores.length > 0 && (
+              <Link
+                href="/admin/mitra"
+                className="p-3 bg-card rounded-xl border border-border/80 hover:border-amber-500/60 transition-all flex items-center justify-between group"
+              >
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-extrabold text-foreground block">
+                    Verifikasi KYC Mitra
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    <strong className="text-amber-600 tabular-nums">{pendingKycStores.length}</strong> toko menunggu aktivasi
+                  </span>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground group-hover:text-amber-600 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            )}
+
+            {pendingDisbursements.length > 0 && (
+              <Link
+                href="/admin/keuangan"
+                className="p-3 bg-card rounded-xl border border-border/80 hover:border-amber-500/60 transition-all flex items-center justify-between group"
+              >
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-extrabold text-foreground block">
+                    Pencairan Dana Escrow
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    <strong className="text-purple-600 tabular-nums">{pendingDisbursements.length}</strong> transfer menunggu bukti
+                  </span>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground group-hover:text-purple-600 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            )}
+
+            {lowBoxStores.length > 0 && (
+              <Link
+                href="/admin/boxes"
+                className="p-3 bg-card rounded-xl border border-border/80 hover:border-amber-500/60 transition-all flex items-center justify-between group"
+              >
+                <div className="space-y-0.5">
+                  <span className="text-[11px] font-extrabold text-foreground block">
+                    Kritis Stok Kemasan Box
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    <strong className="text-rose-600 tabular-nums">{lowBoxStores.length}</strong> toko stok di bawah 10 pcs
+                  </span>
+                </div>
+                <ArrowRight className="size-4 text-muted-foreground group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* 4 Kartu Metrik Utama */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -105,7 +105,8 @@ export interface Order {
   status: OrderStatus;
   paymentMethod: "QRIS" | "GoPay" | "ShopeePay" | "BCA_VA" | "TUNAI_KASIR" | "TRANSFER_VA";
   paidAt?: string;
-  pickupCode: string; // 4-digit PIN e.g. "4829"
+  pickupCode: string; // Order Code e.g. "RB-8492"
+  pickupPin?: string; // 4-digit PIN e.g. "4829"
   pickupQrData: string;
   completedAt?: string;
   isChatLocked: boolean; // locked 24h after completion

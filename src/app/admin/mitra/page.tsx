@@ -190,79 +190,169 @@ export default function AdminMitraPage() {
         </div>
       </Card>
 
-      {/* Dialog Modal Inspeksi KYC Bukti Usaha */}
+      {/* Dialog Modal Inspeksi KYC Bukti Usaha - Split Screen Reviewer */}
       <Dialog open={!!selectedKycStore} onOpenChange={(open) => !open && setSelectedKycStore(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Verifikasi Dokumen Bukti Usaha</DialogTitle>
-            <DialogDescription>
-              {selectedKycStore?.name} • Pemilik: {selectedKycStore?.kycDetails?.ownerName || "Mitra Cirebon"}
-            </DialogDescription>
+        <DialogContent className="max-w-4xl max-h-[92vh] overflow-y-auto p-6">
+          <DialogHeader className="pb-3 border-b border-border">
+            <div className="flex items-center justify-between">
+              <div>
+                <DialogTitle className="text-base font-black flex items-center gap-2">
+                  <span>Audit & Verifikasi Dokumen Kemitraan (KYC)</span>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    {selectedKycStore?.id}
+                  </Badge>
+                </DialogTitle>
+                <DialogDescription className="text-xs">
+                  {selectedKycStore?.name} • Pemilik: {selectedKycStore?.kycDetails?.ownerName || "Mitra Cirebon"}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
 
           {selectedKycStore && (
-            <div className="space-y-4 text-xs pt-2">
-              <div className="grid grid-cols-2 gap-3 p-3 bg-muted/40 rounded-xl">
-                <div>
-                  <span className="text-muted-foreground text-[10px] block">Nomor Induk KTP</span>
-                  <span className="font-mono font-bold text-foreground">
-                    {selectedKycStore.kycDetails?.ktpNumber || "3274012903890002"}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground text-[10px] block">Waktu Pengajuan</span>
-                  <span className="font-mono text-muted-foreground">
-                    {selectedKycStore.kycDetails?.submittedAt
-                      ? new Date(selectedKycStore.kycDetails.submittedAt).toLocaleDateString("id-ID")
-                      : "Terdaftar"}
-                  </span>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pt-3 text-xs">
+              {/* Left Pane: Split Document Evidence View */}
+              <div className="md:col-span-6 space-y-4 border-r md:border-border/80 md:pr-4">
+                <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block">
+                  1. Bukti Fisik & Dokumen Legalitas
+                </span>
+
+                <div className="space-y-3">
+                  {/* Bukti KTP */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-foreground">
+                      <span>Kartu Tanda Penduduk (KTP)</span>
+                      <Badge className="bg-emerald-600/10 text-emerald-700 text-[9px] border-emerald-500/30">
+                        NIK Terdaftar
+                      </Badge>
+                    </div>
+                    <div className="h-44 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center p-4 text-center gap-2 relative overflow-hidden group">
+                      <Shield className="size-10 text-purple-600/80 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <span className="text-xs font-mono font-black text-foreground block tabular-nums">
+                          {selectedKycStore.kycDetails?.ktpNumber || "3274012903890002"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block">
+                          Atas Nama: {selectedKycStore.kycDetails?.ownerName || "Mitra Kuliner"}
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-emerald-600 font-bold bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-300">
+                        Pemeriksaan Dukcapil Cocok ✓
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bukti Foto Tampak Depan Usaha */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-foreground">
+                      <span>Foto Outlet / Dapur Usaha</span>
+                      <span className="text-[10px] text-muted-foreground font-mono">
+                        {selectedKycStore.area}
+                      </span>
+                    </div>
+                    <div className="h-44 rounded-2xl border-2 border-dashed border-border bg-muted/30 flex flex-col items-center justify-center p-4 text-center gap-2 relative overflow-hidden group">
+                      <Building2 className="size-10 text-emerald-600/80 group-hover:scale-110 transition-transform" />
+                      <div>
+                        <span className="text-xs font-bold text-foreground block">
+                          {selectedKycStore.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block max-w-[240px] truncate">
+                          {selectedKycStore.address}
+                        </span>
+                      </div>
+                      <span className="text-[9px] text-muted-foreground font-medium">
+                        Koordinat GPS terverifikasi di wilayah operasional Cirebon
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <span className="font-bold text-foreground block">1. Foto KTP Pemilik</span>
-                  <div className="h-36 rounded-xl border border-border bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-3 text-center gap-1.5">
-                    <Shield className="size-8 text-purple-600/70" />
-                    <span className="text-[11px] font-mono text-muted-foreground">KTP-NIK-TERVERIFIKASI</span>
-                    <span className="text-[10px] text-emerald-600 font-semibold">Tercatat di Dukcapil</span>
+              {/* Right Pane: Business Details & Decision Actions */}
+              <div className="md:col-span-6 space-y-4 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground block">
+                    2. Profil & Data Rekening Pencairan
+                  </span>
+
+                  <div className="space-y-2.5 p-4 rounded-2xl bg-muted/40 border border-border/80">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Nama Usaha Kuliner</span>
+                      <span className="text-sm font-extrabold text-foreground">{selectedKycStore.name}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/60">
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Kategori</span>
+                        <span className="font-bold text-foreground">{selectedKycStore.category}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-muted-foreground block">Zona Wilayah</span>
+                        <span className="font-bold text-foreground">{selectedKycStore.area}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-1 border-t border-border/60">
+                      <span className="text-[10px] text-muted-foreground block">Alamat Lengkap</span>
+                      <span className="text-[11px] text-foreground font-medium leading-relaxed block">
+                        {selectedKycStore.address}
+                      </span>
+                    </div>
+
+                    <div className="pt-1 border-t border-border/60">
+                      <span className="text-[10px] text-muted-foreground block">Rekening Bank Pencairan Escrow</span>
+                      <div className="flex items-center justify-between mt-0.5">
+                        <span className="font-mono font-bold text-xs text-foreground">
+                          BCA 134-089-2182
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-600">
+                          a.n. {selectedKycStore.kycDetails?.ownerName || selectedKycStore.name}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-1">
+                    <span className="text-[11px] font-bold text-amber-800 dark:text-amber-300 block">
+                      Pakta Komitmen Kemitraan:
+                    </span>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      Dengan menyetujui, toko ini dapat langsung menerbitkan paket Surprise Bag dan wajib menggunakan kemasan resmi Rescue Box bersubsidi.
+                    </p>
                   </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <span className="font-bold text-foreground block">2. Foto Tampak Depan Toko</span>
-                  <div className="h-36 rounded-xl border border-border bg-slate-100 dark:bg-slate-900 flex flex-col items-center justify-center p-3 text-center gap-1.5">
-                    <Building2 className="size-8 text-emerald-600/70" />
-                    <span className="text-[11px] font-semibold text-foreground">{selectedKycStore.name}</span>
-                    <span className="text-[10px] text-muted-foreground">{selectedKycStore.address}</span>
-                  </div>
+                {/* Keputusan Action Buttons */}
+                <div className="space-y-2 pt-4 border-t border-border">
+                  {selectedKycStore.status === "PENDING_APPROVAL" ? (
+                    <div className="flex items-center gap-2.5">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleRejectOrSuspendStore(selectedKycStore.id)}
+                        className="flex-1 text-xs font-bold h-9 cursor-pointer"
+                      >
+                        Tolak Kemitraan
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleApproveStore(selectedKycStore.id)}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold h-9 cursor-pointer shadow-2xs"
+                      >
+                        Setujui Kemitraan (Approve)
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground font-bold">
+                        Status Saat Ini: <strong className="text-foreground">{selectedKycStore.status}</strong>
+                      </span>
+                      <Button size="sm" variant="outline" onClick={() => setSelectedKycStore(null)}>
+                        Tutup Pratinjau
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
-                {selectedKycStore.status === "PENDING_APPROVAL" ? (
-                  <>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleRejectOrSuspendStore(selectedKycStore.id)}
-                      className="text-xs font-bold"
-                    >
-                      Tolak Kemitraan (Reject)
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleApproveStore(selectedKycStore.id)}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
-                    >
-                      Setujui Kemitraan (Approve)
-                    </Button>
-                  </>
-                ) : (
-                  <Button size="sm" variant="outline" onClick={() => setSelectedKycStore(null)}>
-                    Tutup Pratinjau
-                  </Button>
-                )}
               </div>
             </div>
           )}

@@ -6,7 +6,7 @@ import { storeService } from "@/services/storeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { CheckCircle2, Box } from "lucide-react";
+import { CheckCircle2, Box, TrendingDown, AlertCircle, Sparkles } from "lucide-react";
 
 export default function SellerBoxesPage() {
   const [store, setStore] = useState<Store | null>(null);
@@ -55,6 +55,68 @@ export default function SellerBoxesPage() {
           <span>Pesanan Rescue Box berhasil diproses! Stok kemasan Anda telah diperbarui.</span>
         </div>
       )}
+
+      {/* Kalkulator Cerdas Kebutuhan Kemasan & Sisa Stok */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <Card className="md:col-span-4 border-border shadow-xs bg-card p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground uppercase">
+              Sisa Stok Kemasan Anda
+            </span>
+            <Box className="size-4 text-emerald-600" />
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-foreground tabular-nums">
+              {store.currentBoxStock || 0}
+            </span>
+            <span className="text-xs font-bold text-muted-foreground">Pcs Box Tersedia</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Wajib digunakan untuk mengemas seluruh pesanan Surprise Bag demi kepatuhan audit.
+          </p>
+        </Card>
+
+        <Card className="md:col-span-8 border-border shadow-xs bg-muted/30 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-4 text-amber-500" />
+              <h4 className="text-xs font-extrabold text-foreground">
+                Prediksi Depletion & Rekomendasi Restock B2B
+              </h4>
+            </div>
+            <Badge variant="outline" className="text-[10px] font-bold border-amber-500/40 text-amber-600">
+              Rata-rata 5 box / hari
+            </Badge>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border/70">
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
+                <TrendingDown className="size-3.5 text-amber-500" />
+                <span>
+                  Estimasi Habis:{" "}
+                  <strong className="text-amber-600 tabular-nums">
+                    {Math.max(1, Math.round(((store.currentBoxStock || 15) / 5) * 10) / 10)} Hari Lagi
+                  </strong>
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Rekomendasi sistem: Pesan <strong>Paket Reguler (100 Box)</strong> untuk mengamankan operasional 20 hari ke depan.
+              </p>
+            </div>
+
+            {boxPackages.length > 1 && (
+              <Button
+                size="sm"
+                onClick={() => handleBuyBoxes(boxPackages[1])}
+                className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs h-8 px-3 rounded-lg shrink-0 cursor-pointer shadow-2xs"
+              >
+                Pesan 100 Box Rekomendasi
+              </Button>
+            )}
+          </div>
+        </Card>
+      </div>
 
       {/* Grid Paket Box */}
       <div>

@@ -17,6 +17,10 @@ import {
   ShoppingBag,
   User,
   CheckCircle2,
+  Star,
+  ShieldCheck,
+  PackageCheck,
+  X,
 } from "lucide-react";
 
 export default function HistoryPage() {
@@ -24,6 +28,10 @@ export default function HistoryPage() {
   const [state, setState] = useState(storeService.getState());
   const [activeTab, setActiveTab] = useState<"aktif" | "riwayat">("aktif");
   const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
+  const [reviewOrder, setReviewOrder] = useState<Order | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const [usedRescueBox, setUsedRescueBox] = useState(true);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -32,7 +40,7 @@ export default function HistoryPage() {
     return unsub;
   }, []);
 
-  const { orders, currentUser } = state;
+  const { orders, reviews, currentUser } = state;
 
   const userOrders = useMemo(() => {
     return orders.filter(
@@ -200,8 +208,43 @@ export default function HistoryPage() {
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="pt-1">
+                {/* Actions & Compliance Review */}
+                <div className="pt-1 space-y-1.5">
+                  {ord.status === "COMPLETED" && (
+                    <>
+                      {reviews.some((r) => r.orderId === ord.id) ? (
+                        <div className="p-2 rounded-xl bg-muted/60 border border-border/80 flex items-center justify-between text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <PackageCheck className="size-3.5 text-emerald-700" />
+                            <span className="text-[11px] font-bold text-foreground">
+                              {reviews.find((r) => r.orderId === ord.id)?.usedOfficialRescueBox
+                                ? "Wadah Resmi Terverifikasi"
+                                : "Kemasan Non-Standar"}
+                            </span>
+                          </div>
+                          <span className="flex items-center gap-0.5 text-amber-600 font-black text-[11px]">
+                            <Star className="size-3 fill-amber-500 text-amber-500" />
+                            <span>{reviews.find((r) => r.orderId === ord.id)?.rating}</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setReviewOrder(ord);
+                            setRating(5);
+                            setComment("");
+                            setUsedRescueBox(true);
+                          }}
+                          className="w-full text-xs font-bold gap-1.5 h-8 bg-emerald-700 hover:bg-emerald-800 text-white shadow-2xs"
+                        >
+                          <PackageCheck className="size-3.5" />
+                          <span>Cek Kepatuhan Wadah & Beri Ulasan</span>
+                        </Button>
+                      )}
+                    </>
+                  )}
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -216,6 +259,133 @@ export default function HistoryPage() {
             ))
           )}
         </main>
+
+        {/* Modal Evaluasi Kepatuhan Wadah Ramah Lingkungan */}
+        {reviewOrder && (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="w-full max-w-sm rounded-3xl bg-card border border-border shadow-2xl p-4 space-y-3.5 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between pb-2 border-b border-border">
+                <div className="space-y-0.5">
+                  <h3 className="font-extrabold text-xs text-foreground">
+                    Audit Kepatuhan & Ulasan
+                  </h3>
+                  <span className="text-[10px] text-muted-foreground block truncate">
+                    {reviewOrder.storeName} ({reviewOrder.id})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setReviewOrder(null)}
+                  className="size-7 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
+
+              {/* 1. Pertanyaan Wadah Ramah Lingkungan */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-foreground block">
+                  Apakah kasir menyerahkan makanan menggunakan wadah resmi Rescue Box?
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setUsedRescueBox(true)}
+                    className={`p-2.5 rounded-xl border text-left text-xs space-y-0.5 transition-all cursor-pointer ${
+                      usedRescueBox
+                        ? "bg-emerald-700 text-white border-emerald-700 font-bold shadow-2xs"
+                        : "bg-muted/40 hover:bg-muted text-foreground border-border/80"
+                    }`}
+                  >
+                    <span className="block font-black text-[11px]">Ya, Sesuai Standar</span>
+                    <span className={`block text-[9px] ${usedRescueBox ? "text-emerald-100" : "text-muted-foreground"}`}>
+                      Wadah Rescue Box
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setUsedRescueBox(false)}
+                    className={`p-2.5 rounded-xl border text-left text-xs space-y-0.5 transition-all cursor-pointer ${
+                      !usedRescueBox
+                        ? "bg-rose-700 text-white border-rose-700 font-bold shadow-2xs"
+                        : "bg-muted/40 hover:bg-muted text-foreground border-border/80"
+                    }`}
+                  >
+                    <span className="block font-black text-[11px]">Tidak Sesuai</span>
+                    <span className={`block text-[9px] ${!usedRescueBox ? "text-rose-100" : "text-muted-foreground"}`}>
+                      Plastik Sekali Pakai
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 2. Rating Bintang */}
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-foreground block">
+                  Kualitas & Kesegaran Makanan
+                </label>
+                <div className="flex items-center gap-2 justify-center py-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
+                    >
+                      <Star
+                        className={`size-6 ${
+                          star <= rating
+                            ? "fill-amber-500 text-amber-500"
+                            : "text-muted-foreground/40"
+                        }`}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Catatan Ulasan */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-foreground block">
+                  Komentar Anda (Opsional)
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Ceritakan kondisi makanan dan keramahan staf kasir..."
+                  className="w-full text-xs p-2 rounded-xl bg-muted/40 border border-border/80 focus:ring-1 focus:ring-emerald-600 focus:outline-hidden min-h-[60px]"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setReviewOrder(null)}
+                  className="flex-1 text-xs h-8.5 rounded-xl"
+                >
+                  Batal
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    storeService.submitReview(
+                      reviewOrder.id,
+                      rating,
+                      comment.trim() || "Kualitas makanan sangat baik dan layak konsumsi.",
+                      usedRescueBox
+                    );
+                    setReviewOrder(null);
+                  }}
+                  className="flex-1 text-xs font-bold h-8.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white"
+                >
+                  Simpan Evaluasi
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Floating Bottom App Navigation */}
         <nav className="fixed bottom-0 sm:absolute z-20 left-0 right-0 max-w-md mx-auto bg-background/95 backdrop-blur-xs border-t border-border/80 px-4 py-2 flex items-center justify-around">

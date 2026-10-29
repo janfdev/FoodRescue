@@ -194,38 +194,92 @@ export default function SellerBagsPage() {
                     </span>
                   </td>
                   <td className="p-3.5">
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleQuotaChange(
-                            bag.id,
-                            Math.max(0, bag.quotaRemaining - 1),
-                            bag.isActive
-                          )
-                        }
-                        className="size-7 p-0 font-bold"
-                      >
-                        -
-                      </Button>
-                      <span className="font-black tabular-nums w-8 text-center text-sm">
-                        {bag.quotaRemaining}
-                      </span>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleQuotaChange(
-                            bag.id,
-                            bag.quotaRemaining + 1,
-                            bag.isActive
-                          )
-                        }
-                        className="size-7 p-0 font-bold"
-                      >
-                        +
-                      </Button>
+                    <div className="space-y-1.5 min-w-[140px]">
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleQuotaChange(
+                              bag.id,
+                              Math.max(0, bag.quotaRemaining - 1),
+                              bag.isActive
+                            )
+                          }
+                          className="size-6 p-0 font-bold cursor-pointer"
+                        >
+                          -
+                        </Button>
+                        <span className="font-black tabular-nums w-7 text-center text-xs text-foreground">
+                          {bag.quotaRemaining}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleQuotaChange(
+                              bag.id,
+                              bag.quotaRemaining + 1,
+                              bag.isActive
+                            )
+                          }
+                          className="size-6 p-0 font-bold cursor-pointer"
+                        >
+                          +
+                        </Button>
+
+                        {bag.quotaRemaining > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuotaChange(bag.id, 0, bag.isActive)}
+                            className="text-[9px] font-bold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer ml-1"
+                            title="Tandai porsi habis terjual sekarang"
+                          >
+                            Habiskan
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Quota Progress Bar Indicator */}
+                      <div className="space-y-0.5">
+                        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden border border-border/40">
+                          <div
+                            className={`h-full transition-all rounded-full ${
+                              bag.quotaRemaining === 0
+                                ? "bg-rose-500 w-full"
+                                : bag.quotaRemaining <= 2
+                                ? "bg-amber-500"
+                                : "bg-emerald-600"
+                            }`}
+                            style={{
+                              width:
+                                bag.quotaRemaining === 0
+                                  ? "100%"
+                                  : `${Math.min(100, Math.round((bag.quotaRemaining / (bag.quotaToday || 5)) * 100))}%`,
+                            }}
+                          />
+                        </div>
+                        <div className="flex items-center justify-between text-[8px] font-bold">
+                          <span
+                            className={
+                              bag.quotaRemaining === 0
+                                ? "text-rose-600 dark:text-rose-400"
+                                : bag.quotaRemaining <= 2
+                                ? "text-amber-700 dark:text-amber-400"
+                                : "text-emerald-700 dark:text-emerald-400"
+                            }
+                          >
+                            {bag.quotaRemaining === 0
+                              ? "Habis Terjual"
+                              : bag.quotaRemaining <= 2
+                              ? "Sisa Kritis"
+                              : "Stok Aman"}
+                          </span>
+                          <span className="text-muted-foreground tabular-nums">
+                            {bag.quotaRemaining}/{bag.quotaToday}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </td>
                   <td className="p-3.5">

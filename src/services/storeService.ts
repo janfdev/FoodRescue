@@ -336,8 +336,9 @@ class StoreService {
     // Reduce bag quota
     bag.quotaRemaining -= quantity;
 
-    // Nomor pesanan unik e.g. "RB-8492"
+    // Nomor pesanan unik e.g. "RB-8492" dan 4-digit PIN e.g. "4829"
     const orderId = `RB-${Math.floor(1000 + Math.random() * 9000)}`;
+    const pickupPin = Math.floor(1000 + Math.random() * 9000).toString();
 
     const subtotalPrice = bag.discountedPrice * quantity;
     const adminFee = 1000; // Biaya layanan aplikasi Rp 1.000
@@ -368,6 +369,7 @@ class StoreService {
       paymentMethod,
       paidAt: new Date().toISOString(),
       pickupCode: orderId,
+      pickupPin,
       pickupQrData: `RESCUE_ORDER:${orderId}`,
       isChatLocked: false
     };
@@ -405,7 +407,9 @@ class StoreService {
     }
 
     const order = this.state.orders.find(
-      (o) => (o.pickupCode === code || o.id === code) && (o.status === "PAID" || o.status === "READY_FOR_PICKUP")
+      (o) =>
+        (o.pickupCode === code || o.id === code || o.pickupPin === code) &&
+        (o.status === "PAID" || o.status === "READY_FOR_PICKUP")
     );
 
     if (!order) {

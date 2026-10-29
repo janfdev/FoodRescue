@@ -16,6 +16,7 @@ import {
   Banknote,
   Building2,
   CheckCircle2,
+  ShieldCheck,
 } from "lucide-react";
 import { sendLocalNotification } from "@/lib/notification";
 
@@ -411,6 +412,19 @@ function CheckoutContent() {
               </span>
             </div>
           </Card>
+
+          {/* Garansi Proteksi Escrow 100% */}
+          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 flex items-start gap-2.5">
+            <ShieldCheck className="size-4 text-emerald-700 dark:text-emerald-400 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <span className="font-extrabold text-[11px] text-emerald-950 dark:text-emerald-200 block">
+                Garansi 100% Uang Kembali (Proteksi Escrow)
+              </span>
+              <p className="text-[10px] text-emerald-900/80 dark:text-emerald-300/80 leading-relaxed">
+                Dana Anda disimpan aman di Rekber Escrow platform dan baru dilepas ke kasir setelah makanan selesai diambil secara fisik.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Sticky Bottom Bar */}
