@@ -740,7 +740,7 @@ class StoreService {
       description: pkg.description,
       dimensions: pkg.dimensions,
     };
-    this.state.boxPackages.push(newPkg);
+    this.state.boxPackages = [...this.state.boxPackages, newPkg];
     this.persist();
     return newPkg;
   }

@@ -1,0 +1,12 @@
+{
+    "schema_version": 2,
+    "commit": "527084225ed53a1ec98c0ab9b7662047548df239",
+    "indexed_at": "2026-10-29T23:02:04Z",
+    "project": "root-food-rescue",
+    "nodes": 1647,
+    "edges": 3783,
+    "original_size": 5767168,
+    "compressed_size": 799119,
+    "compression_level": 9,
+    "reconcile_basis": "git-clean-head"
+}
