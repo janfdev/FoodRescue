@@ -25,6 +25,7 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { storeService } from "@/services/storeService";
 import { SEED_USERS } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
+import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { Store } from "@/types/domain";
 
 export default function SellerLayout({ children }: { children: React.ReactNode }) {
@@ -36,6 +37,7 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [state, setState] = useState(storeService.getState());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   const syncData = () => {
     const currentState = storeService.getState();
@@ -259,13 +261,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
           <Separator />
 
           <div className="flex items-center justify-between text-xs pt-1">
-            <Link
-              href="/account"
+            <button
+              type="button"
+              onClick={() => setIsEditProfileOpen(true)}
               className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
             >
               <Settings className="size-3.5 text-orange-600" />
               <span>Profil Gerai</span>
-            </Link>
+            </button>
 
             <Link
               href="/"
@@ -441,13 +444,14 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
                   <Wallet className="size-3.5 text-emerald-600" />
                   <span>Saldo & Rekening</span>
                 </Link>
-                <Link
-                  href="/account"
-                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setIsEditProfileOpen(true)}
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
                 >
                   <Settings className="size-3.5 text-orange-600" />
                   <span>Profil & Toko</span>
-                </Link>
+                </button>
                 <Link
                   href="/"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
@@ -498,6 +502,16 @@ export default function SellerLayout({ children }: { children: React.ReactNode }
 
         <div className="p-3 sm:p-5 md:p-6 min-w-0 flex-1">{children}</div>
       </main>
+
+      {/* Edit Profile & Store Modal for Seller */}
+      {isEditProfileOpen && (
+        <EditProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          user={sellerUser}
+          store={store}
+        />
+      )}
     </div>
   );
 }

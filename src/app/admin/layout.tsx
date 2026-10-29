@@ -26,12 +26,14 @@ import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover
 import { storeService } from "@/services/storeService";
 import { SEED_USERS } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
+import { EditProfileModal } from "@/components/account/EditProfileModal";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState(storeService.getState());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -211,6 +213,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center justify-between text-xs pt-1">
             <button
               type="button"
+              onClick={() => setIsEditProfileOpen(true)}
+              className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground font-semibold"
+            >
+              <Settings className="size-3.5 text-purple-600" />
+              <span>Profil Admin</span>
+            </button>
+            <button
+              type="button"
               onClick={handleLogout}
               className="flex items-center gap-1 text-red-600 font-bold"
             >
@@ -331,13 +341,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Users className="size-3.5 text-purple-600" />
                   <span>Manajemen User</span>
                 </Link>
-                <Link
-                  href="/account"
-                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
+                <button
+                  type="button"
+                  onClick={() => setIsEditProfileOpen(true)}
+                  className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors text-left"
                 >
                   <Settings className="size-3.5 text-purple-600" />
                   <span>Profil & Pengaturan</span>
-                </Link>
+                </button>
                 <Link
                   href="/"
                   className="flex items-center gap-2 w-full p-2 rounded-lg text-xs font-medium text-foreground hover:bg-muted transition-colors"
@@ -366,6 +377,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <main className="flex-1 min-w-0 p-3 sm:p-5 md:p-8 overflow-y-auto overflow-x-hidden">
         {children}
       </main>
+
+      {/* Edit Profile Modal for Admin */}
+      {isEditProfileOpen && (
+        <EditProfileModal
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          user={adminUser}
+        />
+      )}
     </div>
   );
 }

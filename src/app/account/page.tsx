@@ -97,9 +97,16 @@ export default function AccountPage() {
     }
   }, [session, currentUser, state.currentUser]);
 
-  const currentStore = currentUser?.storeId
-    ? stores.find((s) => s.id === currentUser.storeId)
-    : null;
+  // Jika user adalah Seller atau Admin, arahkan langsung ke dashboard masing-masing
+  useEffect(() => {
+    if (mounted && currentUser) {
+      if (currentUser.role === "seller") {
+        router.replace("/seller");
+      } else if (currentUser.role === "admin" || (currentUser.role as string) === "super_admin") {
+        router.replace("/admin");
+      }
+    }
+  }, [mounted, currentUser, router]);
 
   const myOrdersCount = currentUser
     ? orders.filter(
@@ -214,11 +221,10 @@ export default function AccountPage() {
               isOpen={isEditModalOpen}
               onClose={() => setIsEditModalOpen(false)}
               user={currentUser}
-              store={currentStore}
             />
           )}
 
-          {/* Role Portal Banners */}
+          {/* Role Portal Banners (Fallback for Mobile if not redirected) */}
           {currentUser?.role === "admin" && (
             <Link
               href="/admin"
