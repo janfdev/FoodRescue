@@ -59,7 +59,16 @@ export default function AdminKeuanganPage() {
   };
 
   const state = storeService.getState();
-  const totalEscrowHold = (state.orders || [])
+  const allOrders = state.orders || [];
+  const totalGrossMerchandiseValue = allOrders.reduce((acc, o) => acc + o.totalPrice, 0);
+  const totalPlatformEarnings = allOrders
+    .filter((o) => o.status === "COMPLETED")
+    .reduce((acc, o) => acc + o.platformFee + (o.adminFee || 0), 0);
+  const totalSellerEarningsCompleted = allOrders
+    .filter((o) => o.status === "COMPLETED")
+    .reduce((acc, o) => acc + o.sellerEarning, 0);
+
+  const totalEscrowHold = allOrders
     .filter((o) => o.status === "PAID" || o.status === "READY_FOR_PICKUP")
     .reduce((acc, o) => acc + o.totalPrice, 0);
   const totalPendingPayouts = withdrawals
@@ -106,43 +115,56 @@ export default function AdminKeuanganPage() {
       </div>
 
       {/* Liquidity Reserves & Vault Solvency Widget */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Total Dana di Escrow Vault</span>
-            <ShieldCheck className="size-4 text-emerald-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">Gross Transaksi (GMV)</span>
+            <Wallet className="size-4 text-emerald-600" />
           </div>
-          <p className="text-2xl font-black text-foreground tabular-nums">
-            Rp {totalVaultBalance.toLocaleString("id-ID")}
+          <p className="text-xl font-black text-foreground tabular-nums">
+            Rp {totalGrossMerchandiseValue.toLocaleString("id-ID")}
           </p>
-          <span className="text-[10px] text-emerald-600 font-bold block">
-            Rasio Solvabilitas 100% Terproteksi
+          <span className="text-[10px] text-muted-foreground block">
+            Nilai akumulasi seluruh pesanan
           </span>
         </Card>
 
         <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Holding Pesanan Aktif</span>
-            <Wallet className="size-4 text-purple-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">Net Revenue Platform (12%)</span>
+            <ArrowUpRight className="size-4 text-emerald-600" />
           </div>
-          <p className="text-2xl font-black text-purple-600 tabular-nums">
+          <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+            Rp {totalPlatformEarnings.toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-emerald-600 font-bold block">
+            Hak bagi hasil + biaya layanan bersih
+          </span>
+        </Card>
+
+        <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Holding Escrow Aktif</span>
+            <ShieldCheck className="size-4 text-purple-600" />
+          </div>
+          <p className="text-xl font-black text-purple-600 tabular-nums">
             Rp {totalEscrowHold.toLocaleString("id-ID")}
           </p>
           <span className="text-[10px] text-muted-foreground block">
-            Dana terkunci sampai pembeli verifikasi PIN
+            Terkunci sampai verifikasi kasir
           </span>
         </Card>
 
         <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Antrean Transfer Mitra</span>
-            <ArrowUpRight className="size-4 text-amber-600" />
+            <span className="text-[11px] font-bold uppercase tracking-wider">Antrean Payout Toko</span>
+            <Landmark className="size-4 text-amber-600" />
           </div>
-          <p className="text-2xl font-black text-amber-600 tabular-nums">
+          <p className="text-xl font-black text-amber-600 tabular-nums">
             Rp {totalPendingPayouts.toLocaleString("id-ID")}
           </p>
           <span className="text-[10px] text-muted-foreground block">
-            {withdrawals.filter((w) => w.status === "PENDING").length} permohonan belum ditransfer
+            {withdrawals.filter((w) => w.status === "PENDING").length} permohonan antre transfer
           </span>
         </Card>
       </div>

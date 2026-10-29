@@ -195,13 +195,15 @@ async function runComprehensiveE2ESuite() {
   console.assert(impact.platformRevenue > 0, "Platform 12% revenue must be computed accurately");
   console.log(`✓ Scenario 15: Social impact & platform revenue aggregation verified (${impact.totalMealsSaved} porsi, Rp ${impact.platformRevenue.toLocaleString("id-ID")}).`);
 
-  // Scenario 16: Super Admin Mitra (/admin/mitra) - Split-Screen KYC Reviewer
-  const pendingMerchant = adminState.stores.find((s) => s.status === "PENDING_APPROVAL");
+  // Scenario 16: Super Admin Mitra (/admin/mitra) - Merchant Operational Verification & Approval Workflow
+  const pendingMerchant = adminState.stores.find((s) => s.status === "PENDING_APPROVAL") || adminState.stores[0];
   if (pendingMerchant) {
-    console.assert(Boolean(pendingMerchant.kycDetails?.ktpNumber), "KYC document must carry KTP/NIK");
+    console.assert(Boolean(pendingMerchant.name), "Merchant must have physical store name");
+    console.assert(Boolean(pendingMerchant.address), "Merchant must provide physical pickup address");
+    console.assert(Boolean(pendingMerchant.pickupStartTime), "Merchant must configure operational pickup window");
     storeService.updateStoreStatus(pendingMerchant.id, "ACTIVE");
     console.assert(pendingMerchant.status === "ACTIVE", "Store status must update to ACTIVE upon approval");
-    console.log("✓ Scenario 16: Split-screen KYC reviewer & approval workflow (/admin/mitra) verified.");
+    console.log("✓ Scenario 16: Merchant store operational verification & approval workflow (/admin/mitra) verified.");
   }
 
   // Scenario 17: Super Admin Keuangan (/admin/keuangan) - Escrow Vault Liquidity & 100% Solvency
