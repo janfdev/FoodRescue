@@ -134,7 +134,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ) || navItems[0];
 
   return (
-    <div className="w-full min-h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans">
+    <div className="w-full h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans overflow-hidden">
 
       {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
       <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
@@ -238,7 +238,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* ─── SIDEBAR KIRI PERSISTEN DESKTOP (>= MD) ───────────────────────── */}
-      <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between min-h-screen">
+      <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between h-screen sticky top-0 overflow-y-auto">
         <div className="space-y-6">
           {/* Logo & Brand Header */}
           <div className="flex items-center gap-3 px-2">
@@ -379,7 +379,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* ─── KONTEN HALAMAN ROUTE MASING-MASING ────────────────────────────── */}
-      <main className="flex-1 min-w-0 p-3 sm:p-5 md:p-8 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 min-w-0 p-3 sm:p-5 md:p-8 h-full overflow-y-auto overflow-x-hidden">
         {children}
       </main>
 
