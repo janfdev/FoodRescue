@@ -185,6 +185,7 @@ class StoreService {
     let user: User | null = null;
 
     try {
+      // 1. Sinkronisasi data user dari DB
       const res = await fetch("/api/users");
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
@@ -202,8 +203,40 @@ class StoreService {
           };
         }
       }
+
+      // 2. Sinkronisasi data stores dari DB jika ada
+      const storeRes = await fetch("/api/stores");
+      const storeJson = await storeRes.json();
+      if (storeJson.success && Array.isArray(storeJson.data) && storeJson.data.length > 0) {
+        const activeStores: Store[] = storeJson.data.map((dbStore: any) => ({
+          id: dbStore.id,
+          name: dbStore.name,
+          category: dbStore.category,
+          address: dbStore.address,
+          area: dbStore.area,
+          latitude: Number(dbStore.latitude) || -6.7172,
+          longitude: Number(dbStore.longitude) || 108.5412,
+          rating: Number(dbStore.rating) || 4.8,
+          reviewCount: dbStore.reviewCount || 0,
+          isOpen: dbStore.isOpen ?? true,
+          status: dbStore.status || "ACTIVE",
+          logoUrl: dbStore.logoUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&auto=format&fit=crop&q=80",
+          imageUrl: dbStore.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=80",
+          pickupStartTime: dbStore.pickupStartTime || "19:30",
+          pickupEndTime: dbStore.pickupEndTime || "21:30",
+          boxComplianceRate: dbStore.boxComplianceRate || 95,
+          boxesSoldTotal: dbStore.boxesSoldTotal || 0,
+          currentBoxStock: dbStore.currentBoxStock || 0,
+          walletBalance: dbStore.walletBalance || 0,
+          bankAccount: dbStore.bankAccount || undefined,
+          kycDetails: dbStore.kycDetails || undefined,
+        }));
+
+        // Gabungkan atau replace stores di state
+        this.state.stores = activeStores;
+      }
     } catch (e) {
-      console.warn("Gagal lookup user dari /api/users saat login:", e);
+      console.warn("Gagal lookup user/store dari API saat login:", e);
     }
 
     if (!user) {

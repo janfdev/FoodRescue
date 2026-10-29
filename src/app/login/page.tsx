@@ -234,8 +234,8 @@ export default function LoginPage() {
                     color: "border-emerald-600/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/40",
                   },
                   {
-                    name: "Siti Rahmawati (Ruby Bakery Tuparev)",
-                    email: "ruby@rerasa.com",
+                    name: "Siti Rahmawati (Ruby Bakery - Seller)",
+                    email: "seller@rerasa.com",
                     pass: "seller123",
                     badge: "Mitra Toko",
                     color: "border-orange-500/40 hover:bg-orange-50 dark:hover:bg-orange-950/40",
@@ -252,7 +252,7 @@ export default function LoginPage() {
                     key={item.email}
                     type="button"
                     onClick={() => handleQuickAutofill(item.email, item.pass)}
-                    className={`flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-colors ${item.color}`}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border text-xs text-left transition-colors cursor-pointer ${item.color}`}
                   >
                     <div className="min-w-0 pr-2">
                       <strong className="block text-foreground truncate">{item.name}</strong>
