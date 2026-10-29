@@ -363,7 +363,7 @@ export default function AccountPage() {
           </Link>
 
           <Link
-            href="/?cart=open"
+            href="/cart"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
           >
             <div className="relative">

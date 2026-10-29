@@ -999,9 +999,8 @@ export function LandingPage() {
             <span className="text-[10px] font-extrabold">Jelajah</span>
           </Link>
 
-          <button
-            type="button"
-            onClick={openCartDrawer}
+          <Link
+            href="/cart"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
           >
             <div className="relative">
@@ -1013,7 +1012,7 @@ export function LandingPage() {
               )}
             </div>
             <span className="text-[10px] font-bold">Keranjang</span>
-          </button>
+          </Link>
 
           <Link
             href="/history"
