@@ -34,17 +34,7 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
 
   const syncServerMessages = () => {
     const serverList = storeService.getChatMessages(order.id);
-    setMessages((prev) => {
-      const pendingMessages = prev.filter(
-        (m) => m.status === "sending" || m.status === "failed"
-      );
-      const serverIds = new Set(serverList.map((m) => m.id));
-      const remainingPending = pendingMessages.filter((m) => !serverIds.has(m.id));
-      return [
-        ...serverList.map((m) => ({ ...m, status: "sent" as const })),
-        ...remainingPending,
-      ];
-    });
+    setMessages(serverList.map((m) => ({ ...m, status: "sent" as const })));
   };
 
   useEffect(() => {
@@ -61,43 +51,18 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
     if (!textToSend.trim() || isLocked) return;
 
     const trimmed = textToSend.trim();
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-    // 1. Optimistic Update
-    const optimisticMsg: ChatMessage = {
-      id: tempId,
-      orderId: order.id,
-      senderRole: currentUser.role === "seller" ? "seller" : "buyer",
-      senderName: currentUser.name,
-      senderAvatarUrl: currentUser.avatarUrl || getDefaultAvatar(currentUser.name),
-      text: trimmed,
-      timestamp: new Date().toISOString(),
-      status: "sending",
-    };
-
-    setMessages((prev) => [...prev, optimisticMsg]);
     setInputText("");
 
-    // 2. Async persistence
-    setTimeout(() => {
-      try {
-        const persisted = storeService.sendChatMessage(order.id, trimmed);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempId ? { ...persisted, status: "sent" as const } : m
-          )
-        );
-      } catch (err: unknown) {
-        if (err instanceof Error && err.message.includes("terkunci")) {
-          setIsLocked(true);
-        }
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempId ? { ...m, status: "failed" as const } : m
-          )
-        );
+    try {
+      storeService.sendChatMessage(order.id, trimmed);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("terkunci")) {
+        setIsLocked(true);
       }
-    }, 30);
+      console.error("Gagal mengirim pesan chat:", err);
+      const message = err instanceof Error ? err.message : "Gagal mengirim chat";
+      alert(message);
+    }
   };
 
   const handleSend = (e: React.FormEvent) => {

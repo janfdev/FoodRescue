@@ -49,18 +49,7 @@ function ChatContent() {
   const syncServerMessages = () => {
     if (!orderId) return;
     const serverList = storeService.getChatMessages(orderId);
-    setMessages((prev) => {
-      // Pertahankan pesan optimistik yang sedang dikirim atau gagal
-      const pendingMessages = prev.filter(
-        (m) => m.status === "sending" || m.status === "failed"
-      );
-      const serverIds = new Set(serverList.map((m) => m.id));
-      const remainingPending = pendingMessages.filter((m) => !serverIds.has(m.id));
-      return [
-        ...serverList.map((m) => ({ ...m, status: "sent" as const })),
-        ...remainingPending,
-      ];
-    });
+    setMessages(serverList.map((m) => ({ ...m, status: "sent" as const })));
   };
 
   useEffect(() => {
@@ -87,41 +76,15 @@ function ChatContent() {
     if (!textToSend.trim() || !order || order.isChatLocked) return;
 
     const trimmed = textToSend.trim();
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
-
-    // 1. Optimistic Update: langsung perbarui UI seketika tanpa menunggu I/O DB
-    const optimisticMsg: ChatMessage = {
-      id: tempId,
-      orderId: order.id,
-      senderRole: currentUser.role === "seller" ? "seller" : "buyer",
-      senderName: currentUser.name,
-      senderAvatarUrl: currentUser.avatarUrl || getDefaultAvatar(currentUser.name),
-      text: trimmed,
-      timestamp: new Date().toISOString(),
-      status: "sending",
-    };
-
-    setMessages((prev) => [...prev, optimisticMsg]);
     setInputText("");
 
-    // 2. Kirim ke persistent storage/DB secara asynchronous
-    setTimeout(() => {
-      try {
-        const persisted = storeService.sendChatMessage(order.id, trimmed);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempId ? { ...persisted, status: "sent" as const } : m
-          )
-        );
-      } catch (err: unknown) {
-        console.error("Gagal menyimpan pesan chat:", err);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === tempId ? { ...m, status: "failed" as const } : m
-          )
-        );
-      }
-    }, 30);
+    try {
+      storeService.sendChatMessage(order.id, trimmed);
+    } catch (err: unknown) {
+      console.error("Gagal menyimpan pesan chat:", err);
+      const message = err instanceof Error ? err.message : "Gagal mengirim pesan chat";
+      alert(message);
+    }
   };
 
   const handleSend = (e?: React.FormEvent) => {
