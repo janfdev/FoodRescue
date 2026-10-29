@@ -2,10 +2,13 @@ import {
   User,
   Store,
   SurpriseBag,
-  RescueBoxPackage,
   Order,
+  RescueBoxPackage,
   RescueBoxOrder,
-  Review
+  Review,
+  ChatMessage,
+  WithdrawalRequest,
+  DisputeTicket,
 } from "@/types/domain";
 
 export const SEED_USERS: User[] = [
@@ -398,8 +401,8 @@ export const SEED_ORDERS: Order[] = [
     quantity: 1,
     unitPrice: 24000,
     totalPrice: 24000,
-    platformFee: 2880,
-    sellerEarning: 21120,
+    platformFee: 2400,
+    sellerEarning: 21600,
     status: "PAID",
     paymentMethod: "QRIS",
     paidAt: "2026-10-28T18:40:00Z",
@@ -419,8 +422,8 @@ export const SEED_ORDERS: Order[] = [
     quantity: 1,
     unitPrice: 24000,
     totalPrice: 24000,
-    platformFee: 2880,
-    sellerEarning: 21120,
+    platformFee: 2400,
+    sellerEarning: 21600,
     status: "COMPLETED",
     paymentMethod: "GoPay",
     paidAt: "2026-10-25T19:00:00Z",
@@ -441,8 +444,8 @@ export const SEED_ORDERS: Order[] = [
     quantity: 1,
     unitPrice: 17000,
     totalPrice: 17000,
-    platformFee: 2040,
-    sellerEarning: 14960,
+    platformFee: 1700,
+    sellerEarning: 15300,
     status: "COMPLETED",
     paymentMethod: "QRIS",
     paidAt: "2026-10-26T19:30:00Z",
@@ -514,5 +517,67 @@ export const SEED_REVIEWS: Review[] = [
     comment: "Porsi lauk daun jatinya melimpah, ada semur daging dan perkedel. Kotak rescue box nya higienis dan tebal.",
     usedOfficialRescueBox: true,
     createdAt: "2026-10-26T21:15:00Z"
+  }
+];
+
+export const SEED_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
+  "RB-7821": [
+    {
+      id: "msg-101",
+      orderId: "RB-7821",
+      senderRole: "buyer",
+      senderName: "Budi Santoso",
+      text: "Halo kak, pesanan saya Surprise Bag Roti masih ada kan? Saya dalam perjalanan ke outlet.",
+      timestamp: "2026-10-28T18:45:00Z",
+      status: "sent"
+    },
+    {
+      id: "msg-102",
+      orderId: "RB-7821",
+      senderRole: "seller",
+      senderName: "Siti Rahmawati (Ruby Bakery)",
+      text: "Halo kak Budi! Siap kak, sudah kami kemas rapi dalam Rescue Box resmi. Tinggal tunjukkan PIN 4829 saat tiba di kasir ya.",
+      timestamp: "2026-10-28T18:46:12Z",
+      status: "sent"
+    }
+  ]
+};
+
+export const SEED_WITHDRAWALS: WithdrawalRequest[] = [
+  {
+    id: "WD-2026-001",
+    storeId: "store-ruby-bakery",
+    storeName: "Ruby Bakery & Cake",
+    amount: 150000,
+    bankName: "BCA",
+    accountNumber: "8291029381",
+    accountHolder: "Ruby Bakery & Pastry",
+    status: "PENDING",
+    requestedAt: "2026-10-29T10:30:00Z"
+  },
+  {
+    id: "WD-2026-002",
+    storeId: "store-jamblang-dul",
+    storeName: "Nasi Jamblang Mang Dul",
+    amount: 250000,
+    bankName: "Mandiri",
+    accountNumber: "1340029384912",
+    accountHolder: "H. Dulah Jamblang",
+    status: "APPROVED",
+    requestedAt: "2026-10-27T14:15:00Z",
+    processedAt: "2026-10-27T15:00:00Z"
+  }
+];
+
+export const SEED_DISPUTES: DisputeTicket[] = [
+  {
+    id: "DSP-1001",
+    orderId: "RB-6100",
+    storeName: "Ruby Bakery & Cake",
+    buyerName: "Budi Santoso",
+    reason: "Kemasan sedikit penyok saat serah terima di kasir",
+    status: "RESOLVED_DISMISSED",
+    createdAt: "2026-10-25T20:30:00Z",
+    adminNotes: "Toko memberikan bonus voucher diskon kemasan berikutnya."
   }
 ];

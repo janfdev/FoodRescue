@@ -42,8 +42,8 @@ async function runComprehensiveE2ESuite() {
   const subtotal = flashSaleBag.discountedPrice * orderQty;
   const expectedBuyerFee = 1000; // Platform app fee
   const expectedTotal = subtotal + expectedBuyerFee;
-  const expectedPlatformFee = Math.round(subtotal * 0.12); // 12% take-rate
-  const expectedSellerEarning = subtotal - expectedPlatformFee; // 88% net to seller
+  const expectedPlatformFee = Math.round(subtotal * 0.10); // 10% take-rate
+  const expectedSellerEarning = subtotal - expectedPlatformFee; // 90% net to seller
 
   const newOrder = storeService.createOrder(
     flashSaleBag.id,
@@ -61,7 +61,7 @@ async function runComprehensiveE2ESuite() {
     flashSaleBag.quotaRemaining === initialQuota - orderQty,
     "Stock quota must be atomically deducted upon reservation"
   );
-  console.log("✓ Scenario 03: Checkout financial formula verified (12% take-rate, 88% seller, Rp 1.000 escrow fee).");
+  console.log("✓ Scenario 03: Checkout financial formula verified (10% take-rate, 90% seller, Rp 1.000 escrow fee).");
 
   // Scenario 4: Buyer Digital Boarding Pass (/tickets) QR Payload & 4-Digit PIN
   console.assert(Boolean(newOrder.pickupQrData), "Order must provide dynamic QR payload");
@@ -192,7 +192,7 @@ async function runComprehensiveE2ESuite() {
   const impact = storeService.getImpactMetrics();
   console.assert(impact.totalMealsSaved > 0, "Impact metrics must calculate meals rescued");
   console.assert(impact.estimatedKgSaved > 0, "Impact metrics must calculate organic waste prevented");
-  console.assert(impact.platformRevenue > 0, "Platform 12% revenue must be computed accurately");
+  console.assert(impact.platformRevenue > 0, "Platform 10% revenue must be computed accurately");
   console.log(`✓ Scenario 15: Social impact & platform revenue aggregation verified (${impact.totalMealsSaved} porsi, Rp ${impact.platformRevenue.toLocaleString("id-ID")}).`);
 
   // Scenario 16: Super Admin Mitra (/admin/mitra) - Merchant Operational Verification & Approval Workflow

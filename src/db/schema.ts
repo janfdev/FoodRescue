@@ -223,8 +223,8 @@ export const orders = pgTable(
     subtotalPrice: integer("subtotal_price"),
     adminFee: integer("admin_fee").notNull().default(1000), // Biaya layanan aplikasi Rp 1.000
     totalPrice: integer("total_price").notNull(),
-    platformFee: integer("platform_fee").notNull(),   // 12% take-rate toko
-    sellerEarning: integer("seller_earning").notNull(), // 88%
+    platformFee: integer("platform_fee").notNull(),   // 10% take-rate toko
+    sellerEarning: integer("seller_earning").notNull(), // 90%
     status: orderStatusEnum("status").notNull().default("PENDING_PAYMENT"),
     paymentMethod: text("payment_method").notNull().default("QRIS"),
     paidAt: timestamp("paid_at"),

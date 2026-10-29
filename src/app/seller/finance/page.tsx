@@ -94,7 +94,7 @@ export default function SellerFinancePage() {
                   Rp {store.walletBalance.toLocaleString("id-ID")}
                 </p>
                 <p className="text-xs text-emerald-100/80 mt-1">
-                  Dana hasil pesanan fisik yang telah divalidasi kasir (net setelah potongan komisi 12%).
+                  Dana hasil pesanan fisik yang telah divalidasi kasir (net setelah potongan komisi 10%).
                 </p>
               </div>
 

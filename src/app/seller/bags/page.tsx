@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Clock, Plus, Upload, Image as ImageIcon, Zap, Pencil } from "lucide-react";
+import { Clock, Plus, Upload, Image as ImageIcon, Zap, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 export default function SellerBagsPage() {
@@ -388,6 +388,19 @@ export default function SellerBagsPage() {
                         <Pencil className="size-3 text-orange-600" />
                         <span>Edit</span>
                       </Link>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Yakin ingin menghapus menu "${bag.title}"?`)) {
+                            storeService.deleteSurpriseBag(bag.id);
+                          }
+                        }}
+                        className="inline-flex items-center justify-center size-8 rounded-md border border-rose-500/30 hover:bg-rose-500/10 text-rose-600 transition-colors cursor-pointer"
+                        title="Hapus Menu"
+                        aria-label="Hapus Menu"
+                      >
+                        <Trash2 className="size-3.5" />
+                      </button>
                     </div>
                   </td>
                 </tr>

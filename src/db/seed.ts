@@ -13,9 +13,8 @@ async function runSeed() {
 
     // 1. Seed Stores (Gerai Mitra Penjual dengan info operasional lengkap)
     // Field: Nama Gerai, Kawasan/Area, Alamat Fisik, Jam Mulai & Selesai Pickup
-    const sellerStores = SEED_STORES.filter((s) => s.id === "store-ruby-bakery");
-    console.log(`-> Seeding ${sellerStores.length} seller store(s) into database...`);
-    for (const s of sellerStores) {
+    console.log(`-> Seeding ${SEED_STORES.length} seller store(s) into database...`);
+    for (const s of SEED_STORES) {
       await db
         .insert(stores)
         .values({
@@ -67,7 +66,7 @@ async function runSeed() {
           },
         });
     }
-    console.log(`✓ Successfully seeded ${sellerStores.length} seller store(s).`);
+    console.log(`✓ Successfully seeded ${SEED_STORES.length} seller store(s).`);
 
     // 2. Seed Users (Admin, Buyer, Seller)
     console.log(`-> Seeding ${SEED_USERS.length} users into database...`);

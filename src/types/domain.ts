@@ -99,10 +99,10 @@ export interface Order {
   quantity: number;
   unitPrice: number;
   subtotalPrice?: number;
-  adminFee?: number; // Biaya layanan aplikasi (Rp 1.000)
+  adminFee?: number;
   totalPrice: number;
-  platformFee: number; // 12% take-rate toko
-  sellerEarning: number; // 88%
+  platformFee: number; // 10% take-rate toko
+  sellerEarning: number; // 90%
   status: OrderStatus;
   paymentMethod: "QRIS" | "GoPay" | "ShopeePay" | "BCA_VA" | "TUNAI_KASIR" | "TRANSFER_VA";
   paidAt?: string;

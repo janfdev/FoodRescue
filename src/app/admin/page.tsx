@@ -173,7 +173,7 @@ export default function AdminOverviewPage() {
         <Card className="border-border shadow-xs">
           <CardContent className="p-4 space-y-1">
             <div className="flex items-center justify-between text-muted-foreground">
-              <span className="text-xs font-bold uppercase tracking-wider">Komisi Platform (12%)</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Komisi Platform (10%)</span>
               <CreditCard className="size-4 text-purple-600" />
             </div>
             <p className="text-2xl font-black text-purple-600 tabular-nums">

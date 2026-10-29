@@ -115,7 +115,7 @@ export default function SellerPosPage() {
           <h2 className="text-xl font-black text-foreground tracking-tight flex items-center gap-2">
             <span>Kasir POS & Serah Terima</span>
             <Badge className="bg-emerald-600/15 text-emerald-800 dark:text-emerald-300 border-emerald-600/30 text-[10px] font-bold">
-              Escrow 88% Instan
+              Escrow 90% Instan
             </Badge>
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -187,7 +187,7 @@ export default function SellerPosPage() {
               <div className="p-3 bg-muted/40 rounded-xl text-xs text-muted-foreground space-y-1">
                 <p className="font-bold text-foreground">Kepatuhan Penyerahan Makanan:</p>
                 <p className="text-[11px] leading-relaxed">
-                  Kasir wajib menyerahkan makanan menggunakan wadah resmi <strong>Rescue Box</strong>. Setelah konfirmasi, dana bersih (88%) langsung masuk ke saldo dompet toko.
+                  Kasir wajib menyerahkan makanan menggunakan wadah resmi <strong>Rescue Box</strong>. Setelah konfirmasi, dana bersih (90%) langsung masuk ke saldo dompet toko.
                 </p>
               </div>
             </CardContent>
@@ -223,7 +223,7 @@ export default function SellerPosPage() {
                       <th className="p-3 px-4">Pembeli</th>
                       <th className="p-3">PIN / Order ID</th>
                       <th className="p-3">Paket</th>
-                      <th className="p-3">Hak Bersih (88%)</th>
+                      <th className="p-3">Hak Bersih (90%)</th>
                       <th className="p-3 text-right">Aksi Kasir</th>
                     </tr>
                   </thead>

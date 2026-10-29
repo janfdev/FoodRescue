@@ -55,9 +55,9 @@ export default function SellerOrdersPage() {
         return o.createdAt.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
       });
 
-      // Net pendapatan seller = 88% dari subtotal
+      // Net pendapatan seller = 90% dari subtotal
       const dayNet = dayOrders.reduce(
-        (sum, o) => sum + (o.totalPrice - (o.platformFee || Math.round(o.totalPrice * 0.12))),
+        (sum, o) => sum + (o.totalPrice - (o.platformFee || Math.round(o.totalPrice * 0.10))),
         0
       );
 
@@ -104,7 +104,7 @@ export default function SellerOrdersPage() {
                   Tren Omzet & Pendapatan Bersih (Net)
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Pendapatan toko 7 hari terakhir setelah potongan fee platform 12%
+                  Pendapatan toko 7 hari terakhir setelah potongan fee platform 10%
                 </CardDescription>
               </div>
               <Badge variant="outline" className="text-[10px] font-mono border-orange-500/40 text-orange-700">

@@ -38,6 +38,7 @@ import { cartService, CartItem } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { LandingDetailModal } from "@/components/landing/LandingDetailModal";
 import { FlashSaleSection } from "@/components/landing/FlashSaleSection";
+import { TestimonialSection } from "@/components/landing/TestimonialSection";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { useSession } from "@/lib/auth-client";
@@ -852,6 +853,9 @@ export function LandingPage() {
               </div>
             )}
           </div>
+
+          {/* 7. Ulasan & Testimoni Pelanggan (Komunitas Penyelamat Pangan) */}
+          <TestimonialSection reviews={state.reviews} stores={stores} />
         </main>
 
         {/* Dynamic Flying Dot Indicator Animation */}

@@ -19,6 +19,7 @@ import {
   Zap,
   Loader2,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 
 const CATEGORIES: StoreCategory[] = [
@@ -485,21 +486,38 @@ export default function EditSurpriseBagPage({ params }: any) {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-2">
-          <Link
-            href="/seller/bags"
-            className="px-4 py-2 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
-          >
-            Batal
-          </Link>
+        <div className="flex items-center justify-between gap-3 pt-2">
           <Button
-            type="submit"
-            disabled={isSaving || isUploading}
-            className="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs h-10 px-6 shadow-xs rounded-xl gap-2"
+            type="button"
+            variant="destructive"
+            onClick={() => {
+              if (confirm(`Yakin ingin menghapus menu "${title}" secara permanen?`)) {
+                storeService.deleteSurpriseBag(bagId);
+                router.push("/seller/bags");
+              }
+            }}
+            className="text-xs font-bold h-10 px-4 rounded-xl gap-2 cursor-pointer"
           >
-            {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-            <span>Simpan Perubahan Paket</span>
+            <Trash2 className="size-4" />
+            <span>Hapus Menu</span>
           </Button>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/seller/bags"
+              className="px-4 py-2 rounded-xl border border-border text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
+            >
+              Batal
+            </Link>
+            <Button
+              type="submit"
+              disabled={isSaving || isUploading}
+              className="bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs h-10 px-6 shadow-xs rounded-xl gap-2"
+            >
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+              <span>Simpan Perubahan Paket</span>
+            </Button>
+          </div>
         </div>
       </form>
     </div>

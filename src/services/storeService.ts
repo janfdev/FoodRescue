@@ -21,6 +21,9 @@ import {
   SEED_ORDERS,
   SEED_BOX_ORDERS,
   SEED_REVIEWS,
+  SEED_CHAT_MESSAGES,
+  SEED_WITHDRAWALS,
+  SEED_DISPUTES,
   SEED_USERS
 } from "./seedData";
 import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
@@ -48,9 +51,9 @@ export const DEFAULT_INITIAL_STATE: AppState = {
   boxPackages: SEED_BOX_PACKAGES,
   boxOrders: [],
   reviews: [],
-  chatMessages: {},
-  withdrawals: [],
-  disputes: [],
+  chatMessages: SEED_CHAT_MESSAGES,
+  withdrawals: SEED_WITHDRAWALS,
+  disputes: SEED_DISPUTES,
 };
 
 class StoreService {
@@ -141,9 +144,9 @@ class StoreService {
       boxPackages: SEED_BOX_PACKAGES,
       boxOrders: SEED_BOX_ORDERS,
       reviews: SEED_REVIEWS,
-      chatMessages: {},
-      withdrawals: [],
-      disputes: [],
+      chatMessages: SEED_CHAT_MESSAGES,
+      withdrawals: SEED_WITHDRAWALS,
+      disputes: SEED_DISPUTES,
     };
     this.persist();
   }
@@ -513,6 +516,15 @@ class StoreService {
     return updatedBag;
   }
 
+  public deleteSurpriseBag(bagId: string): void {
+    const bagIndex = this.state.surpriseBags.findIndex((b) => b.id === bagId);
+    if (bagIndex === -1) {
+      throw new Error(`Surprise bag dengan ID '${bagId}' tidak ditemukan.`);
+    }
+    this.state.surpriseBags.splice(bagIndex, 1);
+    this.persist();
+  }
+
   // =====================
   // BUYER ORDER & ESCROW
   // =====================
@@ -539,7 +551,7 @@ class StoreService {
     const subtotalPrice = bag.discountedPrice * quantity;
     const adminFee = 1000; // Biaya layanan aplikasi Rp 1.000
     const totalPrice = subtotalPrice + adminFee;
-    const platformFee = Math.round(subtotalPrice * 0.12); // 12% take-rate toko
+    const platformFee = Math.round(subtotalPrice * 0.10); // 10% take-rate toko
     const sellerEarning = subtotalPrice - platformFee;
 
     const buyerName = guestDetails?.name || this.state.currentUser?.name || "Tamu";

@@ -131,7 +131,7 @@ export default function AdminKeuanganPage() {
 
         <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Net Revenue Platform (12%)</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Net Revenue Platform (10%)</span>
             <ArrowUpRight className="size-4 text-emerald-600" />
           </div>
           <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
