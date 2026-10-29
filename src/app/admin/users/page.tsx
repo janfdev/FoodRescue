@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "@/types/domain";
-import { SEED_USERS } from "@/services/seedData";
 import { storeService } from "@/services/storeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,8 @@ import { resolveUserAvatar } from "@/lib/avatar";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AdminUsersPage() {
-  const [users, setUsers] = useState<User[]>(SEED_USERS);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<string>("all");
   const [userPage, setUserPage] = useState(1);
@@ -21,16 +21,44 @@ export default function AdminUsersPage() {
 
   const stores = storeService.getStores();
 
-  const handleToggleUserStatus = (userId: string) => {
+  const fetchUsers = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/users");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setUsers(json.data);
+      }
+    } catch (err) {
+      console.warn("Gagal memuat pengguna:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleToggleUserStatus = async (userId: string) => {
+    const targetUser = users.find((u) => u.id === userId);
+    if (!targetUser) return;
+    const nextStatus = targetUser.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+
+    // Optimistic UI update
     setUsers((prev) =>
-      prev.map((u) => {
-        if (u.id === userId) {
-          const nextStatus = u.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
-          return { ...u, status: nextStatus };
-        }
-        return u;
-      })
+      prev.map((u) => (u.id === userId ? { ...u, status: nextStatus } : u))
     );
+
+    try {
+      await fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, status: nextStatus }),
+      });
+    } catch (err) {
+      console.warn("Gagal update status user di server:", err);
+    }
   };
 
   const filteredUsers = users.filter((u) => {

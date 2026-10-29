@@ -1,5 +1,5 @@
 // Rerasa PWA Service Worker (Native)
-const CACHE_NAME = "rerasa-pwa-v2";
+const CACHE_NAME = "rerasa-pwa-v3";
 const STATIC_ASSETS = [
   "/",
   "/manifest.webmanifest",
