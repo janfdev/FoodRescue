@@ -17,6 +17,8 @@ import {
   Receipt,
   LogOut,
   ShoppingBag,
+  ShoppingCart,
+  Compass,
   User,
   ChevronRight,
   Pencil,
@@ -27,12 +29,22 @@ import { usePwa } from "@/components/pwa/PwaProvider";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { useSession, signOut } from "@/lib/auth-client";
 import { requestNotificationPermission, sendLocalNotification } from "@/lib/notification";
+import { cartService } from "@/services/cartService";
 
 export default function AccountPage() {
   const router = useRouter();
   const [state, setState] = useState(DEFAULT_INITIAL_STATE);
   const [mounted, setMounted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    setCartCount(cartService.getTotalCount());
+    const unsub = cartService.subscribe(() => {
+      setCartCount(cartService.getTotalCount());
+    });
+    return unsub;
+  }, []);
   const { isInstalled, isStandalone, openInstallGuide } = usePwa();
   const { data: session } = useSession();
   const [notifPermission, setNotifPermission] = useState<string>("default");
@@ -346,8 +358,23 @@ export default function AccountPage() {
             href="/"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ShoppingBag className="size-5" />
+            <Compass className="size-5" />
             <span className="text-[10px] font-bold">Jelajah</span>
+          </Link>
+
+          <Link
+            href="/?cart=open"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingCart className="size-5" />
+              {cartCount > 0 && (
+                <span className="size-4 rounded-full bg-amber-500 text-stone-950 text-[9px] font-black flex items-center justify-center absolute -top-1 -right-2 tabular-nums shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-bold">Keranjang</span>
           </Link>
 
           <Link

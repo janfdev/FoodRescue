@@ -15,6 +15,8 @@ import {
   Receipt,
   MessageSquare,
   ShoppingBag,
+  ShoppingCart,
+  Compass,
   User,
   CheckCircle2,
   Star,
@@ -22,6 +24,7 @@ import {
   PackageCheck,
   X,
 } from "lucide-react";
+import { cartService } from "@/services/cartService";
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -32,6 +35,15 @@ export default function HistoryPage() {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [usedRescueBox, setUsedRescueBox] = useState(true);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    setCartCount(cartService.getTotalCount());
+    const unsubCart = cartService.subscribe(() => {
+      setCartCount(cartService.getTotalCount());
+    });
+    return unsubCart;
+  }, []);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -393,8 +405,23 @@ export default function HistoryPage() {
             href="/"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ShoppingBag className="size-5" />
+            <Compass className="size-5" />
             <span className="text-[10px] font-bold">Jelajah</span>
+          </Link>
+
+          <Link
+            href="/?cart=open"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingCart className="size-5" />
+              {cartCount > 0 && (
+                <span className="size-4 rounded-full bg-amber-500 text-stone-950 text-[9px] font-black flex items-center justify-center absolute -top-1 -right-2 tabular-nums shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-bold">Keranjang</span>
           </Link>
 
           <Link

@@ -17,15 +17,29 @@ import {
   ExternalLink,
   MessageSquare,
   ShoppingBag,
+  ShoppingCart,
+  Compass,
+  Receipt,
+  User,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { cartService } from "@/services/cartService";
 
 export default function TicketsPage() {
   const router = useRouter();
   const [state, setState] = useState(storeService.getState());
   const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
   const [now, setNow] = useState<number>(0);
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    setCartCount(cartService.getTotalCount());
+    const unsubCart = cartService.subscribe(() => {
+      setCartCount(cartService.getTotalCount());
+    });
+    return unsubCart;
+  }, []);
 
   useEffect(() => {
     setNow(Date.now());
@@ -253,6 +267,49 @@ export default function TicketsPage() {
             })
           )}
         </main>
+
+        {/* Floating Bottom App Navigation */}
+        <nav className="fixed bottom-0 sm:absolute z-20 left-0 right-0 max-w-md mx-auto bg-background/95 backdrop-blur-xs border-t border-border/80 px-4 py-2 flex items-center justify-around">
+          <Link
+            href="/"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Compass className="size-5" />
+            <span className="text-[10px] font-bold">Jelajah</span>
+          </Link>
+
+          <Link
+            href="/?cart=open"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingCart className="size-5" />
+              {cartCount > 0 && (
+                <span className="size-4 rounded-full bg-amber-500 text-stone-950 text-[9px] font-black flex items-center justify-center absolute -top-1 -right-2 tabular-nums shadow-xs">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-bold">Keranjang</span>
+          </Link>
+
+          <Link
+            href="/history"
+            className="flex flex-col items-center gap-0.5 text-emerald-700 dark:text-emerald-400 relative"
+          >
+            <Receipt className="size-5" />
+            <span className="text-[10px] font-extrabold">Riwayat</span>
+            <span className="size-2 rounded-full bg-emerald-600 absolute top-0 right-3" />
+          </Link>
+
+          <Link
+            href="/account"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <User className="size-5" />
+            <span className="text-[10px] font-bold">Akun</span>
+          </Link>
+        </nav>
 
         {/* Chat Modal for Active Ticket Coordination */}
         {activeChatOrder && (

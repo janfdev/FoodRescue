@@ -11,6 +11,8 @@ import {
   Wheat,
   Apple,
   ShoppingBag,
+  ShoppingCart,
+  Compass,
   Receipt,
   ChevronDown,
   ShieldCheck,
@@ -327,7 +329,7 @@ export function LandingPage() {
                 className="relative size-8 rounded-full ring-1 ring-border/80 hover:bg-muted transition-all flex items-center justify-center text-foreground cursor-pointer"
                 aria-label="Buka Keranjang Belanja"
               >
-                <ShoppingBag className="size-4 text-emerald-700 dark:text-emerald-400" />
+                <ShoppingCart className="size-4 text-emerald-700 dark:text-emerald-400" />
                 {cartTotalCount > 0 && (
                   <span className="absolute -top-1 -right-1 size-4.5 bg-amber-500 text-stone-950 text-[10px] font-black rounded-full flex items-center justify-center tabular-nums shadow-xs">
                     {cartTotalCount}
@@ -993,7 +995,7 @@ export function LandingPage() {
             }}
             className="flex flex-col items-center gap-0.5 text-emerald-700 dark:text-emerald-400"
           >
-            <ShoppingBag className="size-5" />
+            <Compass className="size-5" />
             <span className="text-[10px] font-extrabold">Jelajah</span>
           </Link>
 
@@ -1003,7 +1005,7 @@ export function LandingPage() {
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
           >
             <div className="relative">
-              <ShoppingBag className="size-5" />
+              <ShoppingCart className="size-5" />
               {cartTotalCount > 0 && (
                 <span className="size-4 rounded-full bg-amber-500 text-stone-950 text-[9px] font-black flex items-center justify-center absolute -top-1 -right-2 tabular-nums shadow-xs">
                   {cartTotalCount}
