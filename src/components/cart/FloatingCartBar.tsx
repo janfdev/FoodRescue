@@ -45,8 +45,7 @@ export function FloatingCartBar() {
 
   const handleProceedCheckout = () => {
     if (items.length === 0) return;
-    const firstItem = items[0];
-    router.push(`/checkout?bagId=${firstItem.bag.id}&quantity=${totalCount}`);
+    router.push("/checkout?fromCart=true");
   };
 
   return (

@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { storeService } from "@/services/storeService";
+import { cartService, CartItem } from "@/services/cartService";
 import { SurpriseBag, Store, Order } from "@/types/domain";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,7 +27,9 @@ function CheckoutContent() {
   const router = useRouter();
   const bagId = searchParams.get("bagId");
   const qtyParam = searchParams.get("quantity");
+  const fromCart = searchParams.get("fromCart") === "true";
 
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [bag, setBag] = useState<SurpriseBag | null>(null);
   const [store, setStore] = useState<Store | null>(null);
   const [quantity, setQuantity] = useState(() => {
@@ -40,6 +43,7 @@ function CheckoutContent() {
   const [guestPhone, setGuestPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+  const [confirmedOrders, setConfirmedOrders] = useState<Order[]>([]);
   const currentUser = storeService.getState().currentUser;
 
   useEffect(() => {
@@ -55,7 +59,13 @@ function CheckoutContent() {
     if (savedName) setGuestName(savedName);
     if (savedPhone) setGuestPhone(savedPhone);
 
-    if (bagId) {
+    if (fromCart) {
+      const items = cartService.getItems();
+      setCartItems([...items]);
+      if (items.length > 0) {
+        setStore(items[0].store);
+      }
+    } else if (bagId) {
       const state = storeService.getState();
       const foundBag = state.surpriseBags.find((b) => b.id === bagId);
       if (foundBag) {
@@ -64,9 +74,11 @@ function CheckoutContent() {
         if (foundStore) setStore(foundStore);
       }
     }
-  }, [bagId]);
+  }, [bagId, fromCart]);
 
-  if (!bagId || !bag || !store) {
+  const isCartMode = fromCart && cartItems.length > 0;
+
+  if (!isCartMode && (!bagId || !bag || !store)) {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-6 text-center space-y-4">
@@ -79,11 +91,18 @@ function CheckoutContent() {
     );
   }
 
-  const discountPct = Math.round(((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100);
-  const subtotal = bag.discountedPrice * quantity;
+  // Calculations
+  const discountPct = bag
+    ? Math.round(((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100)
+    : 0;
+  const subtotal = isCartMode
+    ? cartItems.reduce((acc, curr) => acc + curr.bag.discountedPrice * curr.quantity, 0)
+    : (bag ? bag.discountedPrice * quantity : 0);
   const adminFee = 1000;
   const total = subtotal + adminFee;
-  const totalNormal = bag.originalPrice * quantity;
+  const totalNormal = isCartMode
+    ? cartItems.reduce((acc, curr) => acc + curr.bag.originalPrice * curr.quantity, 0)
+    : (bag ? bag.originalPrice * quantity : 0);
   const totalSavings = totalNormal - subtotal;
 
   const handleConfirmOrder = () => {
@@ -106,18 +125,36 @@ function CheckoutContent() {
 
     try {
       setIsSubmitting(true);
-      const newOrder = storeService.createOrder(
-        bag.id,
-        paymentMethod === "COD" ? "TUNAI_KASIR" : paymentMethod === "VA" ? "TRANSFER_VA" : "QRIS",
-        { name: finalName, phone: finalPhone },
-        quantity
-      );
-      setConfirmedOrder(newOrder);
+      const chosenMethod = paymentMethod === "COD" ? "TUNAI_KASIR" : paymentMethod === "VA" ? "TRANSFER_VA" : "QRIS";
 
-      // Trigger Web Push Notification
-      sendLocalNotification("Pesanan Dikonfirmasi!", {
-        body: `Pesanan ${newOrder.bagTitle} (${newOrder.id}) telah terbayar. Siap diambil di ${store.name}!`,
-      });
+      if (isCartMode) {
+        // Multi-Item Checkout dari Keranjang
+        const orders = storeService.createMultiItemOrder(
+          cartItems.map((ci) => ({ bagId: ci.bag.id, quantity: ci.quantity })),
+          chosenMethod,
+          { name: finalName, phone: finalPhone }
+        );
+        setConfirmedOrders(orders);
+        setConfirmedOrder(orders[0]);
+        cartService.clearCart();
+
+        sendLocalNotification("Pesanan Berhasil Diselamatkan!", {
+          body: `${orders.length} paket makanan surplus telah terbayar. Siap diambil di gerai!`,
+        });
+      } else if (bag) {
+        // Single Bag Checkout
+        const newOrder = storeService.createOrder(
+          bag.id,
+          chosenMethod,
+          { name: finalName, phone: finalPhone },
+          quantity
+        );
+        setConfirmedOrder(newOrder);
+
+        sendLocalNotification("Pesanan Dikonfirmasi!", {
+          body: `Pesanan ${newOrder.bagTitle} (${newOrder.id}) telah terbayar. Siap diambil di ${store?.name}!`,
+        });
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pesanan";
       alert(message);
@@ -163,15 +200,17 @@ function CheckoutContent() {
             <div className="space-y-1 text-xs pt-2 border-t border-border/60">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Mitra:</span>
-                <span className="font-bold text-foreground">{store.name}</span>
+                <span className="font-bold text-foreground">{store?.name}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Paket ({confirmedOrder.quantity} porsi):</span>
-                <span className="font-semibold text-foreground text-right">{bag.title}</span>
+                <span className="font-semibold text-foreground text-right">{confirmedOrder.bagTitle}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Jam Ambil:</span>
-                <span className="font-bold text-amber-700 dark:text-amber-400">{bag.pickupWindow}</span>
+                <span className="font-bold text-amber-700 dark:text-amber-400">
+                  {confirmedOrder.pickupWindow || bag?.pickupWindow || "19:00 - 21:00"}
+                </span>
               </div>
               <div className="flex justify-between pt-1 font-bold text-sm">
                 <span>Total Bayar:</span>
@@ -229,78 +268,104 @@ function CheckoutContent() {
         {/* Content Body */}
         <div className="p-4 space-y-4 flex-1 overflow-y-auto">
           {/* Card Rincian Paket */}
-          <Card className="p-3.5 border-border shadow-2xs space-y-3">
-            <div className="flex items-start gap-3">
-              <img
-                src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600"}
-                alt={bag.title}
-                className="size-20 rounded-xl object-cover border border-border/80 shrink-0"
-              />
-              <div className="min-w-0 flex-1 space-y-1">
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 truncate">
-                    {store.name}
+          {isCartMode ? (
+            <Card className="p-3.5 border-border shadow-2xs space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                <span className="text-xs font-bold text-foreground">Daftar Paket Keranjang</span>
+                <span className="text-[11px] text-muted-foreground font-semibold">{cartItems.length} menu</span>
+              </div>
+              <div className="space-y-2.5">
+                {cartItems.map((item) => (
+                  <div key={item.bag.id} className="flex items-center justify-between gap-2 text-xs">
+                    <div className="min-w-0 flex-1">
+                      <strong className="block truncate text-foreground text-[11px]">{item.bag.title}</strong>
+                      <span className="text-[10px] text-muted-foreground">
+                        {item.quantity} x Rp {item.bag.discountedPrice.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+                    <span className="font-bold tabular-nums text-emerald-700 dark:text-emerald-400">
+                      Rp {(item.bag.discountedPrice * item.quantity).toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : bag ? (
+            <Card className="p-3.5 border-border shadow-2xs space-y-3">
+              <div className="flex items-start gap-3">
+                <img
+                  src={bag.imageUrl || "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600"}
+                  alt={bag.title}
+                  className="size-20 rounded-xl object-cover border border-border/80 shrink-0"
+                />
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 truncate">
+                      {store?.name}
+                    </span>
+                    <Badge variant="secondary" className="text-[9px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 px-1 py-0">
+                      Hemat {discountPct}%
+                    </Badge>
+                  </div>
+                  <h3 className="font-extrabold text-xs text-foreground leading-snug line-clamp-2">
+                    {bag.title}
+                  </h3>
+                  <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Clock className="size-3 text-amber-600 shrink-0" />
+                    <span>Ambil: {bag.pickupWindow}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
+                <span className="text-muted-foreground">Harga Satuan Porsi:</span>
+                <div className="text-right">
+                  <span className="text-[10px] text-muted-foreground line-through mr-1.5 tabular-nums">
+                    Rp {bag.originalPrice.toLocaleString("id-ID")}
                   </span>
-                  <Badge variant="secondary" className="text-[9px] font-bold bg-amber-500/15 text-amber-800 dark:text-amber-400 border border-amber-500/30 px-1 py-0">
-                    Hemat {discountPct}%
-                  </Badge>
-                </div>
-                <h3 className="font-extrabold text-xs text-foreground leading-snug line-clamp-2">
-                  {bag.title}
-                </h3>
-                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Clock className="size-3 text-amber-600 shrink-0" />
-                  <span>Ambil: {bag.pickupWindow}</span>
+                  <span className="font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+                    Rp {bag.discountedPrice.toLocaleString("id-ID")}
+                  </span>
                 </div>
               </div>
-            </div>
+            </Card>
+          ) : null}
 
-            <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
-              <span className="text-muted-foreground">Harga Satuan Porsi:</span>
-              <div className="text-right">
-                <span className="text-[10px] text-muted-foreground line-through mr-1.5 tabular-nums">
-                  Rp {bag.originalPrice.toLocaleString("id-ID")}
-                </span>
-                <span className="font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
-                  Rp {bag.discountedPrice.toLocaleString("id-ID")}
-                </span>
-              </div>
-            </div>
-          </Card>
+          {/* Stepper Hitung Jumlah Kuantitas Porsi (Single bag mode only) */}
+          {!isCartMode && bag && (
+            <Card className="p-3.5 border-border shadow-2xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="font-extrabold text-xs text-foreground block">Jumlah Porsi Pesanan</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Tersedia {bag.quotaRemaining} porsi surplus hari ini
+                  </span>
+                </div>
 
-          {/* Stepper Hitung Jumlah Kuantitas Porsi */}
-          <Card className="p-3.5 border-border shadow-2xs space-y-2.5">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="font-extrabold text-xs text-foreground block">Jumlah Porsi Pesanan</span>
-                <span className="text-[11px] text-muted-foreground">
-                  Tersedia {bag.quotaRemaining} porsi surplus hari ini
-                </span>
+                <div className="flex items-center gap-2.5 bg-muted/50 p-1 rounded-xl border border-border/60">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    className="size-7 rounded-lg bg-background hover:bg-muted font-black text-xs text-foreground flex items-center justify-center transition-colors disabled:opacity-40"
+                  >
+                    -
+                  </button>
+                  <span className="font-black text-xs tabular-nums text-foreground min-w-5 text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(bag.quotaRemaining, q + 1))}
+                    disabled={quantity >= bag.quotaRemaining}
+                    className="size-7 rounded-lg bg-background hover:bg-muted font-black text-xs text-foreground flex items-center justify-center transition-colors disabled:opacity-40"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2.5 bg-muted/50 p-1 rounded-xl border border-border/60">
-                <button
-                  type="button"
-                  disabled={quantity <= 1}
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="size-7 rounded-lg bg-background hover:bg-muted font-bold text-xs flex items-center justify-center border border-border/60 disabled:opacity-40 transition-colors"
-                >
-                  -
-                </button>
-                <span className="font-black text-sm tabular-nums w-6 text-center text-foreground">
-                  {quantity}
-                </span>
-                <button
-                  type="button"
-                  disabled={quantity >= bag.quotaRemaining}
-                  onClick={() => setQuantity((q) => Math.min(bag.quotaRemaining, q + 1))}
-                  className="size-7 rounded-lg bg-background hover:bg-muted font-bold text-xs flex items-center justify-center border border-border/60 disabled:opacity-40 transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          )}
 
           {/* Pemilihan Metode Pembayaran */}
           <Card className="p-3.5 border-border shadow-2xs space-y-2.5">
@@ -401,7 +466,7 @@ function CheckoutContent() {
           <Card className="p-3.5 border-border shadow-2xs space-y-2 text-xs bg-muted/20">
             <span className="font-extrabold text-xs text-foreground block">Rincian Pembayaran</span>
             <div className="flex justify-between text-muted-foreground">
-              <span>Subtotal Makanan ({quantity} porsi)</span>
+              <span>Subtotal Makanan ({isCartMode ? `${cartItems.length} menu` : `${quantity} porsi`})</span>
               <span className="tabular-nums font-semibold text-foreground">
                 Rp {subtotal.toLocaleString("id-ID")}
               </span>

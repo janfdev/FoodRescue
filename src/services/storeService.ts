@@ -567,6 +567,9 @@ class StoreService {
       pickupCode: orderId,
       pickupPin,
       pickupQrData: `RESCUE_ORDER:${orderId}`,
+      pickupWindow: bag.pickupWindow,
+      storeAddress: store.address,
+      createdAt: new Date().toISOString(),
       isChatLocked: false
     };
 
@@ -586,6 +589,21 @@ class StoreService {
 
     this.persist();
     return newOrder;
+  }
+
+  public createMultiItemOrder(
+    items: { bagId: string; quantity: number }[],
+    paymentMethod: Order["paymentMethod"],
+    guestDetails?: { name: string; phone: string }
+  ): Order[] {
+    if (!items || items.length === 0) throw new Error("Keranjang belanja kosong");
+
+    const createdOrders: Order[] = [];
+    for (const item of items) {
+      const order = this.createOrder(item.bagId, paymentMethod, guestDetails, item.quantity);
+      createdOrders.push(order);
+    }
+    return createdOrders;
   }
 
   // =====================

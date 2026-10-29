@@ -68,10 +68,7 @@ export default function CartPage() {
 
   const handleProceedCheckout = () => {
     if (items.length === 0) return;
-    const firstItem = items[0];
-    router.push(
-      `/checkout?bagId=${firstItem.bag.id}&quantity=${firstItem.quantity}`
-    );
+    router.push("/checkout?fromCart=true");
   };
 
   return (

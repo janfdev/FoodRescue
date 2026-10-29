@@ -109,6 +109,7 @@ export interface Order {
   pickupCode: string; // Order Code e.g. "RB-8492"
   pickupPin?: string; // 4-digit PIN e.g. "4829"
   pickupQrData: string;
+  pickupWindow?: string;
   storeAddress?: string;
   createdAt?: string;
   completedAt?: string;
