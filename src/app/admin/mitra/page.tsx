@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Store } from "@/types/domain";
+import { useState, useEffect, useMemo } from "react";
+import { Store, StoreCategory } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { TableToolbar } from "@/components/common/TableToolbar";
 import {
   Dialog,
   DialogContent,
@@ -13,11 +14,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Shield, Building2, Check, X, Image as ImageIcon, Eye } from "lucide-react";
+import Link from "next/link";
+import { Shield, Building2, Check, X, Image as ImageIcon, Eye, ExternalLink } from "lucide-react";
 
 export default function AdminMitraPage() {
   const [stores, setStores] = useState<Store[]>([]);
   const [selectedKycStore, setSelectedKycStore] = useState<Store | null>(null);
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   const syncData = () => {
     setStores([...storeService.getState().stores]);
@@ -43,6 +50,19 @@ export default function AdminMitraPage() {
 
   const pendingStores = stores.filter((s) => s.status === "PENDING_APPROVAL");
 
+  const filteredStores = useMemo(() => {
+    return stores.filter((s) => {
+      const matchSearch =
+        s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.area.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (s.kycDetails?.ownerName && s.kycDetails.ownerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchCategory = categoryFilter === "ALL" || s.category === categoryFilter;
+      const matchStatus = statusFilter === "ALL" || s.status === statusFilter;
+      return matchSearch && matchCategory && matchStatus;
+    });
+  }, [stores, searchQuery, categoryFilter, statusFilter]);
+
   return (
     <div className="space-y-6 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -61,6 +81,34 @@ export default function AdminMitraPage() {
         )}
       </div>
 
+      <TableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Cari nama gerai, alamat, pemilik, atau area Cirebon..."
+        categoryFilter={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        categoryOptions={[
+          { label: "Bakery & Pastry", value: "Bakery & Pastry" },
+          { label: "Restoran & Kafe", value: "Restoran & Kafe" },
+          { label: "Hotel & Buffet", value: "Hotel & Buffet" },
+          { label: "Supermarket & Buah", value: "Supermarket & Buah" },
+          { label: "Katering", value: "Katering" },
+        ]}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        statusOptions={[
+          { label: "Menunggu Approval", value: "PENDING_APPROVAL" },
+          { label: "Aktif Beroperasi", value: "ACTIVE" },
+          { label: "Dibekukan", value: "SUSPENDED" },
+        ]}
+        totalResults={filteredStores.length}
+        onResetFilters={() => {
+          setSearchQuery("");
+          setCategoryFilter("ALL");
+          setStatusFilter("ALL");
+        }}
+      />
+
       <Card className="border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -74,7 +122,14 @@ export default function AdminMitraPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {stores.map((st) => {
+              {filteredStores.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                    Tidak ada mitra yang sesuai dengan kriteria filter.
+                  </td>
+                </tr>
+              ) : (
+                filteredStores.map((st) => {
                 const isPending = st.status === "PENDING_APPROVAL";
                 return (
                   <tr
@@ -102,16 +157,15 @@ export default function AdminMitraPage() {
                     </td>
 
                     <td className="p-4">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedKycStore(st)}
-                        className="flex items-center gap-2 p-1.5 px-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold shadow-2xs transition-colors"
-                        title="Klik untuk membuka bukti foto KTP dan Toko"
+                      <Link
+                        href={`/admin/mitra/${st.id}`}
+                        className="inline-flex items-center gap-1.5 p-1.5 px-3 rounded-xl border border-border bg-card hover:bg-muted text-foreground text-xs font-semibold shadow-2xs transition-colors hover:border-purple-500/50"
+                        title="Klik untuk membuka verifikasi bukti usaha di halaman penuh"
                       >
                         <ImageIcon className="size-3.5 text-purple-600 shrink-0" />
-                        <span>Lihat Bukti Foto</span>
-                        <Eye className="size-3 text-muted-foreground ml-1" />
-                      </button>
+                        <span>Verifikasi Bukti</span>
+                        <ExternalLink className="size-3 text-muted-foreground ml-0.5" />
+                      </Link>
                     </td>
 
                     <td className="p-4">
@@ -140,25 +194,35 @@ export default function AdminMitraPage() {
                     </td>
 
                     <td className="p-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link href={`/admin/mitra/${st.id}`}>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="size-8 p-0 rounded-lg text-foreground hover:bg-muted"
+                            title="Buka Halaman Audit Detail"
+                          >
+                            <Eye className="size-3.5" />
+                          </Button>
+                        </Link>
                         {st.status === "PENDING_APPROVAL" ? (
                           <>
                             <Button
                               size="sm"
                               onClick={() => handleApproveStore(st.id)}
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs gap-1 h-8"
+                              className="size-8 p-0 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs"
+                              title="Setujui Kemitraan (Approve)"
                             >
                               <Check className="size-3.5" />
-                              <span>Approve</span>
                             </Button>
                             <Button
                               size="sm"
                               variant="destructive"
                               onClick={() => handleRejectOrSuspendStore(st.id)}
-                              className="text-xs font-bold shadow-xs gap-1 h-8"
+                              className="size-8 p-0 rounded-lg shadow-xs"
+                              title="Tolak Kemitraan (Reject)"
                             >
                               <X className="size-3.5" />
-                              <span>Reject</span>
                             </Button>
                           </>
                         ) : st.status === "ACTIVE" ? (
@@ -166,25 +230,28 @@ export default function AdminMitraPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => handleRejectOrSuspendStore(st.id)}
-                            className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold h-8"
+                            className="text-red-600 border-red-200 hover:bg-red-50 dark:hover:bg-red-950/40 text-xs font-bold h-8 px-2.5 rounded-lg"
+                            title="Bekukan Operasional Toko"
                           >
-                            Bekukan Toko
+                            Bekukan
                           </Button>
                         ) : (
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() => handleApproveStore(st.id)}
-                            className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 text-xs font-bold h-8"
+                            className="text-emerald-700 border-emerald-300 hover:bg-emerald-50 text-xs font-bold h-8 px-2.5 rounded-lg"
+                            title="Pulihkan Mitra"
                           >
-                            Pulihkan Mitra
+                            Pulihkan
                           </Button>
                         )}
                       </div>
                     </td>
                   </tr>
                 );
-              })}
+              })
+            )}
             </tbody>
           </table>
         </div>

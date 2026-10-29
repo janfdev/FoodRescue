@@ -148,9 +148,18 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
       {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
       <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="size-8 rounded-lg bg-orange-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-            <StoreIcon className="size-4" />
-          </div>
+          <Link href="/seller/profile" className="size-8 rounded-lg overflow-hidden border border-border shrink-0 shadow-xs block">
+            <Avatar className="size-full rounded-lg">
+              <AvatarImage
+                src={resolveUserAvatar(activeStore.logoUrl || sellerUser.avatarUrl, activeStore.name)}
+                alt={activeStore.name}
+                className="object-cover size-full"
+              />
+              <AvatarFallback className="bg-orange-600 text-white font-bold text-xs rounded-lg">
+                {activeStore.name.slice(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="font-extrabold text-xs text-foreground truncate max-w-[120px]">
@@ -285,8 +294,17 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
           {/* Store Brand Header */}
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-2">
-              <Link href="/" className="size-10 rounded-xl bg-orange-600 text-white flex items-center justify-center font-black text-lg shadow-xs shrink-0">
-                <StoreIcon className="size-5" />
+              <Link href="/seller/profile" className="size-10 rounded-xl overflow-hidden border border-border shadow-xs shrink-0 block">
+                <Avatar className="size-full rounded-xl">
+                  <AvatarImage
+                    src={resolveUserAvatar(activeStore.logoUrl || sellerUser.avatarUrl, activeStore.name)}
+                    alt={activeStore.name}
+                    className="object-cover size-full"
+                  />
+                  <AvatarFallback className="bg-orange-600 text-white font-bold text-xs rounded-xl">
+                    {activeStore.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </Link>
               <div className="min-w-0 flex-1">
                 <span className="font-extrabold text-sm text-foreground block truncate">

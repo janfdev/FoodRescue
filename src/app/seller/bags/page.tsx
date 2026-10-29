@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SurpriseBag, StoreCategory } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { TableToolbar } from "@/components/common/TableToolbar";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +21,11 @@ import Link from "next/link";
 export default function SellerBagsPage() {
   const [surpriseBags, setSurpriseBags] = useState<SurpriseBag[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
 
   // Form states for new Surprise Bag
   const [title, setTitle] = useState("");
@@ -113,6 +119,22 @@ export default function SellerBagsPage() {
 
   const discountPercent = Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
 
+  const filteredBags = useMemo(() => {
+    return surpriseBags.filter((b) => {
+      const matchSearch =
+        b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.pickupWindow.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchCategory = categoryFilter === "ALL" || b.category === categoryFilter;
+      const matchStatus =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && b.isActive && b.quotaRemaining > 0) ||
+        (statusFilter === "SOLDOUT" && b.quotaRemaining === 0) ||
+        (statusFilter === "INACTIVE" && !b.isActive);
+      return matchSearch && matchCategory && matchStatus;
+    });
+  }, [surpriseBags, searchQuery, categoryFilter, statusFilter]);
+
   return (
     <div className="space-y-6 w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -125,14 +147,41 @@ export default function SellerBagsPage() {
           </p>
         </div>
 
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs gap-1.5 shadow-xs shrink-0"
-        >
-          <Plus className="size-4" />
-          <span>Terbitkan Surprise Bag Baru</span>
-        </Button>
+        <Link href="/seller/bags/new">
+          <Button className="bg-orange-600 hover:bg-orange-700 text-white font-black text-xs gap-1.5 shadow-xs cursor-pointer">
+            <Plus className="size-4" />
+            <span>Create Surprise Bag</span>
+          </Button>
+        </Link>
       </div>
+
+      <TableToolbar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Cari nama paket makanan atau deskripsi..."
+        categoryFilter={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        categoryOptions={[
+          { label: "Bakery & Pastry", value: "Bakery & Pastry" },
+          { label: "Restoran & Kafe", value: "Restoran & Kafe" },
+          { label: "Hotel & Buffet", value: "Hotel & Buffet" },
+          { label: "Supermarket & Buah", value: "Supermarket & Buah" },
+          { label: "Katering", value: "Katering" },
+        ]}
+        statusFilter={statusFilter}
+        onStatusChange={setStatusFilter}
+        statusOptions={[
+          { label: "Aktif (Tersedia)", value: "ACTIVE" },
+          { label: "Habis Terjual (Sold Out)", value: "SOLDOUT" },
+          { label: "Nonaktif", value: "INACTIVE" },
+        ]}
+        totalResults={filteredBags.length}
+        onResetFilters={() => {
+          setSearchQuery("");
+          setCategoryFilter("ALL");
+          setStatusFilter("ALL");
+        }}
+      />
 
       <Card className="border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
@@ -148,8 +197,15 @@ export default function SellerBagsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {surpriseBags.map((bag) => (
-                <tr key={bag.id} className="hover:bg-muted/20">
+              {filteredBags.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-muted-foreground">
+                    Tidak ada paket Surprise Bag yang sesuai dengan filter pencarian.
+                  </td>
+                </tr>
+              ) : (
+                filteredBags.map((bag) => (
+                  <tr key={bag.id} className="hover:bg-muted/20">
                   <td className="p-3.5 px-4">
                     <div className="flex items-center gap-3">
                       {bag.imageUrl ? (
@@ -326,7 +382,8 @@ export default function SellerBagsPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+              ))
+            )}
             </tbody>
           </table>
         </div>
@@ -532,21 +589,16 @@ export default function SellerBagsPage() {
             </div>
 
             <div className="flex justify-end gap-2 pt-3 border-t border-border">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddModalOpen(false)}
-              >
-                Batal
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold"
-              >
-                Terbitkan Paket Sekarang
-              </Button>
+              <Link href="/seller/bags/new">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold"
+                  onClick={() => setIsAddModalOpen(false)}
+                >
+                  Buka Halaman Form Create
+                </Button>
+              </Link>
             </div>
           </form>
         </DialogContent>

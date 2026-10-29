@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -28,7 +28,7 @@ import { SEED_USERS } from "@/services/seedData";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [state, setState] = useState(storeService.getState());
@@ -392,5 +392,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         />
       )}
     </div>
+  );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center bg-background">
+          <div className="size-8 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </Suspense>
   );
 }

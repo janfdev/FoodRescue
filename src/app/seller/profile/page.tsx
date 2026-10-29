@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import showToast from "@/lib/toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { Store, User } from "@/types/domain";
@@ -90,6 +90,9 @@ export default function SellerProfilePage() {
         setStoreAddress(activeStore.address);
         setPickupStartTime(activeStore.pickupStartTime || "19:00");
         setPickupEndTime(activeStore.pickupEndTime || "21:00");
+        if (activeStore.logoUrl) {
+          setAvatarUrl(activeStore.logoUrl);
+        }
       }
     };
 
@@ -103,6 +106,8 @@ export default function SellerProfilePage() {
     if (!file) return;
 
     setIsUploading(true);
+    const toastId = "upload-avatar";
+    showToast.loading("Mengunggah foto logo gerai...", { id: toastId });
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -115,10 +120,17 @@ export default function SellerProfilePage() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.url) setAvatarUrl(data.url);
+        if (data.url) {
+          setAvatarUrl(data.url);
+          showToast.success("Logo gerai berhasil diunggah!", { id: toastId });
+        }
+      } else {
+        setAvatarUrl(URL.createObjectURL(file));
+        showToast.success("Logo lokal berhasil dipilih!", { id: toastId });
       }
     } catch {
       setAvatarUrl(URL.createObjectURL(file));
+      showToast.success("Logo lokal berhasil dipilih!", { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -147,11 +159,11 @@ export default function SellerProfilePage() {
 
       setIsSaving(false);
       setSaveSuccess(true);
-      toast.success("Profil gerai dan penanggung jawab berhasil disimpan!");
+      showToast.success("Profil gerai dan penanggung jawab berhasil disimpan!");
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setIsSaving(false);
-      toast.error("Gagal menyimpan profil gerai.");
+      showToast.error("Gagal menyimpan profil gerai.");
       console.warn("Gagal menyimpan profil:", err);
     }
   };

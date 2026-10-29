@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
+import showToast from "@/lib/toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { User } from "@/types/domain";
@@ -71,6 +71,8 @@ export default function AdminProfilePage() {
     if (!file) return;
 
     setIsUploading(true);
+    const toastId = "upload-admin-avatar";
+    showToast.loading("Mengunggah foto profil admin...", { id: toastId });
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -83,10 +85,17 @@ export default function AdminProfilePage() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.url) setAvatarUrl(data.url);
+        if (data.url) {
+          setAvatarUrl(data.url);
+          showToast.success("Foto profil admin berhasil diunggah!", { id: toastId });
+        }
+      } else {
+        setAvatarUrl(URL.createObjectURL(file));
+        showToast.success("Foto lokal berhasil dipilih!", { id: toastId });
       }
     } catch {
       setAvatarUrl(URL.createObjectURL(file));
+      showToast.success("Foto lokal berhasil dipilih!", { id: toastId });
     } finally {
       setIsUploading(false);
     }
@@ -106,11 +115,11 @@ export default function AdminProfilePage() {
 
       setIsSaving(false);
       setSaveSuccess(true);
-      toast.success("Profil Admin berhasil diperbarui!");
+      showToast.success("Profil Admin berhasil diperbarui!");
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setIsSaving(false);
-      toast.error("Gagal menyimpan profil admin.");
+      showToast.error("Gagal menyimpan profil admin.");
       console.warn("Gagal update profil:", err);
     }
   };

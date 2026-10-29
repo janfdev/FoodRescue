@@ -89,14 +89,7 @@ export default function RootLayout({
               fontSize: "13px",
               fontWeight: 600,
               borderRadius: "12px",
-              border: "1px solid rgba(255,255,255,0.1)",
               padding: "10px 16px",
-            },
-            success: {
-              iconTheme: {
-                primary: "#ea580c",
-                secondary: "#fff",
-              },
             },
           }}
         />

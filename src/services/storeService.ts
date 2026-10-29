@@ -231,6 +231,7 @@ class StoreService {
         pickupStartTime?: string;
         pickupEndTime?: string;
         address?: string;
+        logoUrl?: string;
       };
     }
   ) {
@@ -258,26 +259,27 @@ class StoreService {
       }
     }
 
-    // If storeData is provided, update associated store
-    if (data.storeData) {
-      const currentU = this.state.currentUser;
-      const storeIndex = this.state.stores.findIndex(
-        (s) =>
-          (currentU?.storeId && s.id === currentU.storeId) ||
-          (currentU?.name && s.name.toLowerCase().includes(currentU.name.toLowerCase()))
-      );
-      if (storeIndex !== -1) {
-        const currentStore = this.state.stores[storeIndex];
-        this.state.stores[storeIndex] = {
-          ...currentStore,
-          ...(data.avatarUrl ? { logoUrl: data.avatarUrl } : {}),
-          ...(data.storeData.name ? { name: data.storeData.name } : {}),
-          ...(data.storeData.area ? { area: data.storeData.area } : {}),
-          ...(data.storeData.pickupStartTime ? { pickupStartTime: data.storeData.pickupStartTime } : {}),
-          ...(data.storeData.pickupEndTime ? { pickupEndTime: data.storeData.pickupEndTime } : {}),
-          ...(data.storeData.address ? { address: data.storeData.address } : {}),
-        };
-      }
+    // Always synchronize logoUrl and storeData to persistent stores
+    const currentU = this.state.currentUser;
+    const storeIndex = this.state.stores.findIndex(
+      (s) =>
+        (currentU?.storeId && s.id === currentU.storeId) ||
+        (currentU?.name && s.name.toLowerCase().includes(currentU.name.toLowerCase())) ||
+        s.id === "store-ruby-bakery"
+    );
+
+    if (storeIndex !== -1) {
+      const currentStore = this.state.stores[storeIndex];
+      const targetLogo = data.storeData?.logoUrl || data.avatarUrl || currentStore.logoUrl;
+      this.state.stores[storeIndex] = {
+        ...currentStore,
+        ...(targetLogo ? { logoUrl: targetLogo } : {}),
+        ...(data.storeData?.name ? { name: data.storeData.name } : {}),
+        ...(data.storeData?.area ? { area: data.storeData.area } : {}),
+        ...(data.storeData?.pickupStartTime ? { pickupStartTime: data.storeData.pickupStartTime } : {}),
+        ...(data.storeData?.pickupEndTime ? { pickupEndTime: data.storeData.pickupEndTime } : {}),
+        ...(data.storeData?.address ? { address: data.storeData.address } : {}),
+      };
     }
 
     this.persist();
