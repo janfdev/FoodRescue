@@ -57,6 +57,7 @@ export default function TicketsPage() {
 
   // Filter orders belonging to current user that are ready for pickup
   const activeTickets = useMemo(() => {
+    if (!currentUser) return [];
     return orders.filter((o) => {
       const matchBuyer =
         o.buyerId === currentUser.id ||

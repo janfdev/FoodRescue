@@ -41,7 +41,7 @@ export function BuyerAppView() {
   const [surpriseBags, setSurpriseBags] = useState<SurpriseBag[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [currentUser, setCurrentUser] = useState(storeService.getState().currentUser);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginName, setLoginName] = useState("");
@@ -61,8 +61,13 @@ export function BuyerAppView() {
     const state = storeService.getState();
     setStores(state.stores.filter((s) => s.status === "ACTIVE"));
     setSurpriseBags(state.surpriseBags);
-    setOrders(state.orders.filter((o) => o.buyerId === state.currentUser.id));
+    setOrders(
+      state.orders.filter((o) =>
+        state.currentUser ? o.buyerId === state.currentUser.id : false
+      )
+    );
     setCurrentUser(state.currentUser);
+    setIsLoggedIn(Boolean(state.currentUser));
   };
 
   useEffect(() => {
@@ -141,7 +146,7 @@ export function BuyerAppView() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {isLoggedIn ? (
+          {isLoggedIn && currentUser ? (
             <button
               type="button"
               onClick={() => setActiveTab("profile")}
@@ -446,37 +451,55 @@ export function BuyerAppView() {
         {/* Tab Profil Pembeli */}
         {activeTab === "profile" && (
           <div className="p-4 space-y-4">
-            <Card className="border-border shadow-xs">
-              <CardContent className="p-5 space-y-4">
-                <div className="flex items-center gap-3.5">
-                  <Avatar className="size-12">
-                    <AvatarFallback className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black text-lg border border-emerald-200 dark:border-emerald-800">
-                      {currentUser.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-extrabold text-base text-foreground truncate">
-                      {currentUser.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                      <Mail className="size-3" />
-                      <span>{currentUser.email}</span>
-                    </p>
+            {currentUser ? (
+              <Card className="border-border shadow-xs">
+                <CardContent className="p-5 space-y-4">
+                  <div className="flex items-center gap-3.5">
+                    <Avatar className="size-12">
+                      <AvatarFallback className="bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-black text-lg border border-emerald-200 dark:border-emerald-800">
+                        {currentUser.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-extrabold text-base text-foreground truncate">
+                        {currentUser.name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                        <Mail className="size-3" />
+                        <span>{currentUser.email}</span>
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border">
-                  <div className="bg-muted/40 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-muted-foreground font-semibold block">Nomor Ponsel</span>
-                    <span className="text-xs font-bold text-foreground font-mono">{currentUser.phone}</span>
+                  <div className="grid grid-cols-2 gap-2.5 pt-2 border-t border-border">
+                    <div className="bg-muted/40 p-2.5 rounded-xl">
+                      <span className="text-[10px] text-muted-foreground font-semibold block">Nomor Ponsel</span>
+                      <span className="text-xs font-bold text-foreground font-mono">{currentUser.phone}</span>
+                    </div>
+                    <div className="bg-muted/40 p-2.5 rounded-xl">
+                      <span className="text-[10px] text-muted-foreground font-semibold block">Peran Akun</span>
+                      <span className="text-xs font-bold text-emerald-600 uppercase font-mono">{currentUser.role}</span>
+                    </div>
                   </div>
-                  <div className="bg-muted/40 p-2.5 rounded-xl">
-                    <span className="text-[10px] text-muted-foreground font-semibold block">Peran Akun</span>
-                    <span className="text-xs font-bold text-emerald-600 uppercase font-mono">{currentUser.role}</span>
-                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border shadow-xs text-center p-6 space-y-3">
+                <div className="size-12 rounded-full bg-muted mx-auto flex items-center justify-center text-muted-foreground">
+                  <UserIcon className="size-6" />
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-sm text-foreground">Belum Masuk</h3>
+                  <p className="text-xs text-muted-foreground">Silakan masuk untuk mengakses fitur profil lengkap.</p>
+                </div>
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs"
+                >
+                  Masuk Sekarang
+                </Button>
+              </Card>
+            )}
 
             {/* Menu Aksi Profil */}
             <div className="bg-card border border-border rounded-2xl p-2 divide-y divide-border text-xs">
@@ -723,7 +746,7 @@ export function BuyerAppView() {
                 <Input
                   type="text"
                   required
-                  value={loginName || currentUser.name}
+                  value={loginName || (currentUser?.name ?? "")}
                   onChange={(e) => setLoginName(e.target.value)}
                   placeholder="Budi Santoso"
                   className="text-xs font-medium"
@@ -737,7 +760,7 @@ export function BuyerAppView() {
                 <Input
                   type="email"
                   required
-                  value={loginEmail || currentUser.email}
+                  value={loginEmail || (currentUser?.email ?? "")}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   placeholder="budi.cirebon@gmail.com"
                   className="text-xs font-medium"

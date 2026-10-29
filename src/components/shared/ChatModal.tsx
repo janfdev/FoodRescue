@@ -18,7 +18,15 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
   const [isLocked, setIsLocked] = useState(order.isChatLocked);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const currentUser = storeService.getState().currentUser;
+  const currentUser = storeService.getState().currentUser || {
+    id: "guest",
+    name: "Tamu",
+    email: "tamu@foodrescue.id",
+    phone: "081234567890",
+    role: "buyer" as const,
+    avatarUrl: getDefaultAvatar("Tamu"),
+    status: "ACTIVE" as const,
+  };
   const partnerName = currentUser.role === "buyer" ? order.storeName : order.buyerName;
   const partnerAvatarUrl = useMemo(() => {
     return resolveUserAvatar(undefined, partnerName);

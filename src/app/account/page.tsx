@@ -75,7 +75,7 @@ export default function AccountPage() {
   }, []);
 
   const { currentUser: simulatedUser, orders, stores } = state;
-  const currentUser: UserType = session?.user
+  const currentUser: UserType | null = session?.user
     ? {
         id: session.user.id,
         name: session.user.name || "Pengguna",
@@ -92,20 +92,23 @@ export default function AccountPage() {
     : simulatedUser;
 
   useEffect(() => {
-    if (session?.user && session.user.id !== state.currentUser.id) {
+    if (session?.user && currentUser && (!state.currentUser || session.user.id !== state.currentUser.id)) {
       storeService.setCurrentUser(currentUser);
     }
-  }, [session, currentUser, state.currentUser.id]);
-  const currentStore = currentUser.storeId
+  }, [session, currentUser, state.currentUser]);
+
+  const currentStore = currentUser?.storeId
     ? stores.find((s) => s.id === currentUser.storeId)
     : null;
 
-  const myOrdersCount = orders.filter(
-    (o) =>
-      o.buyerId === currentUser.id ||
-      o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
-      o.buyerPhone === currentUser.phone
-  ).length;
+  const myOrdersCount = currentUser
+    ? orders.filter(
+        (o) =>
+          o.buyerId === currentUser.id ||
+          o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
+          o.buyerPhone === currentUser.phone
+      ).length
+    : 0;
 
   const handleLogout = async () => {
     try {
@@ -113,7 +116,7 @@ export default function AccountPage() {
     } catch (err) {
       console.warn("Logout error:", err);
     }
-    storeService.resetToDefault();
+    storeService.logoutUser();
     router.push("/login");
   };
 
@@ -136,63 +139,87 @@ export default function AccountPage() {
         {/* Content Body */}
         <main className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* User Profile Card */}
-          <Card className="p-4 border-border/80 rounded-2xl shadow-2xs space-y-3 bg-card">
-            <div className="flex items-center gap-3">
-              <Avatar className="size-14">
-                <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
-                <AvatarFallback className="bg-emerald-700 text-white font-black text-sm">
-                  {currentUser.name.slice(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-
-              <div className="min-w-0 flex-1 space-y-0.5">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-black text-sm text-foreground truncate">
-                    {currentUser.name}
-                  </h2>
-                </div>
-                <span className="text-xs text-muted-foreground block truncate">
-                  {currentUser.email}
-                </span>
-                <span className="text-[11px] text-muted-foreground font-mono block">
-                  {currentUser.phone}
-                </span>
+          {!currentUser ? (
+            <Card className="p-5 border-border/80 rounded-2xl shadow-2xs space-y-3.5 bg-card text-center flex flex-col items-center py-6">
+              <div className="size-14 rounded-full bg-muted/80 flex items-center justify-center text-muted-foreground border border-border">
+                <User className="size-7 text-muted-foreground" />
               </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
-              <div className="flex items-center gap-1.5">
-                <span className="text-muted-foreground">Peran:</span>
-                <Badge
-                  variant="secondary"
-                  className="font-bold text-[10px] capitalize bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20"
-                >
-                  {currentUser.role.replace("_", " ")}
-                </Badge>
+              <div className="space-y-1 max-w-xs">
+                <h2 className="font-black text-sm text-foreground">
+                  Pengunjung / Belum Masuk
+                </h2>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Masuk untuk melihat riwayat transaksi, tiket penjemputan, dan preferensi akun Anda.
+                </p>
               </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsEditModalOpen(true)}
-                className="h-7 text-[11px] font-bold rounded-lg gap-1.5 border-emerald-600/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/10 cursor-pointer"
+              <Link
+                href="/login"
+                className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs h-9 px-5 shadow-xs inline-flex items-center justify-center transition-colors"
               >
-                <Pencil className="size-3" />
-                <span>Ubah Profil</span>
-              </Button>
-            </div>
-          </Card>
+                Masuk ke Akun
+              </Link>
+            </Card>
+          ) : (
+            <Card className="p-4 border-border/80 rounded-2xl shadow-2xs space-y-3 bg-card">
+              <div className="flex items-center gap-3">
+                <Avatar className="size-14">
+                  <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
+                  <AvatarFallback className="bg-emerald-700 text-white font-black text-sm">
+                    {currentUser.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-black text-sm text-foreground truncate">
+                      {currentUser.name}
+                    </h2>
+                  </div>
+                  <span className="text-xs text-muted-foreground block truncate">
+                    {currentUser.email}
+                  </span>
+                  <span className="text-[11px] text-muted-foreground font-mono block">
+                    {currentUser.phone}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-muted-foreground">Peran:</span>
+                  <Badge
+                    variant="secondary"
+                    className="font-bold text-[10px] capitalize bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20"
+                  >
+                    {currentUser.role.replace("_", " ")}
+                  </Badge>
+                </div>
+
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditModalOpen(true)}
+                  className="h-7 text-[11px] font-bold rounded-lg gap-1.5 border-emerald-600/30 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-500/10 cursor-pointer"
+                >
+                  <Pencil className="size-3" />
+                  <span>Ubah Profil</span>
+                </Button>
+              </div>
+            </Card>
+          )}
 
           {/* Edit Profile Modal */}
-          <EditProfileModal
-            isOpen={isEditModalOpen}
-            onClose={() => setIsEditModalOpen(false)}
-            user={currentUser}
-            store={currentStore}
-          />
+          {currentUser && (
+            <EditProfileModal
+              isOpen={isEditModalOpen}
+              onClose={() => setIsEditModalOpen(false)}
+              user={currentUser}
+              store={currentStore}
+            />
+          )}
 
           {/* Role Portal Banners */}
-          {currentUser.role === "admin" && (
+          {currentUser?.role === "admin" && (
             <Link
               href="/admin"
               className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-purple-500/15 via-purple-500/10 to-transparent border border-purple-500/30 hover:border-purple-500/50 transition-all text-xs"
@@ -214,7 +241,7 @@ export default function AccountPage() {
             </Link>
           )}
 
-          {currentUser.role === "seller" && (
+          {currentUser?.role === "seller" && (
             <Link
               href="/seller"
               className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-orange-500/15 via-orange-500/10 to-transparent border border-orange-500/30 hover:border-orange-500/50 transition-all text-xs"
@@ -325,7 +352,7 @@ export default function AccountPage() {
               </div>
             </Link>
 
-            {session?.user ? (
+            {currentUser ? (
               <button
                 type="button"
                 onClick={handleLogout}

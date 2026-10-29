@@ -27,7 +27,7 @@ import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
 const STORAGE_KEY = "sisarasa_app_state_clean_v1";
 
 interface AppState {
-  currentUser: User;
+  currentUser: User | null;
   stores: Store[];
   surpriseBags: SurpriseBag[];
   orders: Order[];
@@ -40,15 +40,7 @@ interface AppState {
 }
 
 export const DEFAULT_INITIAL_STATE: AppState = {
-  currentUser: {
-    id: "user-buyer-1",
-    name: "Pengguna",
-    email: "user@foodrescue.id",
-    phone: "081234567890",
-    role: "buyer",
-    avatarUrl: getDefaultAvatar("Pengguna"),
-    status: "ACTIVE",
-  },
+  currentUser: null,
   stores: [],
   surpriseBags: [],
   orders: [],
@@ -65,21 +57,35 @@ class StoreService {
   private listeners: Set<() => void> = new Set();
 
   constructor() {
-    this.state = DEFAULT_INITIAL_STATE;
+    this.state = { ...DEFAULT_INITIAL_STATE };
     if (typeof window !== "undefined") {
       try {
+        const cachedAuth = localStorage.getItem("foodrescue_auth_user");
         const cached = localStorage.getItem(STORAGE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          // Migrasi avatar jika masih menggunakan format lama atau kosong
-          if (parsed?.currentUser) {
-            parsed.currentUser.avatarUrl = resolveUserAvatar(
-              parsed.currentUser.avatarUrl,
-              parsed.currentUser.name
-            );
+          // Default awal: user TIDAK login otomatis. Hanya login jika ada data auth valid di localStorage
+          if (cachedAuth) {
+            try {
+              const authUser = JSON.parse(cachedAuth);
+              if (authUser && authUser.id) {
+                authUser.avatarUrl = resolveUserAvatar(
+                  authUser.avatarUrl,
+                  authUser.name
+                );
+                parsed.currentUser = authUser;
+              } else {
+                parsed.currentUser = null;
+              }
+            } catch {
+              parsed.currentUser = null;
+            }
+          } else {
+            parsed.currentUser = null;
           }
           this.state = parsed;
         } else {
+          this.state = { ...DEFAULT_INITIAL_STATE };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
         }
       } catch (e) {
@@ -126,7 +132,7 @@ class StoreService {
 
   public loadSeedData() {
     this.state = {
-      currentUser: SEED_USERS[0],
+      currentUser: null,
       stores: SEED_STORES,
       surpriseBags: SEED_SURPRISE_BAGS,
       orders: SEED_ORDERS,
@@ -195,7 +201,7 @@ class StoreService {
   }
 
   public logoutUser() {
-    this.state.currentUser = SEED_USERS[0];
+    this.state.currentUser = null;
     if (typeof window !== "undefined") {
       localStorage.removeItem("foodrescue_auth_user");
     }
@@ -218,9 +224,10 @@ class StoreService {
       };
     }
   ) {
-    if (this.state.currentUser.id === userId) {
+    if (this.state.currentUser && this.state.currentUser.id === userId) {
+      const current = this.state.currentUser;
       this.state.currentUser = {
-        ...this.state.currentUser,
+        ...current,
         ...(data.name ? { name: data.name } : {}),
         ...(data.phone ? { phone: data.phone } : {}),
         ...(data.avatarUrl ? { avatarUrl: data.avatarUrl } : {}),
@@ -232,10 +239,11 @@ class StoreService {
 
     // If storeData is provided, update associated store
     if (data.storeData) {
+      const currentU = this.state.currentUser;
       const storeIndex = this.state.stores.findIndex(
         (s) =>
-          (this.state.currentUser.storeId && s.id === this.state.currentUser.storeId) ||
-          s.name.toLowerCase().includes(this.state.currentUser.name.toLowerCase())
+          (currentU?.storeId && s.id === currentU.storeId) ||
+          (currentU?.name && s.name.toLowerCase().includes(currentU.name.toLowerCase()))
       );
       if (storeIndex !== -1) {
         const currentStore = this.state.stores[storeIndex];
@@ -346,12 +354,12 @@ class StoreService {
     const platformFee = Math.round(subtotalPrice * 0.12); // 12% take-rate toko
     const sellerEarning = subtotalPrice - platformFee;
 
-    const buyerName = guestDetails?.name || this.state.currentUser.name;
-    const buyerPhone = guestDetails?.phone || this.state.currentUser.phone;
+    const buyerName = guestDetails?.name || this.state.currentUser?.name || "Tamu";
+    const buyerPhone = guestDetails?.phone || this.state.currentUser?.phone || "081234567890";
 
     const newOrder: Order = {
       id: orderId,
-      buyerId: guestDetails ? `guest-${Date.now()}` : this.state.currentUser.id,
+      buyerId: guestDetails ? `guest-${Date.now()}` : (this.state.currentUser?.id || `guest-${Date.now()}`),
       buyerName,
       buyerPhone,
       storeId: store.id,
@@ -480,14 +488,15 @@ class StoreService {
       }
     }
 
+    const currentU = this.state.currentUser;
     const newMessage: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       orderId,
-      senderRole: this.state.currentUser.role === "seller" ? "seller" : "buyer",
-      senderName: this.state.currentUser.name,
+      senderRole: currentU?.role === "seller" ? "seller" : "buyer",
+      senderName: currentU?.name || "Tamu",
       senderAvatarUrl:
-        this.state.currentUser.avatarUrl ||
-        getDefaultAvatar(this.state.currentUser.name),
+        currentU?.avatarUrl ||
+        getDefaultAvatar(currentU?.name || "Tamu"),
       text,
       timestamp: new Date().toISOString()
     };
@@ -543,8 +552,8 @@ class StoreService {
       id: `rev-${Date.now()}`,
       orderId,
       storeId: order.storeId,
-      buyerId: this.state.currentUser.id,
-      buyerName: this.state.currentUser.name,
+      buyerId: this.state.currentUser?.id || order.buyerId || "guest-1",
+      buyerName: this.state.currentUser?.name || order.buyerName || "Pelanggan Rerasa",
       rating,
       comment,
       usedOfficialRescueBox,

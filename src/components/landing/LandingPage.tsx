@@ -112,19 +112,19 @@ export function LandingPage() {
   const bags = dbBags;
 
   // Resolusi Pengguna: Prioritas Session Login Riil (Google/Auth)
-  const currentUser: UserType = useMemo(() => {
+  const currentUser: UserType | null = useMemo(() => {
     if (session?.user) {
       return {
         id: session.user.id,
         name: session.user.name || "Pengguna",
         email: session.user.email || "",
-        phone: ((session.user as Record<string, unknown>).phone as string) || state.currentUser.phone || "",
-        role: (((session.user as Record<string, unknown>).role as UserType["role"])) || state.currentUser.role || "buyer",
+        phone: ((session.user as Record<string, unknown>).phone as string) || "",
+        role: (((session.user as Record<string, unknown>).role as UserType["role"])) || "buyer",
         avatarUrl:
           session.user.image ||
           ((session.user as Record<string, unknown>).avatarUrl as string) ||
           resolveUserAvatar(undefined, session.user.name || session.user.email),
-        storeId: ((session.user as Record<string, unknown>).storeId as string) || state.currentUser.storeId,
+        storeId: ((session.user as Record<string, unknown>).storeId as string) || undefined,
         status: "ACTIVE",
       };
     }
@@ -133,13 +133,14 @@ export function LandingPage() {
 
   // Sinkronisasi session ke storeService untuk flow transaksi
   useEffect(() => {
-    if (session?.user && session.user.id !== state.currentUser.id) {
+    if (session?.user && currentUser && (!state.currentUser || session.user.id !== state.currentUser.id)) {
       storeService.setCurrentUser(currentUser);
     }
-  }, [session, currentUser, state.currentUser.id]);
+  }, [session, currentUser, state.currentUser]);
 
   // Active user orders
   const userOrders = useMemo(() => {
+    if (!currentUser) return [];
     return orders.filter(
       (o) =>
         o.buyerId === currentUser.id ||
@@ -337,89 +338,100 @@ export function LandingPage() {
                 )}
               </button>
 
-              {/* Profile Popover with Avatar */}
-              <Popover>
-                <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted cursor-pointer">
-                  <Avatar className="size-full">
-                    <AvatarImage
-                      src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)}
-                      alt={currentUser.name}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="text-[11px] font-black bg-emerald-700 text-white">
-                      {currentUser.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </PopoverTrigger>
-                <PopoverContent align="end" className="w-64 p-3 space-y-3">
-                  <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                    <Avatar className="size-10 shrink-0">
-                      <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
-                      <AvatarFallback className="text-xs font-bold bg-emerald-700 text-white">
+              {/* Profile Avatar Popover or Login Button */}
+              {currentUser ? (
+                <Popover>
+                  <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted cursor-pointer">
+                    <Avatar className="size-full">
+                      <AvatarImage
+                        src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)}
+                        alt={currentUser.name}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="text-[11px] font-black bg-emerald-700 text-white">
                         {currentUser.name.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
-                      <span className="font-extrabold text-xs block truncate text-foreground">
-                        {currentUser.name}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground block truncate">
-                        {currentUser.email}
-                      </span>
-                      <Badge variant="secondary" className="text-[9px] font-bold mt-0.5 px-1.5 py-0 capitalize">
-                        {currentUser.role.replace("_", " ")}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 text-xs">
-                    {(currentUser.role === "admin" || (currentUser.role as string) === "super_admin") && (
-                      <Link
-                        href="/admin"
-                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
-                      >
-                        <ShieldCheck className="size-3.5 text-emerald-700" />
-                        <span>Masuk Command Center Admin</span>
-                      </Link>
-                    )}
-
-                    {currentUser.role === "seller" && (
-                      <Link
-                        href="/seller"
-                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
-                      >
-                        <Building2 className="size-3.5 text-emerald-700" />
-                        <span>Masuk Portal Mitra Kuliner</span>
-                      </Link>
-                    )}
-
-                    <Link
-                      href="/history"
-                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Receipt className="size-3.5 text-emerald-700" />
-                        <span>Riwayat Pesanan Saya</span>
-                      </span>
-                      {activeTicketsCount > 0 && (
-                        <Badge className="size-4 p-0 flex items-center justify-center bg-emerald-700 text-white text-[9px] font-bold rounded-full">
-                          {activeTicketsCount}
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-64 p-3 space-y-3">
+                    <div className="flex items-center gap-2.5 pb-2 border-b border-border">
+                      <Avatar className="size-10 shrink-0">
+                        <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
+                        <AvatarFallback className="text-xs font-bold bg-emerald-700 text-white">
+                          {currentUser.name.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <span className="font-extrabold text-xs block truncate text-foreground">
+                          {currentUser.name}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block truncate">
+                          {currentUser.email}
+                        </span>
+                        <Badge variant="secondary" className="text-[9px] font-bold mt-0.5 px-1.5 py-0 capitalize">
+                          {currentUser.role.replace("_", " ")}
                         </Badge>
-                      )}
-                    </Link>
-                  </div>
+                      </div>
+                    </div>
 
-                  <div className="pt-2 border-t border-border flex flex-col gap-1">
-                    <Link
-                      href="/account"
-                      className="w-full flex items-center justify-center gap-1.5 text-xs text-foreground hover:bg-muted font-semibold py-1.5 rounded-lg transition-colors"
-                    >
-                      <User className="size-3.5 text-muted-foreground" />
-                      <span>Profil & Pengaturan Akun</span>
-                    </Link>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                    <div className="space-y-1 text-xs">
+                      {(currentUser.role === "admin" || (currentUser.role as string) === "super_admin") && (
+                        <Link
+                          href="/admin"
+                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
+                        >
+                          <ShieldCheck className="size-3.5 text-emerald-700" />
+                          <span>Masuk Command Center Admin</span>
+                        </Link>
+                      )}
+
+                      {currentUser.role === "seller" && (
+                        <Link
+                          href="/seller"
+                          className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
+                        >
+                          <Building2 className="size-3.5 text-emerald-700" />
+                          <span>Masuk Portal Mitra Kuliner</span>
+                        </Link>
+                      )}
+
+                      <Link
+                        href="/history"
+                        className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Receipt className="size-3.5 text-emerald-700" />
+                          <span>Riwayat Pesanan Saya</span>
+                        </span>
+                        {activeTicketsCount > 0 && (
+                          <Badge className="size-4 p-0 flex items-center justify-center bg-emerald-700 text-white text-[9px] font-bold rounded-full">
+                            {activeTicketsCount}
+                          </Badge>
+                        )}
+                      </Link>
+                    </div>
+
+                    <div className="pt-2 border-t border-border flex flex-col gap-1">
+                      <Link
+                        href="/account"
+                        className="w-full flex items-center justify-center gap-1.5 text-xs text-foreground hover:bg-muted font-semibold py-1.5 rounded-lg transition-colors"
+                      >
+                        <User className="size-3.5 text-muted-foreground" />
+                        <span>Profil & Pengaturan Akun</span>
+                      </Link>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Link
+                  href="/login"
+                  className="h-8 px-3 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs transition-colors"
+                  aria-label="Masuk ke Akun"
+                >
+                  <User className="size-3.5" />
+                  <span>Masuk</span>
+                </Link>
+              )}
             </div>
           </div>
 

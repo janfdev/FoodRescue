@@ -55,11 +55,12 @@ export default function HistoryPage() {
   const { orders, reviews, currentUser } = state;
 
   const userOrders = useMemo(() => {
+    if (!currentUser) return [];
     return orders.filter(
       (o) =>
         o.buyerId === currentUser.id ||
         o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
-        o.buyerPhone === currentUser.phone
+        (currentUser.phone && o.buyerPhone === currentUser.phone)
     );
   }, [orders, currentUser]);
 

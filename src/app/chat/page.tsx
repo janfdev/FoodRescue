@@ -73,7 +73,15 @@ function ChatContent() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const currentUser = state.currentUser;
+  const currentUser = state.currentUser || {
+    id: "guest",
+    name: "Tamu",
+    email: "tamu@foodrescue.id",
+    phone: "081234567890",
+    role: "buyer" as const,
+    avatarUrl: getDefaultAvatar("Tamu"),
+    status: "ACTIVE" as const,
+  };
 
   const executeSendMessage = (textToSend: string) => {
     if (!textToSend.trim() || !order || order.isChatLocked) return;

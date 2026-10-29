@@ -250,11 +250,11 @@ async function runComprehensiveE2ESuite() {
 
   // Scenario 21: Super Admin Users (/admin/users) - Multi-Role Switcher & Verification
   storeService.switchRole("buyer");
-  console.assert(storeService.getState().currentUser.role === "buyer", "Buyer role must be switchable");
+  console.assert(storeService.getState().currentUser?.role === "buyer", "Buyer role must be switchable");
   storeService.switchRole("seller");
-  console.assert(storeService.getState().currentUser.role === "seller", "Seller role must be switchable");
+  console.assert(storeService.getState().currentUser?.role === "seller", "Seller role must be switchable");
   storeService.switchRole("admin");
-  console.assert(storeService.getState().currentUser.role === "admin", "Admin role must be switchable");
+  console.assert(storeService.getState().currentUser?.role === "admin", "Admin role must be switchable");
   console.log("✓ Scenario 21: Multi-role user role system (Buyer, Seller, Admin) verified.");
 
   // ==========================================================================
