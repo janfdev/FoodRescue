@@ -5,13 +5,9 @@ import {
   History,
   Shield,
   Search,
-  Filter,
-  CheckCircle2,
-  AlertTriangle,
   Clock,
   User,
   Store,
-  CreditCard,
   RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -19,63 +15,47 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
-interface AuditLog {
-  id: string;
-  actorId: string;
-  actorName: string;
-  actorRole: "buyer" | "seller" | "admin" | "super_admin" | "system";
-  action: string;
-  entityType: string;
-  entityId: string;
-  details?: string;
-  ipAddress?: string;
-  createdAt: string;
-}
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { useAuditLogs } from "@/hooks/use-queries";
 
 export default function AdminAuditLogsPage() {
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
 
-  const fetchLogs = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/admin/audit-logs");
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          setLogs(json.data);
-        }
-      }
-    } catch (err) {
-      console.error("Gagal memuat audit log:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Debounce search input for performance
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset to page 1 on new search
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
-      const matchesSearch =
-        (log.actorName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (log.action || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (log.details || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (log.entityId || "").toLowerCase().includes(searchQuery.toLowerCase());
+  const { logs, pagination, isLoading, isValidating, mutate } = useAuditLogs({
+    page,
+    limit: pageSize,
+    search: debouncedSearch,
+    role: selectedRole === "all" ? undefined : selectedRole,
+  });
 
-      const matchesRole =
-        selectedRole === "all" ||
-        log.actorRole === selectedRole ||
-        (selectedRole === "admin" && (log.actorRole as string) === "super_admin");
+  const totalPages = pagination?.totalPages || 1;
+  const totalCount = pagination?.total || 0;
 
-      return matchesSearch && matchesRole;
-    });
-  }, [logs, searchQuery, selectedRole]);
+  const handleRoleChange = (roleId: string) => {
+    setSelectedRole(roleId);
+    setPage(1);
+  };
 
   const getActionBadge = (action: string) => {
     switch (action) {
@@ -131,6 +111,26 @@ export default function AdminAuditLogsPage() {
     }
   };
 
+  // Generate pagination page numbers
+  const pageNumbers = useMemo(() => {
+    const pages: (number | "ellipsis")[] = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (page > 3) pages.push("ellipsis");
+      const start = Math.max(2, page - 1);
+      const end = Math.min(totalPages - 1, page + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (page < totalPages - 2) pages.push("ellipsis");
+      pages.push(totalPages);
+    }
+    return pages;
+  }, [page, totalPages]);
+
+  const startRecord = totalCount > 0 ? (page - 1) * pageSize + 1 : 0;
+  const endRecord = Math.min(page * pageSize, totalCount);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -152,11 +152,11 @@ export default function AdminAuditLogsPage() {
         <Button
           variant="outline"
           size="sm"
-          onClick={fetchLogs}
-          disabled={isLoading}
+          onClick={() => mutate()}
+          disabled={isLoading || isValidating}
           className="gap-2 self-start sm:self-auto cursor-pointer"
         >
-          <RefreshCw className={`size-3.5 ${isLoading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`size-3.5 ${isValidating ? "animate-spin" : ""}`} />
           Segarkan Data
         </Button>
       </div>
@@ -186,7 +186,7 @@ export default function AdminAuditLogsPage() {
               key={item.id}
               variant={selectedRole === item.id ? "default" : "outline"}
               size="sm"
-              onClick={() => setSelectedRole(item.id)}
+              onClick={() => handleRoleChange(item.id)}
               className="text-xs h-9 cursor-pointer shrink-0"
             >
               {item.label}
@@ -198,25 +198,30 @@ export default function AdminAuditLogsPage() {
       {/* Table Card */}
       <Card className="border border-border shadow-xs overflow-hidden">
         <CardHeader className="p-4 sm:p-5 bg-card border-b border-border">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
               <CardTitle className="text-sm font-bold">Histori Aktivitas Platform</CardTitle>
-              <CardDescription className="text-xs mt-0.5">
-                Menampilkan {filteredLogs.length} dari total {logs.length} catatan aktivitas
+              <CardDescription className="text-xs mt-0.5 tabular-nums">
+                Menampilkan {startRecord}-{endRecord} dari total {totalCount} catatan aktivitas
               </CardDescription>
             </div>
-            <Badge variant="outline" className="tabular-nums font-mono text-xs">
-              Total: {logs.length}
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="tabular-nums font-mono text-xs">
+                Halaman {page} dari {totalPages}
+              </Badge>
+              <Badge variant="outline" className="tabular-nums font-mono text-xs">
+                Total: {totalCount}
+              </Badge>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          {isLoading ? (
+          {isLoading && logs.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
               <RefreshCw className="size-6 animate-spin text-purple-600" />
               <span className="text-xs font-medium">Memuat catatan audit...</span>
             </div>
-          ) : filteredLogs.length === 0 ? (
+          ) : logs.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
               <Clock className="size-8 mx-auto text-muted-foreground/50 mb-2" />
               <p className="text-sm font-medium">Tidak ada catatan audit yang cocok.</p>
@@ -236,7 +241,7 @@ export default function AdminAuditLogsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {filteredLogs.map((log) => {
+                  {logs.map((log) => {
                     const dateObj = new Date(log.createdAt);
                     const formattedDate = !isNaN(dateObj.getTime())
                       ? dateObj.toLocaleString("id-ID", {
@@ -290,6 +295,73 @@ export default function AdminAuditLogsPage() {
                   })}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Shadcn Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-border bg-card flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-xs text-muted-foreground tabular-nums order-2 sm:order-1">
+                Menampilkan halaman <span className="font-bold text-foreground">{page}</span> dari{" "}
+                <span className="font-bold text-foreground">{totalPages}</span>
+              </div>
+              <Pagination className="mx-0 w-auto justify-end order-1 sm:order-2">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      text="Sebelumnya"
+                      aria-disabled={page <= 1}
+                      className={page <= 1 ? "pointer-events-none opacity-40" : "cursor-pointer"}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page > 1) setPage(page - 1);
+                      }}
+                    />
+                  </PaginationItem>
+
+                  {pageNumbers.map((p, idx) => {
+                    if (p === "ellipsis") {
+                      return (
+                        <PaginationItem key={`ellipsis-${idx}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      );
+                    }
+                    const isCurrent = p === page;
+                    return (
+                      <PaginationItem key={p}>
+                        <PaginationLink
+                          href="#"
+                          isActive={isCurrent}
+                          className="cursor-pointer tabular-nums"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(p);
+                          }}
+                        >
+                          {p}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      text="Berikutnya"
+                      aria-disabled={page >= totalPages}
+                      className={
+                        page >= totalPages ? "pointer-events-none opacity-40" : "cursor-pointer"
+                      }
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (page < totalPages) setPage(page + 1);
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </CardContent>

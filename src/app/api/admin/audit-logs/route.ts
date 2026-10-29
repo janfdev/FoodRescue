@@ -1,26 +1,29 @@
 import { NextResponse } from "next/server";
-import { getAuditLogs, recordAuditLog, AuditLogEntry } from "@/lib/audit";
+import { getPaginatedAuditLogs, recordAuditLog } from "@/lib/audit";
 import { getClientIp } from "@/lib/ip";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const action = searchParams.get("action");
-    const role = searchParams.get("role");
+    const action = searchParams.get("action") || undefined;
+    const role = searchParams.get("role") || undefined;
+    const search = searchParams.get("search") || searchParams.get("q") || undefined;
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
 
-    let logs = await getAuditLogs();
-
-    if (action) {
-      logs = logs.filter((log) => log.action.toLowerCase() === action.toLowerCase());
-    }
-    if (role) {
-      logs = logs.filter((log) => log.actorRole.toLowerCase() === role.toLowerCase());
-    }
+    const result = await getPaginatedAuditLogs({
+      page: isNaN(page) ? 1 : page,
+      limit: isNaN(limit) ? 10 : limit,
+      search,
+      role,
+      action,
+    });
 
     return NextResponse.json({
       success: true,
-      count: logs.length,
-      data: logs,
+      count: result.data.length,
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     return NextResponse.json(

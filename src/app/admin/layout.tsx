@@ -106,7 +106,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     },
     {
       href: "/admin/audit",
-      label: "Audit & Sengketa",
+      label: "Ulasan & Wadah Mitra",
       icon: Settings,
       badge: null,
       exact: false,

@@ -1,4 +1,5 @@
 import { db, auditLogs } from "@/db";
+import { desc, eq, and, or, ilike, count } from "drizzle-orm";
 
 export interface AuditLogEntry {
   id: string;
@@ -121,4 +122,120 @@ export async function getAuditLogs(): Promise<AuditLogEntry[]> {
   }
 
   return [...memoryAuditLogs];
+}
+
+export interface GetAuditLogsParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  action?: string;
+}
+
+export interface PaginatedAuditLogs {
+  data: AuditLogEntry[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export async function getPaginatedAuditLogs(
+  params: GetAuditLogsParams = {}
+): Promise<PaginatedAuditLogs> {
+  const page = Math.max(1, params.page || 1);
+  const limit = Math.max(1, Math.min(100, params.limit || 10));
+  const search = params.search?.trim();
+  const role = params.role?.trim();
+  const action = params.action?.trim();
+
+  if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
+    try {
+      const conditions = [];
+      if (role && role !== "all") {
+        conditions.push(eq(auditLogs.actorRole, role as any));
+      }
+      if (action && action !== "all") {
+        conditions.push(eq(auditLogs.action, action as any));
+      }
+      if (search) {
+        const s = `%${search}%`;
+        conditions.push(
+          or(
+            ilike(auditLogs.actorName, s),
+            ilike(auditLogs.action, s),
+            ilike(auditLogs.details, s),
+            ilike(auditLogs.entityId, s),
+            ilike(auditLogs.ipAddress, s)
+          )
+        );
+      }
+
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+      const [{ value: totalCount }] = await db
+        .select({ value: count() })
+        .from(auditLogs)
+        .where(whereClause);
+
+      const rows = await db
+        .select()
+        .from(auditLogs)
+        .where(whereClause)
+        .orderBy(desc(auditLogs.createdAt))
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      const total = Number(totalCount || 0);
+
+      return {
+        data: rows as unknown as AuditLogEntry[],
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / limit)),
+        },
+      };
+    } catch (err) {
+      console.warn("[Audit] DB paginated query fallback to memory:", err);
+    }
+  }
+
+  // Fallback to in-memory filter
+  const filtered = memoryAuditLogs.filter((log) => {
+    if (role && role !== "all" && log.actorRole.toLowerCase() !== role.toLowerCase()) {
+      return false;
+    }
+    if (action && action !== "all" && log.action.toLowerCase() !== action.toLowerCase()) {
+      return false;
+    }
+    if (search) {
+      const s = search.toLowerCase();
+      const match =
+        (log.actorName || "").toLowerCase().includes(s) ||
+        (log.action || "").toLowerCase().includes(s) ||
+        (log.details || "").toLowerCase().includes(s) ||
+        (log.entityId || "").toLowerCase().includes(s) ||
+        (log.ipAddress || "").toLowerCase().includes(s);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  const total = filtered.length;
+  const offset = (page - 1) * limit;
+  const paginatedData = filtered.slice(offset, offset + limit);
+
+  return {
+    data: paginatedData,
+    pagination: {
+      page,
+      limit,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    },
+  };
 }
