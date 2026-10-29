@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { SurpriseBag, StoreCategory } from "@/types/domain";
 import { storeService } from "@/services/storeService";
@@ -123,10 +124,12 @@ export default function EditSurpriseBagPage({ params }: any) {
     e.preventDefault();
     if (!title.trim()) {
       setErrorMsg("Nama paket Surprise Bag wajib diisi.");
+      toast.error("Nama paket Surprise Bag wajib diisi.");
       return;
     }
     if (discountedPrice >= originalPrice) {
       setErrorMsg("Harga penyelamatan (diskon) harus lebih murah dari harga normal etalase.");
+      toast.error("Harga diskon harus lebih murah dari harga normal.");
       return;
     }
 
@@ -151,12 +154,15 @@ export default function EditSurpriseBagPage({ params }: any) {
 
       setIsSaving(false);
       setSaveSuccess(true);
+      toast.success("Surprise Bag berhasil diperbarui!");
       setTimeout(() => {
         router.push("/seller/bags");
       }, 1200);
     } catch (err: any) {
       setIsSaving(false);
-      setErrorMsg(err?.message || "Gagal menyimpan perubahan paket.");
+      const msg = err?.message || "Gagal menyimpan perubahan paket.";
+      setErrorMsg(msg);
+      toast.error(msg);
     }
   };
 

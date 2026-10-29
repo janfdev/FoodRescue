@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import {
   ArrowLeft,
   Store as StoreIcon,
@@ -155,6 +156,7 @@ export default function RegisterSellerPage() {
     e.preventDefault();
     if (!bankName.trim() || !accountNumber.trim()) {
       setErrorMsg("Informasi rekening bank wajib diisi untuk pencairan saldo penjualan.");
+      toast.error("Informasi rekening bank wajib diisi.");
       return;
     }
 
@@ -181,9 +183,12 @@ export default function RegisterSellerPage() {
 
       setIsSubmitting(false);
       setIsSuccess(true);
+      toast.success("Pendaftaran mitra berhasil dikirim!");
     } catch (err: any) {
       setIsSubmitting(false);
-      setErrorMsg(err?.message || "Gagal mengirimkan formulir pendaftaran.");
+      const msg = err?.message || "Gagal mengirimkan formulir pendaftaran.";
+      setErrorMsg(msg);
+      toast.error(msg);
     }
   };
 

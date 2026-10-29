@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import toast from "react-hot-toast";
 import { User, Store } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
@@ -162,6 +163,7 @@ export function EditProfileModal({
 
     setIsSaving(false);
     setSaveSuccess(true);
+    toast.success("Profil berhasil diperbarui!");
     setTimeout(() => {
       setSaveSuccess(false);
       onClose();

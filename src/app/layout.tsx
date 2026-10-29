@@ -3,6 +3,7 @@ import { Poppins, Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PwaProvider } from "@/components/pwa/PwaProvider";
+import { Toaster } from "react-hot-toast";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -78,6 +79,27 @@ export default function RootLayout({
         <PwaProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </PwaProvider>
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 3500,
+            style: {
+              background: "#18181b",
+              color: "#fafafa",
+              fontSize: "13px",
+              fontWeight: 600,
+              borderRadius: "12px",
+              border: "1px solid rgba(255,255,255,0.1)",
+              padding: "10px 16px",
+            },
+            success: {
+              iconTheme: {
+                primary: "#ea580c",
+                secondary: "#fff",
+              },
+            },
+          }}
+        />
       </body>
     </html>
   );

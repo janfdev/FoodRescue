@@ -234,10 +234,21 @@ class StoreService {
       };
     }
   ) {
-    if (this.state.currentUser && this.state.currentUser.id === userId) {
-      const current = this.state.currentUser;
+    if (!this.state.currentUser || this.state.currentUser.id === userId) {
+      const current = this.state.currentUser || SEED_USERS.find((u) => u.id === userId) || SEED_USERS[0];
       this.state.currentUser = {
         ...current,
+        id: userId,
+        ...(data.name ? { name: data.name } : {}),
+        ...(data.phone ? { phone: data.phone } : {}),
+        ...(data.avatarUrl ? { avatarUrl: data.avatarUrl } : {}),
+      };
+      if (typeof window !== "undefined") {
+        localStorage.setItem("foodrescue_auth_user", JSON.stringify(this.state.currentUser));
+      }
+    } else if (this.state.currentUser) {
+      this.state.currentUser = {
+        ...this.state.currentUser,
         ...(data.name ? { name: data.name } : {}),
         ...(data.phone ? { phone: data.phone } : {}),
         ...(data.avatarUrl ? { avatarUrl: data.avatarUrl } : {}),
@@ -259,6 +270,7 @@ class StoreService {
         const currentStore = this.state.stores[storeIndex];
         this.state.stores[storeIndex] = {
           ...currentStore,
+          ...(data.avatarUrl ? { logoUrl: data.avatarUrl } : {}),
           ...(data.storeData.name ? { name: data.storeData.name } : {}),
           ...(data.storeData.area ? { area: data.storeData.area } : {}),
           ...(data.storeData.pickupStartTime ? { pickupStartTime: data.storeData.pickupStartTime } : {}),

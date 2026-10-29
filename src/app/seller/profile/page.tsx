@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { Store, User } from "@/types/domain";
+import { SEED_USERS } from "@/services/seedData";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,35 +56,46 @@ export default function SellerProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    const currentState = storeService.getState();
-    setState(currentState);
-    const activeStore = currentState.stores[0];
-    setStore(activeStore || null);
+    const syncState = () => {
+      const currentState = storeService.getState();
+      setState(currentState);
+      const activeStore = currentState.stores.find((s) => s.id === currentState.currentUser?.storeId) || currentState.stores[0];
+      setStore(activeStore || null);
 
-    const currentUser = currentState.currentUser || {
-      id: "user-seller-ruby",
-      name: "Ruby Wijaya",
-      email: "ruby@rerasa.com",
-      role: "seller" as const,
-      phone: "081987654321",
-      avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RubyBakery",
-      status: "ACTIVE" as const,
+      const currentUser =
+        currentState.currentUser?.role === "seller"
+          ? currentState.currentUser
+          : SEED_USERS.find((u) => u.storeId === activeStore?.id) ||
+            SEED_USERS.find((u) => u.role === "seller") ||
+            currentState.currentUser || {
+              id: "user-seller-ruby",
+              name: "Ruby Wijaya",
+              email: "ruby@rerasa.com",
+              role: "seller" as const,
+              phone: "081987654321",
+              avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RubyBakery",
+              status: "ACTIVE" as const,
+            };
+      setUser(currentUser);
+
+      if (currentUser) {
+        setOwnerName(currentUser.name);
+        setPhone(currentUser.phone || "");
+        setAvatarUrl(currentUser.avatarUrl || "");
+      }
+
+      if (activeStore) {
+        setStoreName(activeStore.name);
+        setStoreArea(activeStore.area);
+        setStoreAddress(activeStore.address);
+        setPickupStartTime(activeStore.pickupStartTime || "19:00");
+        setPickupEndTime(activeStore.pickupEndTime || "21:00");
+      }
     };
-    setUser(currentUser);
 
-    if (currentUser) {
-      setOwnerName(currentUser.name);
-      setPhone(currentUser.phone || "");
-      setAvatarUrl(currentUser.avatarUrl || "");
-    }
-
-    if (activeStore) {
-      setStoreName(activeStore.name);
-      setStoreArea(activeStore.area);
-      setStoreAddress(activeStore.address);
-      setPickupStartTime(activeStore.pickupStartTime || "19:00");
-      setPickupEndTime(activeStore.pickupEndTime || "21:00");
-    }
+    syncState();
+    const unsub = storeService.subscribe(syncState);
+    return unsub;
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,9 +147,11 @@ export default function SellerProfilePage() {
 
       setIsSaving(false);
       setSaveSuccess(true);
+      toast.success("Profil gerai dan penanggung jawab berhasil disimpan!");
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setIsSaving(false);
+      toast.error("Gagal menyimpan profil gerai.");
       console.warn("Gagal menyimpan profil:", err);
     }
   };

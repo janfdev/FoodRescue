@@ -65,14 +65,15 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const fallbackStore = state.stores[0] || SEED_STORES[0];
+  const fallbackStore = state.stores.find((s) => s.id === selectedStoreId) || state.stores[0] || SEED_STORES[0];
   const activeStore = store || fallbackStore;
 
   const sellerUser =
-    state.currentUser?.role === "seller"
+    state.currentUser && state.currentUser.role === "seller"
       ? state.currentUser
       : SEED_USERS.find((u) => u.storeId === activeStore?.id) ||
         SEED_USERS.find((u) => u.role === "seller") ||
+        state.currentUser ||
         SEED_USERS[0];
 
   const initials = sellerUser.name

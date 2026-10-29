@@ -48,9 +48,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [pathname]);
 
   const adminUser =
-    state.currentUser?.role === "admin"
+    state.currentUser && state.currentUser.role === "admin"
       ? state.currentUser
-      : SEED_USERS.find((u) => u.role === "admin") || SEED_USERS[0];
+      : SEED_USERS.find((u) => u.role === "admin") || state.currentUser || SEED_USERS[0];
 
   const initials = adminUser.name
     .split(" ")

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import { storeService } from "@/services/storeService";
 import { resolveUserAvatar } from "@/lib/avatar";
 import { User } from "@/types/domain";
+import { SEED_USERS } from "@/services/seedData";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,25 +35,35 @@ export default function AdminProfilePage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   useEffect(() => {
-    const currentState = storeService.getState();
-    setState(currentState);
+    const syncState = () => {
+      const currentState = storeService.getState();
+      setState(currentState);
 
-    const currentUser = currentState.currentUser || {
-      id: "user-admin-1",
-      name: "Admin Rerasa (Head of Ops Cirebon)",
-      email: "admin@rerasa.com",
-      role: "admin" as const,
-      phone: "081234567890",
-      avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AdminRerasa",
-      status: "ACTIVE" as const,
+      const currentUser =
+        currentState.currentUser?.role === "admin"
+          ? currentState.currentUser
+          : SEED_USERS.find((u) => u.role === "admin") ||
+            currentState.currentUser || {
+              id: "user-admin-1",
+              name: "Admin Rerasa (Head of Ops Cirebon)",
+              email: "admin@rerasa.com",
+              role: "admin" as const,
+              phone: "081234567890",
+              avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AdminRerasa",
+              status: "ACTIVE" as const,
+            };
+      setUser(currentUser);
+
+      if (currentUser) {
+        setName(currentUser.name);
+        setPhone(currentUser.phone || "");
+        setAvatarUrl(currentUser.avatarUrl || "");
+      }
     };
-    setUser(currentUser);
 
-    if (currentUser) {
-      setName(currentUser.name);
-      setPhone(currentUser.phone || "");
-      setAvatarUrl(currentUser.avatarUrl || "");
-    }
+    syncState();
+    const unsub = storeService.subscribe(syncState);
+    return unsub;
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,10 +106,12 @@ export default function AdminProfilePage() {
 
       setIsSaving(false);
       setSaveSuccess(true);
+      toast.success("Profil Admin berhasil diperbarui!");
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err) {
       setIsSaving(false);
-      console.warn("Gagal menyimpan profil admin:", err);
+      toast.error("Gagal menyimpan profil admin.");
+      console.warn("Gagal update profil:", err);
     }
   };
 
