@@ -39,6 +39,7 @@ import { cartService } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { resolveUserAvatar } from "@/lib/avatar";
+import { useSession } from "@/lib/auth-client";
 import { User as UserType, SurpriseBag } from "@/types/domain";
 
 export function LandingPage() {
@@ -95,7 +96,36 @@ export function LandingPage() {
       });
   }, []);
 
-  const { surpriseBags: bags, stores, currentUser, orders } = state;
+  const { data: session } = useSession();
+
+  const { surpriseBags: bags, stores, orders } = state;
+
+  // Resolusi Pengguna: Prioritas Session Login Riil (Google/Auth)
+  const currentUser: UserType = useMemo(() => {
+    if (session?.user) {
+      return {
+        id: session.user.id,
+        name: session.user.name || "Pengguna",
+        email: session.user.email || "",
+        phone: (session.user as Record<string, unknown>).phone as string || state.currentUser.phone || "",
+        role: ((session.user as Record<string, unknown>).role as UserType["role"]) || state.currentUser.role || "buyer",
+        avatarUrl:
+          session.user.image ||
+          ((session.user as Record<string, unknown>).avatarUrl as string) ||
+          resolveUserAvatar(undefined, session.user.name || session.user.email),
+        storeId: ((session.user as Record<string, unknown>).storeId as string) || state.currentUser.storeId,
+        status: "ACTIVE",
+      };
+    }
+    return state.currentUser;
+  }, [session, state.currentUser]);
+
+  // Sinkronisasi session ke storeService untuk flow transaksi
+  useEffect(() => {
+    if (session?.user && session.user.id !== state.currentUser.id) {
+      storeService.setCurrentUser(currentUser);
+    }
+  }, [session, currentUser, state.currentUser.id]);
 
   // Active user orders
   const userOrders = useMemo(() => {
@@ -103,7 +133,7 @@ export function LandingPage() {
       (o) =>
         o.buyerId === currentUser.id ||
         o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
-        o.buyerPhone === currentUser.phone
+        (currentUser.phone && o.buyerPhone === currentUser.phone)
     );
   }, [orders, currentUser]);
 

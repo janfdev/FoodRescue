@@ -25,7 +25,12 @@ export function getDefaultAvatar(seed?: string): string {
  * gunakan avatar resmi DiceBear Adventurer Neutral.
  */
 export function resolveUserAvatar(avatarUrl?: string | null, seed?: string): string {
-  if (avatarUrl && avatarUrl.trim() && !avatarUrl.includes("9.x/notionists")) {
+  if (
+    avatarUrl &&
+    avatarUrl.trim() &&
+    avatarUrl !== DICEBEAR_ADVENTURER_NEUTRAL_BASE &&
+    !avatarUrl.includes("9.x/notionists")
+  ) {
     return avatarUrl;
   }
   return getDefaultAvatar(seed);

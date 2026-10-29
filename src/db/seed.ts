@@ -21,7 +21,7 @@ async function runSeed() {
           name: u.name,
           email: u.email,
           phone: u.phone,
-          role: u.role,
+          role: u.role === "super_admin" ? "admin" : u.role,
           status: u.status || "ACTIVE",
           avatarUrl: u.avatarUrl,
           storeId: u.storeId,

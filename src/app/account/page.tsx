@@ -63,17 +63,27 @@ export default function AccountPage() {
   }, []);
 
   const { currentUser: simulatedUser, orders, stores } = state;
-  const currentUser = session?.user
+  const currentUser: UserType = session?.user
     ? {
         id: session.user.id,
-        name: session.user.name || simulatedUser.name,
-        email: session.user.email || simulatedUser.email,
-        phone: simulatedUser.phone,
-        role: simulatedUser.role,
-        avatarUrl: session.user.image || simulatedUser.avatarUrl,
-        storeId: simulatedUser.storeId,
+        name: session.user.name || "Pengguna",
+        email: session.user.email || "",
+        phone: ((session.user as Record<string, unknown>).phone as string) || "",
+        role: (((session.user as Record<string, unknown>).role as UserType["role"])) || "buyer",
+        avatarUrl:
+          session.user.image ||
+          ((session.user as Record<string, unknown>).avatarUrl as string) ||
+          resolveUserAvatar(undefined, session.user.name || session.user.email),
+        storeId: ((session.user as Record<string, unknown>).storeId as string) || undefined,
+        status: "ACTIVE",
       }
     : simulatedUser;
+
+  useEffect(() => {
+    if (session?.user && session.user.id !== state.currentUser.id) {
+      storeService.setCurrentUser(currentUser);
+    }
+  }, [session, currentUser, state.currentUser.id]);
   const currentStore = currentUser.storeId
     ? stores.find((s) => s.id === currentUser.storeId)
     : null;
@@ -91,6 +101,7 @@ export default function AccountPage() {
     } catch (err) {
       console.warn("Logout error:", err);
     }
+    storeService.resetToDefault();
     router.push("/login");
   };
 
@@ -115,7 +126,7 @@ export default function AccountPage() {
           {/* User Profile Card */}
           <Card className="p-4 border-border/80 rounded-2xl shadow-2xs space-y-3 bg-card">
             <div className="flex items-center gap-3">
-              <Avatar className="size-14 rounded-2xl ring-2 ring-emerald-600/30">
+              <Avatar className="size-14">
                 <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
                 <AvatarFallback className="bg-emerald-700 text-white font-black text-sm">
                   {currentUser.name.slice(0, 2).toUpperCase()}
@@ -220,7 +231,7 @@ export default function AccountPage() {
           >
             <div className="flex items-center gap-2.5">
               <div className="size-9 rounded-xl overflow-hidden shadow-2xs shrink-0 border border-border">
-                <img
+                <Image
                   src="/icons/icon-96x96.png"
                   alt="Rerasa PWA Logo"
                   className="w-full h-full object-cover"
