@@ -389,8 +389,8 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
                   <span className="text-xs font-bold text-foreground block truncate">
                     {sellerUser?.name || "Mitra Toko"}
                   </span>
-                  <span className="text-[10px] text-muted-foreground block truncate font-mono">
-                    Mitra Toko
+                  <span className="text-[10px] text-muted-foreground block truncate">
+                    Pemilik / PIC Gerai
                   </span>
                 </div>
               </div>

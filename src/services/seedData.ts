@@ -83,7 +83,7 @@ export const SEED_STORES: Store[] = [
     boxComplianceRate: 98,
     boxesSoldTotal: 185,
     currentBoxStock: 42,
-    walletBalance: 840000,
+    walletBalance: 0,
     bankAccount: {
       bankName: "BCA",
       accountNumber: "1340889211",

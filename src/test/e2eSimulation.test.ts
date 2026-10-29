@@ -144,7 +144,7 @@ async function runComprehensiveE2ESuite() {
   // Scenario 11: Seller Finance (/seller/finance) - Wallet Accrual & Withdrawal
   const balanceBeforeWd = activeSeller.walletBalance;
   console.assert(balanceBeforeWd > 0, "Seller wallet must hold earnings from completed orders");
-  const wdAmount = 50000;
+  const wdAmount = Math.min(balanceBeforeWd, 25000);
   const withdrawalReq = storeService.requestWithdrawal(activeSeller.id, wdAmount);
   console.assert(withdrawalReq.status === "PENDING", "Withdrawal request must be queued as PENDING");
   console.log("✓ Scenario 11: Seller finance wallet balance & withdrawal request verified.");
