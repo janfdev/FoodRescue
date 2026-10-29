@@ -22,16 +22,37 @@ import {
   ChevronRight,
   Sparkles,
   Pencil,
+  Bell,
 } from "lucide-react";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { usePwa } from "@/components/pwa/PwaProvider";
 import { resolveUserAvatar } from "@/lib/avatar";
+import { useSession } from "@/lib/auth-client";
+import { requestNotificationPermission, sendLocalNotification } from "@/lib/notification";
 
 export default function AccountPage() {
   const router = useRouter();
   const [state, setState] = useState(storeService.getState());
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { isInstalled, isStandalone, openInstallGuide } = usePwa();
+  const { data: session } = useSession();
+  const [notifPermission, setNotifPermission] = useState<string>("default");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotifPermission(Notification.permission);
+    }
+  }, []);
+
+  const handleEnableNotification = async () => {
+    const res = await requestNotificationPermission();
+    setNotifPermission(res);
+    if (res === "granted") {
+      sendLocalNotification("Notifikasi Aktif!", {
+        body: "Anda akan menerima pemberitahuan langsung saat pesanan siap diambil di toko.",
+      });
+    }
+  };
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
@@ -40,7 +61,18 @@ export default function AccountPage() {
     return unsub;
   }, []);
 
-  const { currentUser, orders, stores } = state;
+  const { currentUser: simulatedUser, orders, stores } = state;
+  const currentUser = session?.user
+    ? {
+        id: session.user.id,
+        name: session.user.name || simulatedUser.name,
+        email: session.user.email || simulatedUser.email,
+        phone: simulatedUser.phone,
+        role: simulatedUser.role,
+        avatarUrl: session.user.image || simulatedUser.avatarUrl,
+        storeId: simulatedUser.storeId,
+      }
+    : simulatedUser;
   const currentStore = currentUser.storeId
     ? stores.find((s) => s.id === currentUser.storeId)
     : null;
@@ -209,6 +241,39 @@ export default function AccountPage() {
             >
               {isStandalone || isInstalled ? "Terpasang ✓" : "Pasang App"}
             </Badge>
+          </div>
+
+          {/* Web Push Notification Setting */}
+          <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/80 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="size-9 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <Bell className="size-4" />
+              </div>
+              <div>
+                <span className="font-extrabold text-foreground block">
+                  Notifikasi Pengambilan Makanan
+                </span>
+                <span className="text-[10px] text-muted-foreground block">
+                  {notifPermission === "granted"
+                    ? "Notifikasi web aktif dan siap menerima peringatan"
+                    : "Aktifkan agar tahu saat pesanan siap diambil"}
+                </span>
+              </div>
+            </div>
+            {notifPermission === "granted" ? (
+              <Badge className="bg-emerald-600 text-white text-[9px] font-bold">
+                Aktif ✓
+              </Badge>
+            ) : (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleEnableNotification}
+                className="h-7 text-[10px] font-bold border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-500/10 cursor-pointer"
+              >
+                Izinkan
+              </Button>
+            )}
           </div>
 
           {/* Menu Navigasi Akun */}

@@ -17,6 +17,7 @@ import {
   Building2,
   CheckCircle2,
 } from "lucide-react";
+import { sendLocalNotification } from "@/lib/notification";
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -86,6 +87,11 @@ function CheckoutContent() {
         quantity
       );
       setConfirmedOrder(newOrder);
+
+      // Trigger Web Push Notification
+      sendLocalNotification("Pesanan Dikonfirmasi!", {
+        body: `Pesanan ${newOrder.bagTitle} (${newOrder.id}) telah terbayar. Siap diambil di ${store.name}!`,
+      });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Terjadi kesalahan saat memproses pesanan";
       alert(message);
