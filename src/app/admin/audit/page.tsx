@@ -93,7 +93,7 @@ export default function AdminAuditPage() {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-6 w-full mx-auto">
       {/* Feedback Banner */}
       {actionFeedback && (
         <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-medium flex items-center justify-between">
