@@ -20,7 +20,7 @@ export default function AdminMitraPage() {
   const [selectedKycStore, setSelectedKycStore] = useState<Store | null>(null);
 
   const syncData = () => {
-    setStores(storeService.getState().stores);
+    setStores([...storeService.getState().stores]);
   };
 
   useEffect(() => {

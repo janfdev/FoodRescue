@@ -623,9 +623,13 @@ class StoreService {
   // SUPER ADMIN ACTIONS
   // =====================
   public updateStoreStatus(storeId: string, status: Store["status"]) {
-    const store = this.state.stores.find((s) => s.id === storeId);
-    if (store) {
-      store.status = status;
+    const storeIndex = this.state.stores.findIndex((s) => s.id === storeId);
+    if (storeIndex !== -1) {
+      this.state.stores[storeIndex] = {
+        ...this.state.stores[storeIndex],
+        status,
+      };
+      this.state.stores = [...this.state.stores];
       this.persist();
     }
   }
