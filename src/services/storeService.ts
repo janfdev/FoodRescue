@@ -188,7 +188,18 @@ class StoreService {
   // USER & ROLE SWITCHING
   // =====================
   public switchRole(role: UserRole) {
-    const targetUser = SEED_USERS.find((u) => u.role === role) || SEED_USERS[0];
+    const targetUser =
+      SEED_USERS.find((u) => u.role === role) || {
+        id: `user-${role}-demo`,
+        name: role === "seller" ? "Siti Rahmawati (Ruby Bakery)" : role === "admin" ? "Admin Rerasa" : "Budi Santoso",
+        email: `${role}@rerasa.com`,
+        role: role,
+        phone: "081234567890",
+        status: "ACTIVE" as const,
+        avatarUrl: getDefaultAvatar(role),
+        storeId: role === "seller" ? "store-ruby-bakery" : undefined,
+        createdAt: new Date().toISOString(),
+      };
     this.state.currentUser = targetUser;
     if (typeof window !== "undefined") {
       localStorage.setItem("foodrescue_auth_user", JSON.stringify(targetUser));

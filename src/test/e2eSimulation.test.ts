@@ -179,13 +179,13 @@ async function runAllTests() {
   const withdrawal = storeService.requestWithdrawal(sellerStoreAfter.id, 50000);
   console.assert(withdrawal.status === "PENDING", "Withdrawal must start as PENDING");
 
-  storeService.switchRole("super_admin");
+  storeService.switchRole("admin");
   storeService.approveWithdrawal(withdrawal.id);
   console.assert(withdrawal.status === "APPROVED", "Withdrawal must transition to APPROVED");
-  console.log(`✓ Scenario 9: Seller withdrawal of Rp 50.000 approved by Super Admin.`);
+  console.log(`✓ Scenario 9: Seller withdrawal of Rp 50.000 approved by Admin.`);
 
   // ==========================================
-  // SCENARIO 10: SUPER ADMIN STORE ONBOARDING & AUDIT LOGS
+  // SCENARIO 10: ADMIN STORE ONBOARDING & AUDIT LOGS
   // ==========================================
   const pendingStore = storeService.getStores().find((s) => s.status === "PENDING_APPROVAL");
   if (pendingStore) {
@@ -193,8 +193,8 @@ async function runAllTests() {
     console.assert(pendingStore.status === "ACTIVE", "Store status must become ACTIVE");
     await recordAuditLog({
       actorId: "usr-admin-01",
-      actorName: "Super Admin Rerasa",
-      actorRole: "super_admin",
+      actorName: "Admin Rerasa",
+      actorRole: "admin",
       action: "STORE_APPROVED",
       entityType: "store",
       entityId: pendingStore.id,

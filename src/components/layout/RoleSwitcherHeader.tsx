@@ -67,15 +67,15 @@ export function RoleSwitcherHeader({
 
           <button
             type="button"
-            onClick={() => onSelectRole("super_admin")}
+            onClick={() => onSelectRole("admin")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              currentRole === "super_admin"
+              currentRole === "admin"
                 ? "bg-background text-foreground shadow-xs font-bold"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Shield className="size-3.5 text-purple-500" />
-            <span>Super Admin</span>
+            <span>Admin</span>
           </button>
         </div>
 

@@ -24,7 +24,7 @@ interface AuditLog {
   id: string;
   actorId: string;
   actorName: string;
-  actorRole: "buyer" | "seller" | "super_admin" | "system";
+  actorRole: "buyer" | "seller" | "admin" | "super_admin" | "system";
   action: string;
   entityType: string;
   entityId: string;
@@ -68,7 +68,10 @@ export default function AdminAuditLogsPage() {
         (log.details || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         (log.entityId || "").toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesRole = selectedRole === "all" || log.actorRole === selectedRole;
+      const matchesRole =
+        selectedRole === "all" ||
+        log.actorRole === selectedRole ||
+        (selectedRole === "admin" && (log.actorRole as string) === "super_admin");
 
       return matchesSearch && matchesRole;
     });
@@ -118,6 +121,7 @@ export default function AdminAuditLogsPage() {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
+      case "admin":
       case "super_admin":
         return <Shield className="size-3.5 text-purple-600 dark:text-purple-400" />;
       case "seller":
@@ -174,7 +178,7 @@ export default function AdminAuditLogsPage() {
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: "all", label: "Semua Role" },
-            { id: "super_admin", label: "Admin" },
+            { id: "admin", label: "Admin" },
             { id: "seller", label: "Seller" },
             { id: "buyer", label: "Buyer" },
           ].map((item) => (

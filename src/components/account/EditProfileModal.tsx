@@ -55,7 +55,7 @@ export function EditProfileModal({
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const isSeller = user.role === "seller";
-  const isAdmin = user.role === "super_admin";
+  const isAdmin = user.role === "admin" || (user.role as string) === "super_admin";
 
   const [cirebonAreas, setCirebonAreas] = useState<string[]>([
     "Tuparev",

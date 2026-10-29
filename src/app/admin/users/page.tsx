@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
         <span className="font-bold text-muted-foreground mr-1 text-[11px]">Filter Peran:</span>
         {[
           { id: "all", label: "Semua Akun" },
-          { id: "super_admin", label: "Super Admin" },
+          { id: "admin", label: "Admin" },
           { id: "seller", label: "Mitra Toko" },
           { id: "buyer", label: "Pelanggan" },
         ].map((role) => (
@@ -182,22 +182,22 @@ export default function AdminUsersPage() {
                       <td className="p-3.5">
                         <Badge
                           variant={
-                            u.role === "super_admin"
+                            u.role === "admin"
                               ? "default"
                               : u.role === "seller"
                               ? "secondary"
                               : "outline"
                           }
                           className={`text-[10px] font-bold ${
-                            u.role === "super_admin"
+                            u.role === "admin"
                               ? "bg-purple-700 text-white"
                               : u.role === "seller"
                               ? "bg-orange-500 text-white"
                               : "border-emerald-600 text-emerald-700"
                           }`}
                         >
-                          {u.role === "super_admin"
-                            ? "Super Admin"
+                          {u.role === "admin"
+                            ? "Admin"
                             : u.role === "seller"
                             ? "Mitra Toko"
                             : "Pelanggan"}

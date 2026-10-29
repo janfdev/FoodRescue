@@ -15,6 +15,13 @@
       "when": 1793196824113,
       "tag": "0001_dusty_zarek",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793245937676,
+      "tag": "0002_remarkable_maestro",
+      "breakpoints": true
     }
   ]
 }

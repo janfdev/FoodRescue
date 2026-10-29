@@ -4,7 +4,7 @@ export interface AuditLogEntry {
   id: string;
   actorId: string;
   actorName: string;
-  actorRole: "buyer" | "seller" | "super_admin" | "system";
+  actorRole: "buyer" | "seller" | "admin" | "super_admin" | "system";
   action:
     | "ORDER_PAID"
     | "ORDER_HANDED_OVER"
@@ -30,8 +30,8 @@ const memoryAuditLogs: AuditLogEntry[] = [
   {
     id: "audit-001",
     actorId: "usr-admin-01",
-    actorName: "Super Admin Rerasa",
-    actorRole: "super_admin",
+    actorName: "Admin Rerasa",
+    actorRole: "admin",
     action: "STORE_APPROVED",
     entityType: "store",
     entityId: "store-01",

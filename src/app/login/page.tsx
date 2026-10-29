@@ -3,14 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Lock, Mail, Eye, EyeOff, ShieldCheck, Check, Sparkles } from "lucide-react";
+import { ArrowLeft, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { storeService } from "@/services/storeService";
-import { SEED_USERS } from "@/services/seedData";
 import { authClient } from "@/lib/auth-client";
 
 export default function LoginPage() {
@@ -37,7 +36,7 @@ export default function LoginPage() {
         setIsLoading(false);
 
         // Redirect based on role
-        if (loggedInUser.role === "super_admin") {
+        if (loggedInUser.role === "admin" || (loggedInUser.role as string) === "super_admin") {
           router.push("/admin");
         } else if (loggedInUser.role === "seller") {
           router.push("/seller");
@@ -244,10 +243,10 @@ export default function LoginPage() {
                     color: "border-orange-500/40 hover:bg-orange-50 dark:hover:bg-orange-950/40",
                   },
                   {
-                    name: "Ahmad Fauzi (Head of Ops Cirebon)",
+                    name: "Admin Rerasa (Head of Ops Cirebon)",
                     email: "admin@rerasa.com",
                     pass: "admin123",
-                    badge: "Super Admin",
+                    badge: "Admin",
                     color: "border-purple-600/40 hover:bg-purple-50 dark:hover:bg-purple-950/40",
                   },
                 ].map((item) => (

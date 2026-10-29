@@ -9,174 +9,15 @@ import {
 } from "@/types/domain";
 
 export const SEED_USERS: User[] = [
-  // Super Admin Accounts
   {
     id: "user-admin-1",
-    name: "Ahmad Fauzi",
+    name: "Admin Rerasa",
     email: "admin@rerasa.com",
-    role: "super_admin",
+    role: "admin",
     phone: "082111222333",
     status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AhmadFauzi",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AdminRerasa",
     createdAt: "2026-01-15T08:00:00Z"
-  },
-  {
-    id: "user-admin-2",
-    name: "Dewi Sartika",
-    email: "dewi.ops@rerasa.com",
-    role: "super_admin",
-    phone: "082111222334",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=DewiSartika",
-    createdAt: "2026-01-20T09:30:00Z"
-  },
-  // Mitra Toko (Sellers)
-  {
-    id: "user-seller-1",
-    name: "Siti Rahmawati (Ruby Bakery)",
-    email: "ruby@rerasa.com",
-    role: "seller",
-    phone: "081987654321",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=SitiRahma",
-    storeId: "store-ruby-bakery",
-    createdAt: "2026-02-10T10:00:00Z"
-  },
-  {
-    id: "user-seller-2",
-    name: "Bambang Pratama (Kopi Nako)",
-    email: "nako@rerasa.com",
-    role: "seller",
-    phone: "081987654322",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=BambangPratama",
-    storeId: "store-kopi-nako",
-    createdAt: "2026-02-12T11:00:00Z"
-  },
-  {
-    id: "user-seller-3",
-    name: "H. Mang Dul (Nasi Jamblang)",
-    email: "mangdul@rerasa.com",
-    role: "seller",
-    phone: "081987654323",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=MangDul",
-    storeId: "store-jamblang-dul",
-    createdAt: "2026-02-15T14:20:00Z"
-  },
-  {
-    id: "user-seller-4",
-    name: "H. Apud (Empal Gentong)",
-    email: "apud@rerasa.com",
-    role: "seller",
-    phone: "081987654324",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=HApud",
-    storeId: "store-empal-apud",
-    createdAt: "2026-02-18T16:00:00Z"
-  },
-  {
-    id: "user-seller-5",
-    name: "Kevin Sanjaya (Martabak SF)",
-    email: "sanfran@rerasa.com",
-    role: "seller",
-    phone: "081987654325",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=KevinSanjaya",
-    storeId: "store-martabak-sanfran",
-    createdAt: "2026-02-22T13:45:00Z"
-  },
-  {
-    id: "user-seller-6",
-    name: "Hendra Gunawan (Dapur Ciremai)",
-    email: "ciremai@rerasa.com",
-    role: "seller",
-    phone: "081987654326",
-    status: "SUSPENDED",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=HendraGunawan",
-    storeId: "store-dapur-ciremai",
-    createdAt: "2026-10-27T08:30:00Z"
-  },
-  // Pelanggan (Buyers)
-  {
-    id: "user-buyer-1",
-    name: "Fauzan Rizqi Noor",
-    email: "fauzan@gmail.com",
-    role: "buyer",
-    phone: "081234567890",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=FauzanRizqi",
-    createdAt: "2026-03-01T10:00:00Z"
-  },
-  {
-    id: "user-buyer-2",
-    name: "Budi Santoso",
-    email: "budi.cirebon@gmail.com",
-    role: "buyer",
-    phone: "081234567891",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=BudiSantoso",
-    createdAt: "2026-03-05T11:30:00Z"
-  },
-  {
-    id: "user-buyer-3",
-    name: "Anisa Nurhaliza",
-    email: "anisa.crb@gmail.com",
-    role: "buyer",
-    phone: "081234567892",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=AnisaNur",
-    createdAt: "2026-03-08T15:10:00Z"
-  },
-  {
-    id: "user-buyer-4",
-    name: "Dimas Anggara",
-    email: "dimas.ang@gmail.com",
-    role: "buyer",
-    phone: "081234567893",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=DimasAng",
-    createdAt: "2026-03-12T09:20:00Z"
-  },
-  {
-    id: "user-buyer-5",
-    name: "Rina Kartika",
-    email: "rina.ktk@gmail.com",
-    role: "buyer",
-    phone: "081234567894",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RinaKartika",
-    createdAt: "2026-03-16T14:00:00Z"
-  },
-  {
-    id: "user-buyer-6",
-    name: "Eko Prasetyo",
-    email: "eko.pras@gmail.com",
-    role: "buyer",
-    phone: "081234567895",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=EkoPras",
-    createdAt: "2026-03-20T17:40:00Z"
-  },
-  {
-    id: "user-buyer-7",
-    name: "Mega Utami",
-    email: "mega.crb@gmail.com",
-    role: "buyer",
-    phone: "081234567896",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=MegaUtami",
-    createdAt: "2026-03-25T12:15:00Z"
-  },
-  {
-    id: "user-buyer-8",
-    name: "Reza Pratama",
-    email: "reza.prat@gmail.com",
-    role: "buyer",
-    phone: "081234567897",
-    status: "ACTIVE",
-    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RezaPrat",
-    createdAt: "2026-03-28T16:50:00Z"
   }
 ];
 
@@ -443,7 +284,7 @@ export const SEED_SURPRISE_BAGS: SurpriseBag[] = [
   },
   {
     id: "bag-surya-1",
-    storeId: "store-surya-toserba",
+    storeId: "store-surya-market",
     title: "Surprise Fresh: Buah Segar & Roti Gandum",
     category: "Swalayan & Buah",
     description: "Kombinasi buah potong segar supermarket (melon/semangka) dan 1 pack roti gandum sehat tanggal display terakhir.",

@@ -14,7 +14,7 @@ import { relations } from "drizzle-orm";
 
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
 
-export const userRoleEnum = pgEnum("user_role", ["buyer", "seller", "super_admin"]);
+export const userRoleEnum = pgEnum("user_role", ["buyer", "seller", "admin"]);
 
 export const storeCategoryEnum = pgEnum("store_category", [
   "Bakery & Pastry",
@@ -381,7 +381,7 @@ export const auditLogs = pgTable(
     id: text("id").primaryKey(),
     actorId: text("actor_id").notNull(),
     actorName: text("actor_name").notNull(),
-    actorRole: text("actor_role").notNull(), // "buyer" | "seller" | "super_admin" | "system"
+    actorRole: text("actor_role").notNull(), // "buyer" | "seller" | "admin" | "system"
     action: text("action").notNull(), // "ORDER_PAID" | "ORDER_HANDED_OVER" | "USER_SUSPENDED" | "USER_ACTIVATED" | "STORE_APPROVED" | "WITHDRAWAL_REQUESTED" | "WITHDRAWAL_APPROVED"
     entityType: text("entity_type").notNull(),
     entityId: text("entity_id").notNull(),

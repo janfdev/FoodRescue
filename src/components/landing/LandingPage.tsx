@@ -293,7 +293,7 @@ export function LandingPage() {
                 </div>
 
                 <div className="space-y-1 text-xs">
-                  {currentUser.role === "super_admin" && (
+                  {(currentUser.role === "admin" || (currentUser.role as string) === "super_admin") && (
                     <Link
                       href="/admin"
                       className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"

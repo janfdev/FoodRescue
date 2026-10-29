@@ -1,4 +1,4 @@
-export type UserRole = "buyer" | "seller" | "super_admin";
+export type UserRole = "buyer" | "seller" | "admin";
 
 export type StoreCategory = "Bakery & Pastry" | "Makanan Berat" | "Kafe & Minuman" | "Swalayan & Buah";
 

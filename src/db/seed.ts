@@ -11,8 +11,8 @@ async function runSeed() {
       return;
     }
 
-    // 1. Seed Users (Super Admin, Sellers, Buyers)
-    console.log(`-> Seeding ${SEED_USERS.length} users (Admin, Seller, Buyer)...`);
+    // 1. Seed User (Admin)
+    console.log(`-> Seeding ${SEED_USERS.length} user (Admin)...`);
     for (const u of SEED_USERS) {
       await db
         .insert(users)
@@ -21,12 +21,23 @@ async function runSeed() {
           name: u.name,
           email: u.email,
           phone: u.phone,
-          role: u.role === "super_admin" ? "admin" : u.role,
+          role: u.role,
           status: u.status || "ACTIVE",
           avatarUrl: u.avatarUrl,
           storeId: u.storeId,
         })
-        .onConflictDoNothing();
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            name: u.name,
+            email: u.email,
+            phone: u.phone,
+            role: u.role,
+            status: u.status || "ACTIVE",
+            avatarUrl: u.avatarUrl,
+            storeId: u.storeId,
+          },
+        });
     }
 
     // 2. Seed Stores
@@ -109,8 +120,8 @@ async function runSeed() {
         {
           id: "audit-seed-01",
           actorId: "usr-admin-01",
-          actorName: "Super Admin Rerasa",
-          actorRole: "super_admin",
+          actorName: "Admin Rerasa",
+          actorRole: "admin",
           action: "STORE_APPROVED",
           entityType: "store",
           entityId: "store-ruby-bakery",

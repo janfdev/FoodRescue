@@ -180,7 +180,7 @@ export default function AccountPage() {
           />
 
           {/* Role Portal Banners */}
-          {currentUser.role === "super_admin" && (
+          {currentUser.role === "admin" && (
             <Link
               href="/admin"
               className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-purple-500/15 via-purple-500/10 to-transparent border border-purple-500/30 hover:border-purple-500/50 transition-all text-xs"
@@ -191,7 +191,7 @@ export default function AccountPage() {
                 </div>
                 <div>
                   <span className="font-extrabold text-foreground block">
-                    Pusat Kendali Super Admin
+                    Pusat Kendali Admin
                   </span>
                   <span className="text-[11px] text-muted-foreground">
                     Verifikasi KYC mitra, rekber escrow, dan audit
