@@ -226,11 +226,32 @@ async function runComprehensiveE2ESuite() {
     console.log("✓ Scenario 18: 1-click bank copy & withdrawal approval (/admin/keuangan) verified.");
   }
 
-  // Scenario 19: Super Admin B2B Logistics (/admin/boxes) - Package Order Tracking
+  // Scenario 19: Super Admin B2B Logistics (/admin/boxes) - Master Package Management & Order Tracking
+  // 19a: Admin creates a new custom packaging package
+  const customPkg = storeService.addBoxPackage({
+    name: "Paket Katering Sedang (300 Box)",
+    quantityPcs: 300,
+    price: 330000,
+    dimensions: "20 x 15 x 7 cm",
+    description: "Wadah standar kardus food-grade tebal untuk katering",
+  });
+  console.assert(Boolean(customPkg.id), "Admin must be able to create new box package");
+  console.assert(storeService.getState().boxPackages.some((p) => p.id === customPkg.id), "Package must be listed in state");
+
+  // 19b: Admin updates package price
+  storeService.updateBoxPackage(customPkg.id, { price: 320000 });
+  const updatedPkg = storeService.getState().boxPackages.find((p) => p.id === customPkg.id);
+  console.assert(updatedPkg?.price === 320000, "Package price must be updated");
+
+  // 19c: Admin deletes custom package
+  storeService.deleteBoxPackage(customPkg.id);
+  console.assert(!storeService.getState().boxPackages.some((p) => p.id === customPkg.id), "Package must be deleted");
+
+  // 19d: Box orders tracking
   const boxOrders = adminState.boxOrders;
   console.assert(boxOrders.length > 0, "B2B package orders must be visible to Admin");
   console.assert(boxOrders[0].status === "SHIPPED", "Box order status must be SHIPPED with tracking");
-  console.log("✓ Scenario 19: B2B packaging logistics fulfillment (/admin/boxes) verified.");
+  console.log("✓ Scenario 19: B2B master packaging package CRUD & logistics fulfillment (/admin/boxes) verified.");
 
   // Scenario 20: Super Admin Audit Trail Logs (/admin/audit-logs) - Tamper-Proof Recording
   await recordAuditLog({
