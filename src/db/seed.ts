@@ -1,6 +1,24 @@
 import { db, pool } from "./index";
-import { users, stores, surpriseBags, rescueBoxPackages, auditLogs } from "./schema";
-import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS, SEED_BOX_PACKAGES } from "../services/seedData";
+import {
+  users,
+  stores,
+  surpriseBags,
+  rescueBoxPackages,
+  auditLogs,
+  orders,
+  escrowAccounts,
+  rescueBoxOrders,
+  reviews,
+} from "./schema";
+import {
+  SEED_USERS,
+  SEED_STORES,
+  SEED_SURPRISE_BAGS,
+  SEED_BOX_PACKAGES,
+  SEED_ORDERS,
+  SEED_BOX_ORDERS,
+  SEED_REVIEWS,
+} from "../services/seedData";
 
 async function runSeed() {
   console.log("=== RUNNING FOODRESCUE PRODUCTION SEEDER ===");
@@ -112,7 +130,90 @@ async function runSeed() {
         .onConflictDoNothing();
     }
 
-    // 5. Seed Initial Audit Logs
+    // 5. Seed Orders & Escrow
+    console.log(`-> Seeding ${SEED_ORDERS.length} foundational orders...`);
+    for (const o of SEED_ORDERS) {
+      await db
+        .insert(orders)
+        .values({
+          id: o.id,
+          buyerId: o.buyerId,
+          buyerName: o.buyerName,
+          buyerPhone: o.buyerPhone,
+          storeId: o.storeId,
+          storeName: o.storeName,
+          bagId: o.bagId,
+          bagTitle: o.bagTitle,
+          quantity: o.quantity,
+          unitPrice: o.unitPrice,
+          subtotalPrice: o.unitPrice * o.quantity,
+          adminFee: 1000,
+          totalPrice: o.totalPrice,
+          platformFee: o.platformFee,
+          sellerEarning: o.sellerEarning,
+          status: o.status as any,
+          paymentMethod: o.paymentMethod,
+          paidAt: o.paidAt ? new Date(o.paidAt) : null,
+          pickupCode: o.pickupCode,
+          pickupQrData: o.pickupQrData,
+          completedAt: o.completedAt ? new Date(o.completedAt) : null,
+          isChatLocked: o.isChatLocked ?? false,
+        })
+        .onConflictDoNothing();
+
+      if (o.status === "PAID") {
+        await db
+          .insert(escrowAccounts)
+          .values({
+            id: `escrow-${o.id}`,
+            orderId: o.id,
+            heldAmount: o.totalPrice,
+            status: "HELD",
+          })
+          .onConflictDoNothing();
+      }
+    }
+
+    // 6. Seed Box Orders
+    console.log(`-> Seeding ${SEED_BOX_ORDERS.length} rescue box orders...`);
+    for (const bo of SEED_BOX_ORDERS) {
+      await db
+        .insert(rescueBoxOrders)
+        .values({
+          id: bo.id,
+          storeId: bo.storeId,
+          storeName: bo.storeName,
+          packageId: bo.packageId,
+          quantityPcs: bo.quantityPcs,
+          totalPrice: bo.totalPrice,
+          shippingAddress: bo.shippingAddress,
+          trackingNumber: bo.trackingNumber,
+          status: bo.status as any,
+          orderedAt: new Date(bo.orderedAt),
+        })
+        .onConflictDoNothing();
+    }
+
+    // 7. Seed Reviews
+    console.log(`-> Seeding ${SEED_REVIEWS.length} customer reviews...`);
+    for (const r of SEED_REVIEWS) {
+      await db
+        .insert(reviews)
+        .values({
+          id: r.id,
+          orderId: r.orderId,
+          storeId: r.storeId,
+          buyerId: r.buyerId,
+          buyerName: r.buyerName,
+          rating: r.rating,
+          comment: r.comment,
+          usedOfficialRescueBox: r.usedOfficialRescueBox ?? true,
+          createdAt: new Date(r.createdAt),
+        })
+        .onConflictDoNothing();
+    }
+
+    // 8. Seed Initial Audit Logs
     console.log("-> Seeding foundational audit log entries...");
     await db
       .insert(auditLogs)
