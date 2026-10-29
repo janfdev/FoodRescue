@@ -73,8 +73,10 @@ export default function EditSurpriseBagPage({ params }: any) {
 
   useEffect(() => {
     if (!bagId) return;
-    const allBags = storeService.getState().surpriseBags;
-    const found = allBags.find((b) => b.id === bagId);
+    const state = storeService.getState();
+    const activeStoreId = state.currentUser?.storeId;
+    const allBags = state.surpriseBags;
+    const found = allBags.find((b) => b.id === bagId && (!activeStoreId || b.storeId === activeStoreId));
 
     if (found) {
       setBag(found);

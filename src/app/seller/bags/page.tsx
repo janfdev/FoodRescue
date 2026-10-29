@@ -41,7 +41,14 @@ export default function SellerBagsPage() {
   const [isUploading, setIsUploading] = useState(false);
 
   const syncData = () => {
-    setSurpriseBags(storeService.getState().surpriseBags);
+    const state = storeService.getState();
+    const activeStoreId = state.currentUser?.storeId;
+    if (!activeStoreId) {
+      setSurpriseBags([]);
+      return;
+    }
+    const myBags = (state.surpriseBags || []).filter((b) => b.storeId === activeStoreId);
+    setSurpriseBags(myBags);
   };
 
   useEffect(() => {
@@ -92,10 +99,12 @@ export default function SellerBagsPage() {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const currentStore = storeService.getState().stores[0];
+    const state = storeService.getState();
+    const currentStore = state.stores.find((s) => s.id === state.currentUser?.storeId);
+    if (!currentStore) return;
 
     storeService.addSurpriseBag({
-      storeId: currentStore?.id || "store-ruby-bakery",
+      storeId: currentStore.id,
       title: title.trim(),
       category,
       description: description.trim() || "Paket surplus segar etalase hari ini, higienis dan siap santap.",

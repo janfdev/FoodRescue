@@ -103,12 +103,14 @@ export default function CreateSurpriseBagPage() {
 
     try {
       const state = storeService.getState();
-      const currentStore =
-        state.stores.find((s) => s.id === state.currentUser?.storeId) ||
-        state.stores[0];
+      const currentStore = state.stores.find((s) => s.id === state.currentUser?.storeId);
+
+      if (!currentStore) {
+        throw new Error("Akun seller Anda belum terhubung dengan gerai toko aktif.");
+      }
 
       storeService.addSurpriseBag({
-        storeId: currentStore?.id || "store-ruby-bakery",
+        storeId: currentStore.id,
         title: title.trim(),
         category,
         description:

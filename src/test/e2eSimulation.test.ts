@@ -85,7 +85,7 @@ async function runComprehensiveE2ESuite() {
   // GROUP 3: SELLER FLOW & SUB-MENUS
   // ==========================================================================
   console.log("\n[GROUP 3: SELLER EXPERIENCE & SUB-MENUS]");
-
+  storeService.switchRole("seller");
   // Scenario 6: Seller Bags Management (/seller/bags) - Quota Progression
   const bagForQuota = storeService.getState().surpriseBags[0];
   storeService.updateBagQuota(bagForQuota.id, 5, true);
