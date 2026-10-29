@@ -31,8 +31,6 @@ import { Store } from "@/types/domain";
 const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const [storesList, setStoresList] = useState<Store[]>([]);
-  const [selectedStoreId, setSelectedStoreId] = useState<string>("store-ruby-bakery");
   const [store, setStore] = useState<Store | null>(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [state, setState] = useState(storeService.getState());
@@ -42,10 +40,14 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const syncData = () => {
     const currentState = storeService.getState();
     setState(currentState);
-    const activeStores = currentState.stores.filter((s) => s.status === "ACTIVE");
-    setStoresList(activeStores);
-    const current = activeStores.find((s) => s.id === selectedStoreId) || activeStores[0];
-    setStore(current || currentState.stores[0]);
+    // Toko merchant mitra yang terasosiasi dengan user seller
+    const sellerStoreId = currentState.currentUser?.storeId || "store-ruby-bakery";
+    const current =
+      currentState.stores.find((s) => s.id === sellerStoreId) ||
+      currentState.stores.find((s) => s.status === "ACTIVE") ||
+      currentState.stores[0] ||
+      SEED_STORES[0];
+    setStore(current);
     if (current) {
       const pending = currentState.orders.filter(
         (o) => o.storeId === current.id && (o.status === "PAID" || o.status === "READY_FOR_PICKUP")
@@ -58,15 +60,14 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
     syncData();
     const unsub = storeService.subscribe(syncData);
     return unsub;
-  }, [selectedStoreId]);
+  }, []);
 
   // Close mobile drawer on route transition
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const fallbackStore = state.stores.find((s) => s.id === selectedStoreId) || state.stores[0] || SEED_STORES[0];
-  const activeStore = store || fallbackStore;
+  const activeStore = store || state.stores[0] || SEED_STORES[0];
 
   const sellerUser =
     state.currentUser && state.currentUser.role === "seller"
@@ -191,26 +192,6 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
       {/* ─── MOBILE DRAWER MENU (< MD) ───────────────────────────────────── */}
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-x-0 top-13 z-40 bg-card/98 border-b border-border shadow-xl p-4 space-y-4 max-h-[calc(100vh-3.5rem)] overflow-y-auto animate-in fade-in slide-in-from-top-2">
-          {/* Store Switcher Dropdown */}
-          <div className="space-y-1">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">
-              Ganti Gerai Mitra:
-            </label>
-            <select
-              value={selectedStoreId}
-              onChange={(e) => setSelectedStoreId(e.target.value)}
-              className="w-full bg-muted/50 border border-border rounded-lg text-xs font-semibold p-2 text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500"
-            >
-              {storesList.map((st) => (
-                <option key={st.id} value={st.id}>
-                  {st.name} ({st.area})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <Separator />
-
           {/* Nav Items */}
           <nav className="space-y-1">
             {navItems.map((item) => {
@@ -301,7 +282,7 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
       {/* ─── SIDEBAR KIRI DESKTOP PERSISTEN (>= MD) ────────────────────────── */}
       <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between min-h-screen">
         <div className="space-y-6">
-          {/* Store Switcher & Brand Header */}
+          {/* Store Brand Header */}
           <div className="space-y-3">
             <div className="flex items-center gap-3 px-2">
               <Link href="/" className="size-10 rounded-xl bg-orange-600 text-white flex items-center justify-center font-black text-lg shadow-xs shrink-0">
@@ -315,24 +296,6 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
                   {activeStore.area} • Mitra Aktif
                 </span>
               </div>
-            </div>
-
-            {/* Store Switcher Dropdown */}
-            <div className="px-2">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block mb-1">
-                Pilih Mitra Usaha
-              </label>
-              <select
-                value={selectedStoreId}
-                onChange={(e) => setSelectedStoreId(e.target.value)}
-                className="w-full bg-muted/50 border border-border rounded-lg text-xs font-semibold p-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-orange-500"
-              >
-                {storesList.map((st) => (
-                  <option key={st.id} value={st.id}>
-                    {st.name} ({st.area})
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
