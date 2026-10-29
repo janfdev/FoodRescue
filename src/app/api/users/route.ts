@@ -41,34 +41,38 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, status } = body;
+    const { userId, status, role } = body;
 
-    if (!userId || !status) {
+    if (!userId) {
       return NextResponse.json(
-        { success: false, error: "userId dan status wajib disertakan" },
+        { success: false, error: "userId wajib disertakan" },
         { status: 400 }
       );
     }
+
+    const updatePayload: Record<string, any> = { updatedAt: new Date() };
+    if (status) updatePayload.status = status;
+    if (role) updatePayload.role = role;
 
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
         await db
           .update(users)
-          .set({ status, updatedAt: new Date() })
+          .set(updatePayload)
           .where(eq(users.id, userId));
 
         return NextResponse.json({
           success: true,
-          message: `Status pengguna berhasil diperbarui menjadi ${status}`,
+          message: `Pengguna berhasil diperbarui`,
         });
       } catch (dbErr) {
-        console.warn("Gagal update user status ke DB:", dbErr);
+        console.warn("Gagal update user ke DB:", dbErr);
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Status pengguna disimulasikan menjadi ${status}`,
+      message: `Pengguna disimulasikan berhasil diperbarui`,
     });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Gagal memperbarui pengguna";

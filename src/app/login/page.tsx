@@ -20,7 +20,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) {
       setErrorMsg("Silakan masukkan alamat email Anda.");
@@ -30,24 +30,22 @@ export default function LoginPage() {
     setIsLoading(true);
     setErrorMsg("");
 
-    setTimeout(() => {
-      try {
-        const loggedInUser = storeService.loginWithEmail(email);
-        setIsLoading(false);
+    try {
+      const loggedInUser = await storeService.loginWithEmailAsync(email);
+      setIsLoading(false);
 
-        // Redirect based on role
-        if (loggedInUser.role === "admin" || (loggedInUser.role as string) === "super_admin") {
-          router.push("/admin");
-        } else if (loggedInUser.role === "seller") {
-          router.push("/seller");
-        } else {
-          router.push("/");
-        }
-      } catch (err: any) {
-        setIsLoading(false);
-        setErrorMsg(err?.message || "Gagal masuk ke akun.");
+      // Redirect based on role
+      if (loggedInUser.role === "admin" || (loggedInUser.role as string) === "super_admin") {
+        router.push("/admin");
+      } else if (loggedInUser.role === "seller") {
+        router.push("/seller");
+      } else {
+        router.push("/");
       }
-    }, 400);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err?.message || "Gagal masuk ke akun.");
+    }
   };
 
   const handleQuickAutofill = (seedEmail: string, defaultPass: string) => {
@@ -166,7 +164,7 @@ export default function LoginPage() {
             </div>
 
             {/* Email & Password Form */}
-            <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+            <form onSubmit={handleEmailLogin} className="space-y-3.5">
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-muted-foreground block">
                   Alamat Email

@@ -40,6 +40,23 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
+  const handleChangeUserRole = async (userId: string, newRole: "admin" | "seller" | "buyer") => {
+    // Optimistic UI update
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
+    );
+
+    try {
+      await fetch("/api/users", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, role: newRole }),
+      });
+    } catch (err) {
+      console.warn("Gagal update role user di server:", err);
+    }
+  };
+
   const handleToggleUserStatus = async (userId: string) => {
     const targetUser = users.find((u) => u.id === userId);
     if (!targetUser) return;
@@ -180,28 +197,17 @@ export default function AdminUsersPage() {
                         </div>
                       </td>
                       <td className="p-3.5">
-                        <Badge
-                          variant={
-                            u.role === "admin"
-                              ? "default"
-                              : u.role === "seller"
-                              ? "secondary"
-                              : "outline"
+                        <select
+                          value={u.role}
+                          onChange={(e) =>
+                            handleChangeUserRole(u.id, e.target.value as "admin" | "seller" | "buyer")
                           }
-                          className={`text-[10px] font-bold ${
-                            u.role === "admin"
-                              ? "bg-purple-700 text-white"
-                              : u.role === "seller"
-                              ? "bg-orange-500 text-white"
-                              : "border-emerald-600 text-emerald-700"
-                          }`}
+                          className="text-[11px] font-bold rounded-lg border border-border bg-background px-2.5 py-1 text-foreground focus:outline-none focus:ring-1 focus:ring-purple-600 cursor-pointer"
                         >
-                          {u.role === "admin"
-                            ? "Admin"
-                            : u.role === "seller"
-                            ? "Mitra Toko"
-                            : "Pelanggan"}
-                        </Badge>
+                          <option value="admin">Admin</option>
+                          <option value="seller">Mitra Toko</option>
+                          <option value="buyer">Pelanggan</option>
+                        </select>
                       </td>
                       <td className="p-3.5 font-mono text-muted-foreground">
                         {u.phone || "-"}

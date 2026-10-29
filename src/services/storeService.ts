@@ -25,7 +25,7 @@ import {
 } from "./seedData";
 import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
 
-const STORAGE_KEY = "sisarasa_app_state_clean_v1";
+const STORAGE_KEY = "rerasa_app_state_db_clean_v2";
 
 interface AppState {
   currentUser: User | null;
@@ -42,12 +42,12 @@ interface AppState {
 
 export const DEFAULT_INITIAL_STATE: AppState = {
   currentUser: null,
-  stores: SEED_STORES,
-  surpriseBags: SEED_SURPRISE_BAGS,
-  orders: SEED_ORDERS,
+  stores: [],
+  surpriseBags: [],
+  orders: [],
   boxPackages: SEED_BOX_PACKAGES,
-  boxOrders: SEED_BOX_ORDERS,
-  reviews: SEED_REVIEWS,
+  boxOrders: [],
+  reviews: [],
   chatMessages: {},
   withdrawals: [],
   disputes: [],
@@ -84,12 +84,7 @@ class StoreService {
           } else {
             parsed.currentUser = null;
           }
-          if (!parsed.stores || parsed.stores.length === 0) {
-            parsed.stores = SEED_STORES;
-          }
-          if (!parsed.surpriseBags || parsed.surpriseBags.length === 0) {
-            parsed.surpriseBags = SEED_SURPRISE_BAGS;
-          }
+          // State parsed from storage
           this.state = parsed;
         } else {
           this.state = { ...DEFAULT_INITIAL_STATE };
@@ -183,6 +178,48 @@ class StoreService {
       document.cookie = `rerasa_user_role=${user.role}; path=/; max-age=2592000; SameSite=Lax`;
     }
     this.persist();
+  }
+
+  public async loginWithEmailAsync(email: string): Promise<User> {
+    const cleanEmail = email.toLowerCase().trim();
+    let user: User | null = null;
+
+    try {
+      const res = await fetch("/api/users");
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        const found = json.data.find((u: any) => u.email.toLowerCase() === cleanEmail);
+        if (found) {
+          user = {
+            id: found.id,
+            name: found.name,
+            email: found.email,
+            role: found.role,
+            phone: found.phone || "-",
+            avatarUrl: resolveUserAvatar(found.avatarUrl, found.name),
+            status: found.status || "ACTIVE",
+            storeId: found.storeId,
+          };
+        }
+      }
+    } catch (e) {
+      console.warn("Gagal lookup user dari /api/users saat login:", e);
+    }
+
+    if (!user) {
+      user = this.loginWithEmail(email);
+      return user;
+    }
+
+    this.state.currentUser = user;
+    if (typeof window !== "undefined") {
+      localStorage.setItem("foodrescue_auth_user", JSON.stringify(user));
+      localStorage.setItem("foodrescue_guest_name", user.name);
+      localStorage.setItem("foodrescue_guest_phone", user.phone);
+      document.cookie = `rerasa_user_role=${user.role}; path=/; max-age=2592000; SameSite=Lax`;
+    }
+    this.persist();
+    return user;
   }
 
   public loginWithEmail(email: string): User {
@@ -754,7 +791,7 @@ class StoreService {
     const totalOrdersCount = completedOrders.length;
 
     // Estimate kg of food saved: avg 0.8 kg per bag
-    const estimatedKgSaved = (totalOrdersCount * 0.8) + 148.5; // with historical baseline
+    const estimatedKgSaved = totalOrdersCount * 0.8;
 
     const gmv = this.state.orders
       .filter((o) => o.status === "COMPLETED" || o.status === "PAID")
@@ -769,7 +806,7 @@ class StoreService {
       .reduce((acc, b) => acc + b.quantityPcs, 0);
 
     return {
-      totalMealsSaved: totalOrdersCount + 185,
+      totalMealsSaved: totalOrdersCount,
       estimatedKgSaved: Math.round(estimatedKgSaved * 10) / 10,
       gmv,
       platformRevenue,
