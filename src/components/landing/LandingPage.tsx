@@ -12,7 +12,6 @@ import {
   Apple,
   ShoppingBag,
   Receipt,
-  LogOut,
   ChevronDown,
   ShieldCheck,
   Building2,
@@ -33,7 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { storeService, DEFAULT_INITIAL_STATE } from "@/services/storeService";
-import { cartService } from "@/services/cartService";
+import { cartService, CartItem } from "@/services/cartService";
 import { FloatingCartBar } from "@/components/cart/FloatingCartBar";
 import { useHorizontalScroll } from "@/hooks/useHorizontalScroll";
 import { resolveUserAvatar } from "@/lib/avatar";
@@ -48,6 +47,7 @@ import {
 
 export function LandingPage() {
   const [state, setState] = useState(DEFAULT_INITIAL_STATE);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
@@ -73,6 +73,15 @@ export function LandingPage() {
       setState(storeService.getState());
     });
     return unsub;
+  }, []);
+
+  // Synchronize cartService state dynamically
+  useEffect(() => {
+    setCartItems([...cartService.getItems()]);
+    const unsubCart = cartService.subscribe(() => {
+      setCartItems([...cartService.getItems()]);
+    });
+    return unsubCart;
   }, []);
 
   // Sync DB data into storeService for seamless cart & checkout support
@@ -147,6 +156,10 @@ export function LandingPage() {
     ).length;
   }, [userOrders]);
 
+  const cartTotalCount = useMemo(() => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [cartItems]);
+
   const filteredAreas = useMemo(() => {
     if (!areaSearchQuery.trim()) return availableAreas;
     return availableAreas.filter((a) =>
@@ -191,8 +204,25 @@ export function LandingPage() {
   }, [orders, bags]);
 
   const handleAddToCart = (e: React.MouseEvent, bag: SurpriseBag) => {
-    const store = stores.find((s) => s.id === bag.storeId);
-    if (!store) return;
+    const store = stores.find((s) => s.id === bag.storeId) || {
+      id: bag.storeId,
+      name: "Mitra Kuliner",
+      category: bag.category,
+      address: "Cirebon",
+      area: "Cirebon Kota",
+      latitude: -6.7172,
+      longitude: 108.5412,
+      rating: 4.8,
+      reviewCount: 50,
+      isOpen: true,
+      status: "ACTIVE" as const,
+      pickupStartTime: "19:00",
+      pickupEndTime: "21:00",
+      boxComplianceRate: 98,
+      boxesSoldTotal: 100,
+      currentBoxStock: 50,
+      walletBalance: 0,
+    };
 
     // Trigger fly-to-cart animation
     const rect = e.currentTarget.getBoundingClientRect();
@@ -211,6 +241,13 @@ export function LandingPage() {
     }, 550);
   };
 
+  const openCartDrawer = () => {
+    const trigger = document.getElementById("cart-target-icon");
+    if (trigger) {
+      trigger.click();
+    }
+  };
+
   // Icon mapper helper based on category name
   const getCategoryIcon = (catName: string) => {
     const lower = catName.toLowerCase();
@@ -227,11 +264,11 @@ export function LandingPage() {
         
         {/* Sticky App Header */}
         <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-xs border-b border-border/60 px-3.5 pt-3 pb-2.5 space-y-2">
-          {/* Top Bar: Location Switcher & Profile Avatar */}
+          {/* Top Bar: Location Switcher, Cart Badge & Profile Avatar */}
           <div className="flex items-center justify-between gap-2">
             {/* Location Selector Button */}
             <Popover open={isAreaPickerOpen} onOpenChange={setIsAreaPickerOpen}>
-              <PopoverTrigger className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/60 hover:bg-muted text-xs font-bold text-foreground border border-border/60 transition-colors shrink-0 max-w-[240px]">
+              <PopoverTrigger className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted/60 hover:bg-muted text-xs font-bold text-foreground border border-border/60 transition-colors shrink-0 max-w-[210px]">
                 <MapPin className="size-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
                 <span className="truncate">
                   {selectedArea === "Semua" ? "Semua Lokasi Mitra" : selectedArea}
@@ -285,101 +322,144 @@ export function LandingPage() {
               </PopoverContent>
             </Popover>
 
-            {/* Profile Popover with Avatar */}
-            <Popover>
-              <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted">
-                <Avatar className="size-full">
-                  <AvatarImage
-                    src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)}
-                    alt={currentUser.name}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="text-[11px] font-black bg-emerald-700 text-white">
-                    {currentUser.name.slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-              </PopoverTrigger>
-              <PopoverContent align="end" className="w-64 p-3 space-y-3">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-border">
-                  <Avatar className="size-10 shrink-0">
-                    <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
-                    <AvatarFallback className="text-xs font-bold bg-emerald-700 text-white">
+            {/* Right Header Section: Cart Trigger & Profile */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Cart Button with Live Counter Badge */}
+              <button
+                type="button"
+                onClick={openCartDrawer}
+                className="relative size-8 rounded-full ring-1 ring-border/80 hover:bg-muted transition-all flex items-center justify-center text-foreground cursor-pointer"
+                aria-label="Buka Keranjang Belanja"
+              >
+                <ShoppingBag className="size-4 text-emerald-700 dark:text-emerald-400" />
+                {cartTotalCount > 0 && (
+                  <span className="absolute -top-1 -right-1 size-4.5 bg-amber-500 text-stone-950 text-[10px] font-black rounded-full flex items-center justify-center tabular-nums shadow-xs">
+                    {cartTotalCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Profile Popover with Avatar */}
+              <Popover>
+                <PopoverTrigger className="size-8 rounded-full ring-2 ring-emerald-600/30 hover:ring-emerald-600 transition-all flex items-center justify-center overflow-hidden bg-muted cursor-pointer">
+                  <Avatar className="size-full">
+                    <AvatarImage
+                      src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)}
+                      alt={currentUser.name}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="text-[11px] font-black bg-emerald-700 text-white">
                       {currentUser.name.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="min-w-0">
-                    <span className="font-extrabold text-xs block truncate text-foreground">
-                      {currentUser.name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground block truncate">
-                      {currentUser.email}
-                    </span>
-                    <Badge variant="secondary" className="text-[9px] font-bold mt-0.5 px-1.5 py-0 capitalize">
-                      {currentUser.role.replace("_", " ")}
-                    </Badge>
-                  </div>
-                </div>
-
-                <div className="space-y-1 text-xs">
-                  {(currentUser.role === "admin" || (currentUser.role as string) === "super_admin") && (
-                    <Link
-                      href="/admin"
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
-                    >
-                      <ShieldCheck className="size-3.5 text-emerald-700" />
-                      <span>Masuk Command Center Admin</span>
-                    </Link>
-                  )}
-
-                  {currentUser.role === "seller" && (
-                    <Link
-                      href="/seller"
-                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
-                    >
-                      <Building2 className="size-3.5 text-emerald-700" />
-                      <span>Masuk Portal Mitra Kuliner</span>
-                    </Link>
-                  )}
-
-                  <Link
-                    href="/history"
-                    className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Receipt className="size-3.5 text-emerald-700" />
-                      <span>Riwayat Pesanan Saya</span>
-                    </span>
-                    {activeTicketsCount > 0 && (
-                      <Badge className="size-4 p-0 flex items-center justify-center bg-emerald-700 text-white text-[9px] font-bold rounded-full">
-                        {activeTicketsCount}
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-64 p-3 space-y-3">
+                  <div className="flex items-center gap-2.5 pb-2 border-b border-border">
+                    <Avatar className="size-10 shrink-0">
+                      <AvatarImage src={resolveUserAvatar(currentUser.avatarUrl, currentUser.name)} alt={currentUser.name} />
+                      <AvatarFallback className="text-xs font-bold bg-emerald-700 text-white">
+                        {currentUser.name.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <span className="font-extrabold text-xs block truncate text-foreground">
+                        {currentUser.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground block truncate">
+                        {currentUser.email}
+                      </span>
+                      <Badge variant="secondary" className="text-[9px] font-bold mt-0.5 px-1.5 py-0 capitalize">
+                        {currentUser.role.replace("_", " ")}
                       </Badge>
-                    )}
-                  </Link>
-                </div>
+                    </div>
+                  </div>
 
-                <div className="pt-2 border-t border-border flex flex-col gap-1">
-                  <Link
-                    href="/account"
-                    className="w-full flex items-center justify-center gap-1.5 text-xs text-foreground hover:bg-muted font-semibold py-1.5 rounded-lg transition-colors"
-                  >
-                    <User className="size-3.5 text-muted-foreground" />
-                    <span>Profil & Pengaturan Akun</span>
-                  </Link>
-                </div>
-              </PopoverContent>
-            </Popover>
+                  <div className="space-y-1 text-xs">
+                    {(currentUser.role === "admin" || (currentUser.role as string) === "super_admin") && (
+                      <Link
+                        href="/admin"
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
+                      >
+                        <ShieldCheck className="size-3.5 text-emerald-700" />
+                        <span>Masuk Command Center Admin</span>
+                      </Link>
+                    )}
+
+                    {currentUser.role === "seller" && (
+                      <Link
+                        href="/seller"
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted font-bold text-foreground transition-colors"
+                      >
+                        <Building2 className="size-3.5 text-emerald-700" />
+                        <span>Masuk Portal Mitra Kuliner</span>
+                      </Link>
+                    )}
+
+                    <Link
+                      href="/history"
+                      className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-muted font-medium text-foreground transition-colors"
+                    >
+                      <span className="flex items-center gap-2">
+                        <Receipt className="size-3.5 text-emerald-700" />
+                        <span>Riwayat Pesanan Saya</span>
+                      </span>
+                      {activeTicketsCount > 0 && (
+                        <Badge className="size-4 p-0 flex items-center justify-center bg-emerald-700 text-white text-[9px] font-bold rounded-full">
+                          {activeTicketsCount}
+                        </Badge>
+                      )}
+                    </Link>
+                  </div>
+
+                  <div className="pt-2 border-t border-border flex flex-col gap-1">
+                    <Link
+                      href="/account"
+                      className="w-full flex items-center justify-center gap-1.5 text-xs text-foreground hover:bg-muted font-semibold py-1.5 rounded-lg transition-colors"
+                    >
+                      <User className="size-3.5 text-muted-foreground" />
+                      <span>Profil & Pengaturan Akun</span>
+                    </Link>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="size-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-            <Input
-              type="text"
-              placeholder="Cari roti, resto, atau area Cirebon..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="text-xs h-8 pl-8 pr-3 rounded-full bg-muted/40 border-border/60 focus-visible:ring-1 focus-visible:ring-emerald-700"
-            />
+          {/* Search Input Bar with Filter Toggle */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Cari roti, makanan berat, atau nama mitra..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 h-8.5 text-xs bg-muted/40 border-border/80 focus-visible:ring-emerald-600"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Quick Filter: Last Call / Flash Sale */}
+            <Button
+              size="sm"
+              variant={isLastCallOnly ? "default" : "outline"}
+              onClick={() => setIsLastCallOnly(!isLastCallOnly)}
+              className={`h-8.5 px-2.5 text-[11px] font-bold gap-1 shrink-0 transition-all cursor-pointer ${
+                isLastCallOnly
+                  ? "bg-amber-600 hover:bg-amber-700 text-white border-amber-600 shadow-2xs"
+                  : "hover:bg-muted border-border/80 text-muted-foreground"
+              }`}
+            >
+              <Flame className={`size-3.5 ${isLastCallOnly ? "fill-white text-white" : "text-amber-600"}`} />
+              <span>Last Call</span>
+            </Button>
           </div>
         </header>
 
@@ -435,6 +515,7 @@ export function LandingPage() {
                   flashSaleBags.map((bag) => {
                     const store = stores.find((s) => s.id === bag.storeId);
                     const isSoldOut = bag.quotaRemaining <= 0;
+                    const inCartQty = cartItems.find((i) => i.bag.id === bag.id)?.quantity || 0;
 
                     return (
                       <div
@@ -493,6 +574,35 @@ export function LandingPage() {
                             <span className="h-6 text-[9px] font-bold text-muted-foreground bg-muted border border-border rounded-lg px-2 flex items-center justify-center select-none">
                               Habis
                             </span>
+                          ) : inCartQty > 0 ? (
+                            <div className="flex items-center gap-1 bg-amber-500/15 border border-amber-500/40 rounded-lg p-0.5 h-6">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  cartService.updateQuantity(bag.id, inCartQty - 1);
+                                }}
+                                className="size-5 rounded flex items-center justify-center font-black text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-500/20 cursor-pointer"
+                                aria-label="Kurangi jumlah"
+                              >
+                                -
+                              </button>
+                              <span className="text-[10px] font-black tabular-nums text-amber-950 dark:text-amber-100 px-1">
+                                {inCartQty}
+                              </span>
+                              <button
+                                type="button"
+                                disabled={inCartQty >= bag.quotaRemaining}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleAddToCart(e, bag);
+                                }}
+                                className="size-5 rounded flex items-center justify-center font-black text-xs text-amber-900 dark:text-amber-200 hover:bg-amber-500/20 cursor-pointer disabled:opacity-30"
+                                aria-label="Tambah jumlah"
+                              >
+                                +
+                              </button>
+                            </div>
                           ) : (
                             <Button
                               size="sm"
@@ -717,6 +827,7 @@ export function LandingPage() {
                     ((bag.originalPrice - bag.discountedPrice) / bag.originalPrice) * 100
                   );
                   const isSoldOut = bag.quotaRemaining <= 0;
+                  const inCartQty = cartItems.find((i) => i.bag.id === bag.id)?.quantity || 0;
 
                   return (
                     <Card
@@ -801,17 +912,48 @@ export function LandingPage() {
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-1">
-                              <button
-                                type="button"
-                                onClick={(e) => handleAddToCart(e, bag)}
-                                className="h-6 flex items-center justify-center gap-0.5 rounded-md bg-muted/80 hover:bg-muted text-foreground text-[9px] font-bold border border-border/70 transition-colors cursor-pointer"
-                              >
-                                <Plus className="size-2.5" />
-                                <span>Cart</span>
-                              </button>
+                              {inCartQty > 0 ? (
+                                <div className="h-6 flex items-center justify-between rounded-md bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-600/40 px-1">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      cartService.updateQuantity(bag.id, inCartQty - 1);
+                                    }}
+                                    className="size-4.5 rounded flex items-center justify-center font-black text-xs text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200/50 cursor-pointer"
+                                    aria-label="Kurangi"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="text-[10px] font-black tabular-nums text-emerald-950 dark:text-emerald-100">
+                                    {inCartQty}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    disabled={inCartQty >= bag.quotaRemaining}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAddToCart(e, bag);
+                                    }}
+                                    className="size-4.5 rounded flex items-center justify-center font-black text-xs text-emerald-800 dark:text-emerald-200 hover:bg-emerald-200/50 cursor-pointer disabled:opacity-30"
+                                    aria-label="Tambah"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={(e) => handleAddToCart(e, bag)}
+                                  className="h-6 flex items-center justify-center gap-0.5 rounded-md bg-muted/80 hover:bg-muted text-foreground text-[9px] font-bold border border-border/70 transition-colors cursor-pointer"
+                                >
+                                  <Plus className="size-2.5" />
+                                  <span>Cart</span>
+                                </button>
+                              )}
 
                               <Link
-                                href={`/checkout?bagId=${bag.id}`}
+                                href={`/checkout?bagId=${bag.id}&quantity=${inCartQty > 0 ? inCartQty : 1}`}
                                 className="h-6 flex items-center justify-center rounded-md bg-emerald-700 hover:bg-emerald-800 text-white text-[9px] font-black shadow-2xs transition-colors"
                               >
                                 Beli
@@ -858,6 +1000,22 @@ export function LandingPage() {
             <ShoppingBag className="size-5" />
             <span className="text-[10px] font-extrabold">Jelajah</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={openCartDrawer}
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground relative transition-colors cursor-pointer"
+          >
+            <div className="relative">
+              <ShoppingBag className="size-5" />
+              {cartTotalCount > 0 && (
+                <span className="size-4 rounded-full bg-amber-500 text-stone-950 text-[9px] font-black flex items-center justify-center absolute -top-1 -right-2 tabular-nums shadow-xs">
+                  {cartTotalCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-bold">Keranjang</span>
+          </button>
 
           <Link
             href="/history"

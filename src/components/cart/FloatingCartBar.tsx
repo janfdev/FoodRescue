@@ -56,13 +56,13 @@ export function FloatingCartBar() {
         <div className="pointer-events-auto bg-emerald-800 dark:bg-emerald-950 text-white rounded-2xl p-2.5 px-3.5 shadow-xl border border-emerald-600/50 flex items-center justify-between gap-3 backdrop-blur-md">
           {/* Cart Icon & Counter Badge */}
           <button
+            id="cart-target-icon"
             type="button"
             onClick={() => setIsOpen(true)}
             className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer"
           >
             <div className="relative shrink-0">
               <div
-                id="cart-target-icon"
                 className={`size-9 rounded-xl bg-emerald-700 dark:bg-emerald-800 flex items-center justify-center transition-transform duration-200 ${
                   bouncing ? "scale-125 bg-amber-500 text-stone-900" : "scale-100"
                 }`}

@@ -23,15 +23,27 @@ function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bagId = searchParams.get("bagId");
+  const qtyParam = searchParams.get("quantity");
 
   const [bag, setBag] = useState<SurpriseBag | null>(null);
   const [store, setStore] = useState<Store | null>(null);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(() => {
+    if (qtyParam && !isNaN(Number(qtyParam))) {
+      return Math.max(1, Number(qtyParam));
+    }
+    return 1;
+  });
   const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "COD" | "VA">("QRIS");
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrder, setConfirmedOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    if (qtyParam && !isNaN(Number(qtyParam))) {
+      setQuantity(Math.max(1, Number(qtyParam)));
+    }
+  }, [qtyParam]);
 
   useEffect(() => {
     // Read cached guest details

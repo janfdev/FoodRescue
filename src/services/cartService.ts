@@ -78,27 +78,33 @@ class CartService {
     return this.items[0].store;
   }
 
-  public addItem(bag: SurpriseBag, store: Store, quantity = 1): { success: boolean; replacedStore?: boolean } {
-    // Check if cart has items from different store
-    if (this.items.length > 0 && this.items[0].bag.storeId !== bag.storeId) {
-      // Replace with new store items
-      this.items = [{ bag, store, quantity }];
-      this.notify();
-      return { success: true, replacedStore: true };
-    }
+  public getItemQuantity(bagId: string): number {
+    const item = this.items.find((i) => i.bag.id === bagId);
+    return item ? item.quantity : 0;
+  }
+
+  public addItem(
+    bag: SurpriseBag,
+    store: Store,
+    quantity = 1
+  ): { success: boolean; replacedStore?: boolean } {
+    const maxQuota = Math.max(
+      1,
+      Number(bag.quotaRemaining ?? (bag as unknown as { quota_remaining?: number }).quota_remaining ?? 99)
+    );
 
     const existingIndex = this.items.findIndex((item) => item.bag.id === bag.id);
     if (existingIndex > -1) {
-      const nextQty = Math.min(
-        bag.quotaRemaining,
-        this.items[existingIndex].quantity + quantity
-      );
+      const currentQty = this.items[existingIndex].quantity || 0;
+      const nextQty = Math.min(maxQuota, currentQty + quantity);
       this.items[existingIndex].quantity = nextQty;
+      this.items[existingIndex].bag = bag;
+      this.items[existingIndex].store = store;
     } else {
       this.items.push({
         bag,
         store,
-        quantity: Math.min(bag.quotaRemaining, quantity),
+        quantity: Math.min(maxQuota, Math.max(1, quantity)),
       });
     }
 
@@ -114,7 +120,15 @@ class CartService {
 
     const item = this.items.find((i) => i.bag.id === bagId);
     if (item) {
-      item.quantity = Math.min(item.bag.quotaRemaining, quantity);
+      const maxQuota = Math.max(
+        1,
+        Number(
+          item.bag.quotaRemaining ??
+            (item.bag as unknown as { quota_remaining?: number }).quota_remaining ??
+            99
+        )
+      );
+      item.quantity = Math.min(maxQuota, quantity);
       this.notify();
     }
   }
