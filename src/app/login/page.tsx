@@ -267,6 +267,24 @@ export default function LoginPage() {
                 ))}
               </div>
             </div>
+
+            {/* SELLER REGISTRATION BANNER / CALL TO ACTION */}
+            <div className="mt-5 p-3.5 rounded-2xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-between gap-3">
+              <div className="space-y-0.5 min-w-0">
+                <span className="text-xs font-black text-orange-950 dark:text-orange-200 block">
+                  Punya Usaha Kuliner di Cirebon?
+                </span>
+                <span className="text-[11px] text-orange-800/80 dark:text-orange-300/80 block leading-tight">
+                  Ubah surplus makanan jadi pendapatan tambahan tanpa risiko.
+                </span>
+              </div>
+              <Link
+                href="/register-seller"
+                className="shrink-0 px-3 py-1.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-xs transition-colors"
+              >
+                Daftar Mitra Toko &rarr;
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>

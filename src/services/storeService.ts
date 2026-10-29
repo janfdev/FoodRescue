@@ -11,7 +11,8 @@ import {
   WithdrawalRequest,
   DisputeTicket,
   User,
-  UserRole
+  UserRole,
+  StoreCategory
 } from "@/types/domain";
 import {
   SEED_STORES,
@@ -265,6 +266,84 @@ class StoreService {
     }
 
     this.persist();
+  }
+
+  // =====================
+  // SELLER ONBOARDING / REGISTRATION
+  // =====================
+  public registerSeller(data: {
+    ownerName: string;
+    email: string;
+    phone: string;
+    storeName: string;
+    category: StoreCategory;
+    area: string;
+    address: string;
+    pickupStartTime: string;
+    pickupEndTime: string;
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+    storeFrontImage?: string;
+    logoUrl?: string;
+  }): { user: User; store: Store } {
+    const cleanEmail = data.email.trim().toLowerCase();
+    const existingUser = this.state.stores.find((s) => s.name.toLowerCase() === data.storeName.trim().toLowerCase());
+    if (existingUser) {
+      throw new Error(`Nama gerai '${data.storeName}' sudah terdaftar.`);
+    }
+
+    const storeId = `store-${Date.now().toString(36)}`;
+    const userId = `user-seller-${Date.now().toString(36)}`;
+
+    const newStore: Store = {
+      id: storeId,
+      name: data.storeName.trim(),
+      category: data.category,
+      address: data.address.trim(),
+      area: data.area,
+      latitude: -6.72 + (Math.random() - 0.5) * 0.05,
+      longitude: 108.55 + (Math.random() - 0.5) * 0.05,
+      rating: 5.0,
+      reviewCount: 0,
+      isOpen: false,
+      status: "PENDING_APPROVAL",
+      logoUrl: data.logoUrl || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200&auto=format&fit=crop&q=80",
+      imageUrl: data.storeFrontImage || "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop&q=80",
+      pickupStartTime: data.pickupStartTime,
+      pickupEndTime: data.pickupEndTime,
+      boxComplianceRate: 100,
+      boxesSoldTotal: 0,
+      currentBoxStock: 0,
+      walletBalance: 0,
+      bankAccount: {
+        bankName: data.bankName,
+        accountNumber: data.accountNumber,
+        accountHolder: data.accountHolder || data.ownerName,
+      },
+      kycDetails: {
+        ownerName: data.ownerName.trim(),
+        storeFrontImage: data.storeFrontImage,
+        submittedAt: new Date().toISOString(),
+      },
+    };
+
+    const newUser: User = {
+      id: userId,
+      name: data.ownerName.trim(),
+      email: cleanEmail,
+      phone: data.phone.trim(),
+      role: "seller",
+      storeId: storeId,
+      status: "ACTIVE",
+      avatarUrl: data.logoUrl || resolveUserAvatar(null, data.ownerName),
+      createdAt: new Date().toISOString(),
+    };
+
+    this.state.stores.unshift(newStore);
+    this.persist();
+
+    return { user: newUser, store: newStore };
   }
 
   // =====================

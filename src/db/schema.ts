@@ -151,11 +151,12 @@ export const stores = pgTable(
       accountHolder: string;
     }>(),
     kycDetails: jsonb("kyc_details").$type<{
-      ktpNumber: string;
       ownerName: string;
-      ktpImage: string;
-      storeFrontImage: string;
+      storeFrontImage?: string;
       submittedAt: string;
+      notes?: string;
+      ktpNumber?: string;
+      ktpImage?: string;
     }>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),

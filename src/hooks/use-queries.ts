@@ -189,3 +189,44 @@ export function useAuditLogs(filter?: {
     mutate,
   };
 }
+
+export function useRegisterSeller() {
+  const registerSeller = async (formData: {
+    ownerName: string;
+    email: string;
+    phone: string;
+    storeName: string;
+    category: any;
+    area: string;
+    address: string;
+    pickupStartTime: string;
+    pickupEndTime: string;
+    bankName: string;
+    accountNumber: string;
+    accountHolder: string;
+    storeFrontImage?: string;
+    logoUrl?: string;
+  }) => {
+    // 1. Sync ke in-memory client state store
+    const { user, store } = (await import("@/services/storeService")).storeService.registerSeller(formData);
+
+    // 2. Sync ke backend API endpoint
+    try {
+      const res = await fetch("/api/seller/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) {
+        const errorJson = await res.json().catch(() => ({}));
+        console.warn("Backend register API error, fallback to client state:", errorJson.error);
+      }
+    } catch (apiErr) {
+      console.warn("Backend register API network failure, client state applied:", apiErr);
+    }
+
+    return { user, store };
+  };
+
+  return { registerSeller };
+}

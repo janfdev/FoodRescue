@@ -60,11 +60,12 @@ export interface Store {
     accountHolder: string;
   };
   kycDetails?: {
-    ktpNumber: string;
     ownerName: string;
-    ktpImage: string;
-    storeFrontImage: string;
+    storeFrontImage?: string;
     submittedAt: string;
+    notes?: string;
+    ktpNumber?: string;
+    ktpImage?: string;
   };
 }
 
