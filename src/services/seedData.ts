@@ -30,6 +30,16 @@ export const SEED_USERS: User[] = [
     createdAt: "2026-01-15T08:00:00Z"
   },
   {
+    id: "user-buyer-2",
+    name: "Fauzan Rizqi",
+    email: "fauzan@gmail.com",
+    role: "buyer",
+    phone: "081298765432",
+    status: "ACTIVE",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=FauzanRizqi",
+    createdAt: "2026-01-15T08:00:00Z"
+  },
+  {
     id: "user-seller-ruby",
     name: "Siti Rahmawati",
     email: "seller@rerasa.com",
@@ -38,6 +48,17 @@ export const SEED_USERS: User[] = [
     phone: "081987654321",
     status: "ACTIVE",
     avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=SitiRahmawati",
+    createdAt: "2026-01-15T08:00:00Z"
+  },
+  {
+    id: "user-seller-ruby-alt",
+    name: "Siti Rahmawati (Ruby)",
+    email: "ruby@rerasa.com",
+    role: "seller",
+    storeId: "store-ruby-bakery",
+    phone: "081987654321",
+    status: "ACTIVE",
+    avatarUrl: "https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=RubyBakery",
     createdAt: "2026-01-15T08:00:00Z"
   }
 ];
