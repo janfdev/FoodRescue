@@ -1,6 +1,6 @@
 import { db, pool } from "./index";
-import { users, stores } from "./schema";
-import { SEED_USERS, SEED_STORES } from "../services/seedData";
+import { users, stores, surpriseBags } from "./schema";
+import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS } from "../services/seedData";
 
 async function runSeed() {
   console.log("=== RUNNING FOODRESCUE PRODUCTION SEEDER ===");
@@ -98,6 +98,50 @@ async function runSeed() {
     }
 
     console.log(`✓ Successfully seeded ${SEED_USERS.length} users.`);
+
+    // 3. Seed Surprise Bags (Paket Makanan Surplus per Toko)
+    console.log(`-> Seeding ${SEED_SURPRISE_BAGS.length} surprise bag(s) into database...`);
+    for (const b of SEED_SURPRISE_BAGS) {
+      await db
+        .insert(surpriseBags)
+        .values({
+          id: b.id,
+          storeId: b.storeId,
+          title: b.title,
+          category: b.category as any,
+          description: b.description,
+          imageUrl: b.imageUrl,
+          originalPrice: b.originalPrice,
+          discountedPrice: b.discountedPrice,
+          quotaToday: b.quotaToday,
+          quotaRemaining: b.quotaRemaining,
+          isActive: b.isActive,
+          isLastCall: b.isLastCall,
+          pickupWindow: b.pickupWindow,
+          estimatedWeightKg: b.estimatedWeightKg,
+          allergensWarning: b.allergensWarning,
+        })
+        .onConflictDoUpdate({
+          target: surpriseBags.id,
+          set: {
+            storeId: b.storeId,
+            title: b.title,
+            category: b.category as any,
+            description: b.description,
+            imageUrl: b.imageUrl,
+            originalPrice: b.originalPrice,
+            discountedPrice: b.discountedPrice,
+            quotaToday: b.quotaToday,
+            quotaRemaining: b.quotaRemaining,
+            isActive: b.isActive,
+            isLastCall: b.isLastCall,
+            pickupWindow: b.pickupWindow,
+            estimatedWeightKg: b.estimatedWeightKg,
+            allergensWarning: b.allergensWarning,
+          },
+        });
+    }
+    console.log(`✓ Successfully seeded ${SEED_SURPRISE_BAGS.length} surprise bag(s).`);
   } catch (error) {
     console.error("✗ Seeding failed:", error);
     process.exit(1);
