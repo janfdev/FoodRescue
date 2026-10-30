@@ -36,13 +36,9 @@ export default function SellerOrdersPage() {
 
   const syncData = () => {
     const state = storeService.getState();
-    const activeStoreId = state.currentUser?.storeId;
-    const storeOrders = activeStoreId
-      ? state.orders.filter((o) => o.storeId === activeStoreId)
-      : state.orders;
-    const storeBags = activeStoreId
-      ? state.surpriseBags.filter((b) => b.storeId === activeStoreId)
-      : state.surpriseBags;
+    const activeStoreId = state.currentUser?.storeId || "store-ruby-bakery";
+    const storeOrders = state.orders.filter((o) => o.storeId === activeStoreId);
+    const storeBags = state.surpriseBags.filter((b) => b.storeId === activeStoreId);
 
     setOrders(storeOrders);
     setBags(storeBags);

@@ -42,7 +42,7 @@ export default function SellerBagsPage() {
 
   const syncData = () => {
     const state = storeService.getState();
-    const activeStoreId = state.currentUser?.storeId;
+    const activeStoreId = state.currentUser?.storeId || "store-ruby-bakery";
     if (!activeStoreId) {
       setSurpriseBags([]);
       return;

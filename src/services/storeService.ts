@@ -28,7 +28,7 @@ import {
 } from "./seedData";
 import { getDefaultAvatar, resolveUserAvatar } from "@/lib/avatar";
 
-const STORAGE_KEY = "rerasa_app_state_db_clean_v2";
+const STORAGE_KEY = "rerasa_app_state_db_clean_v3";
 
 interface AppState {
   currentUser: User | null;
@@ -103,6 +103,14 @@ class StoreService {
           }
           if (!parsed.orders || parsed.orders.length === 0) {
             parsed.orders = SEED_ORDERS;
+          } else {
+            // Sinkronkan jika ada pesanan seed baru yang belum tersimpan di cache lokal
+            for (const seedOrd of SEED_ORDERS) {
+              const exists = parsed.orders.some((o: Order) => o.id === seedOrd.id);
+              if (!exists) {
+                parsed.orders.push(seedOrd);
+              }
+            }
           }
           // Pastikan walletBalance tiap toko selalu mencerminkan akumulasi seluruh pesanan selesai
           if (parsed.stores && parsed.orders) {

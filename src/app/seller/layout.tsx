@@ -41,7 +41,7 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
     const currentState = storeService.getState();
     setState(currentState);
     // Toko merchant mitra yang terasosiasi dengan user seller
-    const sellerStoreId = currentState.currentUser?.storeId;
+    const sellerStoreId = currentState.currentUser?.storeId || "store-ruby-bakery";
     const current = sellerStoreId ? currentState.stores.find((s) => s.id === sellerStoreId) || null : null;
     setStore(current);
     if (current) {

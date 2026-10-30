@@ -77,7 +77,7 @@ export default function EditSurpriseBagPage({ params }: any) {
   useEffect(() => {
     if (!bagId) return;
     const state = storeService.getState();
-    const activeStoreId = state.currentUser?.storeId;
+    const activeStoreId = state.currentUser?.storeId || "store-ruby-bakery";
     const allBags = state.surpriseBags;
     const found = allBags.find((b) => b.id === bagId && (!activeStoreId || b.storeId === activeStoreId));
 

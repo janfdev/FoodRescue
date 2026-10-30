@@ -16,7 +16,7 @@ export default function SellerBoxesPage() {
 
   const syncData = () => {
     const state = storeService.getState();
-    const activeStoreId = state.currentUser?.storeId;
+    const activeStoreId = state.currentUser?.storeId || "store-ruby-bakery";
     const current = activeStoreId ? state.stores.find((s) => s.id === activeStoreId) || null : null;
     setStore(current);
     setBoxPackages(state.boxPackages);

@@ -20,7 +20,7 @@ export default function SellerFinancePage() {
 
   const syncData = () => {
     const state = storeService.getState();
-    const activeStoreId = state.currentUser?.storeId;
+    const activeStoreId = state.currentUser?.storeId || "store-ruby-bakery";
     const currentStore = activeStoreId ? state.stores.find((s) => s.id === activeStoreId) || null : null;
     setStore(currentStore);
     if (activeStoreId) {
