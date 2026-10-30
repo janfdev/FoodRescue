@@ -1,6 +1,6 @@
 # LAPORAN AUDIT LENGKAP SELURUH SUB-MENU & ALUR SISTEM
 
-> Tanggal Audit: 2026-10-30T00:44:33.337Z  
+> Tanggal Audit: 2026-10-30T04:07:47.963Z  
 > Target Live URL: [https://rerasa.fizaa.me](https://rerasa.fizaa.me)  
 > Total Sub-Menu / Rute Diperiksa: **28 Halaman** | **✓ OK: 28** | **✗ BROKEN: 0**
 
@@ -12,9 +12,9 @@
 | :--- | :--- | :--- | :---: | :---: | :--- |
 | **Buyer** | Katalog Beranda | `/` | 200 | **✓ OK** | Segera Habis Malam Ini |
 | **Buyer** | Keranjang Makanan | `/cart` | 200 | **✓ OK** | Keranjang Belanja |
-| **Buyer** | Checkout Pembayaran | `/checkout?bagId=bag-ruby-1` | 200 | **✓ OK** | Halaman Aktif |
+| **Buyer** | Checkout Pembayaran | `/checkout?bagId=bag-ruby-1` | 200 | **✓ OK** | Konfirmasi Pesanan |
 | **Buyer** | Riwayat Pesanan & Tiket | `/history` | 200 | **✓ OK** | Riwayat Pesanan |
-| **Buyer** | Ruang Chat Toko | `/chat?orderId=RB-7821` | 200 | **✓ OK** | Halaman Aktif |
+| **Buyer** | Ruang Chat Toko | `/chat?orderId=RB-7821` | 200 | **✓ OK** | Ruby Bakery & Cake |
 | **Buyer** | Akun & Profil Pembeli | `/account` | 200 | **✓ OK** | Akun & Profil |
 | **Buyer** | Registrasi Mitra Baru | `/register-seller` | 200 | **✓ OK** | Pendaftaran Kemitraan Toko |
 | **Buyer** | Portal Login | `/login` | 200 | **✓ OK** | Masuk ke Rerasa |
@@ -41,17 +41,11 @@
 
 ## Error Konsol Halaman Terdeteksi
 
-- Halaman: `https://rerasa.fizaa.me/seller` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/seller/bags` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/seller/boxes` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/seller/finance` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/seller/profile` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/boxes` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/mitra` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/keuangan` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/audit` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/audit-logs` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/transaksi` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/users` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
-- Halaman: `https://rerasa.fizaa.me/admin/profile` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/boxes` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/mitra` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/keuangan` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/audit` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/audit-logs` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/transaksi` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/users` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
+- Halaman: `https://rerasa.fizaa.me/admin/profile` -> `Minified React error #418; visit https://react.dev/errors/418?args[]=HTML&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.`
