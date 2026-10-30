@@ -67,16 +67,37 @@ export default function SellerOrdersPage() {
     return result;
   })();
 
+  // Kalkulasi distribusi jam sibuk penjemputan (Pickup Time Distribution)
   const pickupTimeData = (() => {
-    const timeSlots = ["17:00", "18:00", "19:00", "20:00", "21:00"];
+    // Rentang jam operasional penjemputan sore & malam di Cirebon
+    const timeSlots = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
+
     return timeSlots.map((slot) => {
-      const hour = parseInt(slot.split(":")[0], 10);
+      const slotHour = parseInt(slot.split(":")[0], 10);
       const porsiCount = orders
         .filter((o) => {
+          if (o.status !== "COMPLETED" && o.status !== "READY_FOR_PICKUP" && o.status !== "PAID") {
+            return false;
+          }
+
+          // 1. Cek dari rentang pickupWindow jika ada (misal "19:30 - 21:30 WIB")
+          if (o.pickupWindow) {
+            const startHourMatch = o.pickupWindow.match(/^(\d{1,2}):/);
+            if (startHourMatch) {
+              const startH = parseInt(startHourMatch[1], 10);
+              if (startH === slotHour) return true;
+            }
+          }
+
+          // 2. Cek dari timestamp completedAt / paidAt / createdAt
           const dateStr = o.completedAt || o.paidAt || o.createdAt;
           if (!dateStr) return false;
-          const orderHour = new Date(dateStr).getHours();
-          return orderHour === hour && (o.status === "COMPLETED" || o.status === "READY_FOR_PICKUP");
+          const d = new Date(dateStr);
+
+          // Cek kecocokan jam lokal pengguna maupun jam UTC (agar aman di semua timezone)
+          const localH = d.getHours();
+          const utcH = d.getUTCHours();
+          return localH === slotHour || utcH === slotHour;
         })
         .reduce((sum, o) => sum + (o.quantity || 1), 0);
 

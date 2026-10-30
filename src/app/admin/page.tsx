@@ -17,10 +17,18 @@ import {
   Area,
 } from "recharts";
 import { storeService } from "@/services/storeService";
+import { useStores } from "@/hooks/use-queries";
 
 export default function AdminOverviewPage() {
   const [state, setState] = useState(storeService.getState());
+  const { stores: dbStores } = useStores();
   const metrics = storeService.getImpactMetrics();
+
+  useEffect(() => {
+    if (dbStores && dbStores.length > 0) {
+      storeService.setStores(dbStores);
+    }
+  }, [dbStores]);
 
   useEffect(() => {
     const unsub = storeService.subscribe(() => {
