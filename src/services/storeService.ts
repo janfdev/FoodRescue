@@ -970,25 +970,24 @@ class StoreService {
   // =====================
   public getImpactMetrics() {
     const completedOrders = this.state.orders.filter((o) => o.status === "COMPLETED");
-    const totalOrdersCount = completedOrders.length;
+    const totalMealsSaved = completedOrders.reduce((acc, o) => acc + (o.quantity || 1), 0);
 
     // Estimate kg of food saved: avg 0.8 kg per bag
-    const estimatedKgSaved = totalOrdersCount * 0.8;
+    const estimatedKgSaved = totalMealsSaved * 0.8;
 
     const gmv = this.state.orders
       .filter((o) => o.status === "COMPLETED" || o.status === "PAID")
-      .reduce((acc, o) => acc + o.totalPrice, 0);
+      .reduce((acc, o) => acc + (o.totalPrice || 0), 0);
 
-    const platformRevenue = this.state.orders
-      .filter((o) => o.status === "COMPLETED")
-      .reduce((acc, o) => acc + o.platformFee, 0);
+    const platformRevenue = completedOrders
+      .reduce((acc, o) => acc + (o.platformFee || Math.round((o.totalPrice || 0) * 0.1)), 0);
 
     const totalBoxesSold = this.state.boxOrders
       .filter((b) => b.status === "DELIVERED" || b.status === "SHIPPED")
       .reduce((acc, b) => acc + b.quantityPcs, 0);
 
     return {
-      totalMealsSaved: totalOrdersCount,
+      totalMealsSaved,
       estimatedKgSaved: Math.round(estimatedKgSaved * 10) / 10,
       gmv,
       platformRevenue,

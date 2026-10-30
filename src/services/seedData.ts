@@ -374,6 +374,7 @@ export const SEED_ORDERS: Order[] = [
     status: "PAID",
     paymentMethod: "QRIS",
     paidAt: "2026-10-28T18:40:00Z",
+    createdAt: "2026-10-28T18:35:00Z",
     pickupCode: "4829",
     pickupQrData: "RESCUE_ORDER:RB-7821:4829",
     isChatLocked: false
@@ -396,6 +397,7 @@ export const SEED_ORDERS: Order[] = [
     paymentMethod: "QRIS",
     paidAt: "2026-10-27T19:15:00Z",
     completedAt: "2026-10-27T20:10:00Z",
+    createdAt: "2026-10-27T19:10:00Z",
     pickupCode: "1092",
     pickupQrData: "RESCUE_ORDER:RB-6100:1092",
     isChatLocked: true
@@ -418,6 +420,7 @@ export const SEED_ORDERS: Order[] = [
     paymentMethod: "QRIS",
     paidAt: "2026-10-26T19:30:00Z",
     completedAt: "2026-10-26T21:05:00Z",
+    createdAt: "2026-10-26T19:20:00Z",
     pickupCode: "6541",
     pickupQrData: "RESCUE_ORDER:RB-5219:6541",
     isChatLocked: true

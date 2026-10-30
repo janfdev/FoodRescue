@@ -47,8 +47,9 @@ export default function AdminOverviewPage() {
       const dateStr = d.toISOString().split("T")[0];
 
       const dayOrders = orders.filter((o) => {
-        if (!o.createdAt) return false;
-        return o.createdAt.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
+        const orderDate = o.completedAt || o.paidAt || o.createdAt;
+        if (!orderDate) return false;
+        return orderDate.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
       });
 
       const dayGmv = dayOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
