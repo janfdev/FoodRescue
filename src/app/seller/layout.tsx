@@ -30,6 +30,7 @@ import { Store } from "@/types/domain";
 const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
   const [store, setStore] = useState<Store | null>(null);
   const [pendingOrdersCount, setPendingOrdersCount] = useState<number>(0);
   const [state, setState] = useState(storeService.getState());
@@ -54,6 +55,7 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    setIsMounted(true);
     syncData();
     const unsub = storeService.subscribe(syncData);
     return unsub;
@@ -64,9 +66,8 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const activeStore = store;
-
-  const sellerUser = state.currentUser;
+  const activeStore = isMounted ? store : null;
+  const sellerUser = isMounted ? state.currentUser : null;
 
   const initials = sellerUser?.name
     ? sellerUser.name

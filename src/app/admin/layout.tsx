@@ -31,11 +31,13 @@ import { EditProfileModal } from "@/components/account/EditProfileModal";
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
   const [state, setState] = useState(storeService.getState());
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     const unsub = storeService.subscribe(() => {
       setState(storeService.getState());
     });
@@ -47,7 +49,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  const adminUser = state.currentUser;
+  const adminUser = isMounted ? state.currentUser : null;
 
   const initials = adminUser?.name
     ? adminUser.name
