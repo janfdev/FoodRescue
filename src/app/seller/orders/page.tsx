@@ -1,12 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Order } from "@/types/domain";
+import { Order, SurpriseBag } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { MessageSquare } from "lucide-react";
+import {
+  MessageSquare,
+  PackageOpen,
+  AlertCircle,
+  TrendingUp,
+  CheckCircle2,
+  Scale,
+  Sparkles,
+  ShoppingBag,
+} from "lucide-react";
 import { ChatModal } from "@/components/shared/ChatModal";
 import {
   ResponsiveContainer,
@@ -22,6 +31,7 @@ import {
 
 export default function SellerOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [bags, setBags] = useState<SurpriseBag[]>([]);
   const [activeChatOrder, setActiveChatOrder] = useState<Order | null>(null);
 
   const syncData = () => {
@@ -30,7 +40,12 @@ export default function SellerOrdersPage() {
     const storeOrders = activeStoreId
       ? state.orders.filter((o) => o.storeId === activeStoreId)
       : state.orders;
+    const storeBags = activeStoreId
+      ? state.surpriseBags.filter((b) => b.storeId === activeStoreId)
+      : state.surpriseBags;
+
     setOrders(storeOrders);
+    setBags(storeBags);
   };
 
   useEffect(() => {
@@ -139,6 +154,50 @@ export default function SellerOrdersPage() {
     });
   })();
 
+  // 1. Makanan berlebih setiap hari (Surplus Harian Toko)
+  const dailySurplusPortions = bags.reduce((sum, b) => sum + (b.quotaToday || 0), 0);
+  const dailySurplusKg = bags.reduce(
+    (sum, b) => sum + (b.quotaToday || 0) * (b.estimatedWeightKg || 0.8),
+    0
+  );
+
+  // 2. Pesanan selesai & makanan berhasil diselamatkan
+  const completedOrders = orders.filter((o) => o.status === "COMPLETED");
+  const rescuedPortions = completedOrders.reduce((sum, o) => sum + (o.quantity || 1), 0);
+  const rescuedKg = completedOrders.reduce((sum, o) => {
+    const bag = bags.find((b) => b.id === o.bagId);
+    const weight = bag?.estimatedWeightKg || 0.8;
+    return sum + (o.quantity || 1) * weight;
+  }, 0);
+
+  // 3. Pendapatan yang berhasil dipulihkan (Recovered Revenue)
+  const recoveredRevenue = completedOrders.reduce(
+    (sum, o) => sum + (o.sellerEarning || Math.round(o.totalPrice * 0.9)),
+    0
+  );
+  const retailSaved = completedOrders.reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+
+  // 4. Analisis menu yang paling sering tersisa & efisiensi penyelamatan
+  const menuEfficiency = bags.map((b) => {
+    const soldCount = completedOrders
+      .filter((o) => o.bagId === b.id)
+      .reduce((sum, o) => sum + (o.quantity || 1), 0);
+    const remaining = b.quotaRemaining;
+    const rescueRate = b.quotaToday > 0 ? Math.round((soldCount / b.quotaToday) * 100) : 0;
+    return {
+      id: b.id,
+      title: b.title,
+      quotaToday: b.quotaToday,
+      quotaRemaining: remaining,
+      soldCount,
+      rescueRate,
+      estimatedWeightKg: b.estimatedWeightKg || 0.8,
+    };
+  }).sort((a, b) => b.quotaRemaining - a.quotaRemaining);
+
+  const mostSurplusMenu = menuEfficiency.length > 0 ? menuEfficiency[0] : null;
+  const overallRescueRate = dailySurplusPortions > 0 ? Math.round((rescuedPortions / dailySurplusPortions) * 100) : 0;
+
   return (
     <div className="space-y-6 w-full">
       <div>
@@ -146,40 +205,108 @@ export default function SellerOrdersPage() {
           Riwayat Transaksi & Analitik Toko
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Pantau tren omzet harian, pola jam sibuk penjemputan, dan riwayat pesanan yang telah divalidasi
+          Pantau tren omzet harian, efisiensi surplus pangan, dan riwayat pesanan yang telah divalidasi
         </p>
       </div>
 
-      {/* Ringkasan Ringkas Omzet & Pesanan */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Card className="p-4 border-border shadow-2xs space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground block">Total Pesanan Toko</span>
-          <p className="text-xl font-black text-foreground tabular-nums">
-            {orders.length} Pesanan
-          </p>
-          <span className="text-[10px] text-emerald-600 font-semibold block">
-            {orders.filter((o) => o.status === "COMPLETED").length} Selesai • {orders.filter((o) => o.status === "PAID" || o.status === "READY_FOR_PICKUP").length} Siap Ambil
-          </span>
+      {/* 4 Kartu KPI Utama: Efisiensi Surplus & Pemulihan Nilai */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Metrik 1: Makanan Berlebih Setiap Hari */}
+        <Card className="p-4 border-border shadow-2xs space-y-2 bg-card relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+              <PackageOpen className="size-3.5 text-orange-600" />
+              <span>Surplus Harian</span>
+            </span>
+            <Badge variant="outline" className="text-[9px] font-mono border-orange-500/30 text-orange-700 dark:text-orange-400">
+              Kuota / Hari
+            </Badge>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-foreground tabular-nums tracking-tight">
+              {dailySurplusPortions} Porsi
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1 font-medium">
+              <Scale className="size-3 text-muted-foreground/70" />
+              <span>~{dailySurplusKg.toFixed(1)} Kg estimasi bobot fisik</span>
+            </p>
+          </div>
+          <div className="text-[10px] text-orange-600 font-semibold bg-orange-500/10 px-2 py-1 rounded-md">
+            Total porsi surplus terdaftar hari ini
+          </div>
         </Card>
 
-        <Card className="p-4 border-border shadow-2xs space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground block">Total Omzet Transaksi</span>
-          <p className="text-xl font-black text-foreground tabular-nums">
-            Rp {orders.reduce((sum, o) => sum + (o.subtotalPrice || o.totalPrice), 0).toLocaleString("id-ID")}
-          </p>
-          <span className="text-[10px] text-muted-foreground block">
-            Termasuk pesanan aktif &amp; selesai
-          </span>
+        {/* Metrik 2: Menu Paling Sering Tersisa */}
+        <Card className="p-4 border-border shadow-2xs space-y-2 bg-card relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+              <AlertCircle className="size-3.5 text-amber-600" />
+              <span>Sering Tersisa</span>
+            </span>
+            <Badge variant="outline" className="text-[9px] font-mono border-amber-500/30 text-amber-700 dark:text-amber-400">
+              Sisa Terbanyak
+            </Badge>
+          </div>
+          <div>
+            <p className="text-base font-black text-foreground tracking-tight truncate" title={mostSurplusMenu?.title || "Belum ada menu"}>
+              {mostSurplusMenu ? mostSurplusMenu.title : "Semua Terjual"}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+              {mostSurplusMenu ? `${mostSurplusMenu.quotaRemaining} porsi sisa dari ${mostSurplusMenu.quotaToday} kuota` : "0 porsi tersisa"}
+            </p>
+          </div>
+          <div className="text-[10px] text-amber-600 font-semibold bg-amber-500/10 px-2 py-1 rounded-md truncate">
+            {mostSurplusMenu ? `Prioritas flash sale: sisa ${mostSurplusMenu.quotaRemaining} porsi` : "Stok optimal"}
+          </div>
         </Card>
 
-        <Card className="p-4 border-border shadow-2xs space-y-1">
-          <span className="text-[10px] font-bold text-muted-foreground block">Total Hak Bersih Toko (90%)</span>
-          <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
-            Rp {orders.reduce((sum, o) => sum + (o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9)), 0).toLocaleString("id-ID")}
-          </p>
-          <span className="text-[10px] text-emerald-600 font-semibold block">
-            Setelah komisi platform 10%
-          </span>
+        {/* Metrik 3: Pendapatan Berhasil Dipulihkan */}
+        <Card className="p-4 border-border shadow-2xs space-y-2 bg-card relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+              <TrendingUp className="size-3.5 text-emerald-600" />
+              <span>Dana Dipulihkan</span>
+            </span>
+            <Badge variant="outline" className="text-[9px] font-mono border-emerald-500/30 text-emerald-700 dark:text-emerald-400">
+              Hak Bersih (90%)
+            </Badge>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums tracking-tight">
+              Rp {recoveredRevenue.toLocaleString("id-ID")}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">
+              Dari nilai ritel Rp {retailSaved.toLocaleString("id-ID")}
+            </p>
+          </div>
+          <div className="text-[10px] text-emerald-700 dark:text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded-md">
+            Dana masuk dompet dari pesanan selesai
+          </div>
+        </Card>
+
+        {/* Metrik 4: Banyak Makanan Berhasil Diselamatkan */}
+        <Card className="p-4 border-border shadow-2xs space-y-2 bg-card relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-muted-foreground flex items-center gap-1.5">
+              <CheckCircle2 className="size-3.5 text-blue-600" />
+              <span>Makanan Selamat</span>
+            </span>
+            <Badge variant="outline" className="text-[9px] font-mono border-blue-500/30 text-blue-700 dark:text-blue-400">
+              Rate: {overallRescueRate}%
+            </Badge>
+          </div>
+          <div>
+            <p className="text-2xl font-black text-foreground tabular-nums tracking-tight">
+              {rescuedPortions} Porsi
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1 font-medium">
+              <Scale className="size-3 text-muted-foreground/70" />
+              <span>{rescuedKg.toFixed(1)} Kg sampah organik dicegah</span>
+            </p>
+          </div>
+          <div className="text-[10px] text-blue-700 dark:text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-md">
+            {rescuedPortions} porsi sukses terselamatkan
+          </div>
         </Card>
       </div>
 
@@ -291,6 +418,74 @@ export default function SellerOrdersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Komposisi & Efisiensi Penyelamatan Menu Surplus */}
+      <Card className="border-border shadow-xs p-4 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-border/70">
+          <div>
+            <h3 className="text-sm font-black text-foreground flex items-center gap-2">
+              <ShoppingBag className="size-4 text-emerald-600" />
+              <span>Komposisi &amp; Efisiensi Penyelamatan Menu Surplus</span>
+            </h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Analisis per menu untuk mendeteksi makanan yang paling sering tersisa dan persentase keberhasilan penyelamatan
+            </p>
+          </div>
+          <Badge variant="outline" className="text-[10px] font-mono border-emerald-500/30 text-emerald-700 dark:text-emerald-400 self-start sm:self-auto">
+            {menuEfficiency.length} Menu Terdaftar
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+          {menuEfficiency.map((item) => (
+            <div
+              key={item.id}
+              className="p-3.5 rounded-xl border border-border/80 bg-muted/20 space-y-2.5"
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="font-bold text-xs text-foreground block truncate">
+                    {item.title}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    Bobot per porsi: {item.estimatedWeightKg} kg • Kuota harian: {item.quotaToday} porsi
+                  </span>
+                </div>
+                {item.quotaRemaining > 0 ? (
+                  <Badge variant="secondary" className="text-[9px] font-mono bg-amber-500/15 text-amber-700 dark:text-amber-400 shrink-0">
+                    Sisa {item.quotaRemaining} Porsi
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[9px] font-mono bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 shrink-0">
+                    Habis Terjual
+                  </Badge>
+                )}
+              </div>
+
+              {/* Progress Bar Efisiensi Penyelamatan */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[10px] font-semibold">
+                  <span className="text-muted-foreground">Terselamatkan: {item.soldCount} dari {item.quotaToday} porsi</span>
+                  <span className="font-mono text-emerald-700 dark:text-emerald-400">{item.rescueRate}%</span>
+                </div>
+                <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-emerald-600 rounded-full transition-all"
+                    style={{ width: `${Math.min(100, Math.max(0, item.rescueRate))}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 text-[10px] text-muted-foreground border-t border-border/50">
+                <span>Status Stok:</span>
+                <span className="font-semibold text-foreground">
+                  {item.quotaRemaining > 0 ? `${item.quotaRemaining} porsi butuh diselamatkan` : "Zero Waste Tercapai"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
 
       {/* Tabel Pesanan */}
       <Card className="border-border shadow-xs overflow-hidden">
