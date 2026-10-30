@@ -20,6 +20,7 @@ import {
   Loader2,
   AlertTriangle,
   Trash2,
+  Scale,
 } from "lucide-react";
 
 const CATEGORIES: StoreCategory[] = [
@@ -61,6 +62,7 @@ export default function EditSurpriseBagPage({ params }: any) {
   const [discountedPrice, setDiscountedPrice] = useState<number>(0);
   const [quotaToday, setQuotaToday] = useState<number>(1);
   const [quotaRemaining, setQuotaRemaining] = useState<number>(1);
+  const [estimatedWeightKg, setEstimatedWeightKg] = useState<number>(0.8);
   const [pickupWindow, setPickupWindow] = useState("");
   const [allergensWarning, setAllergensWarning] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -88,6 +90,7 @@ export default function EditSurpriseBagPage({ params }: any) {
       setDiscountedPrice(found.discountedPrice);
       setQuotaToday(found.quotaToday);
       setQuotaRemaining(found.quotaRemaining);
+      setEstimatedWeightKg(found.estimatedWeightKg || 0.8);
       setPickupWindow(found.pickupWindow);
       setAllergensWarning(found.allergensWarning || "");
       setImageUrl(found.imageUrl || "");
@@ -149,6 +152,7 @@ export default function EditSurpriseBagPage({ params }: any) {
         quotaToday: Number(quotaToday),
         quotaRemaining: Math.min(Number(quotaRemaining), Number(quotaToday)),
         pickupWindow: pickupWindow.trim() || "19:30 - 21:00 WIB",
+        estimatedWeightKg: Number(estimatedWeightKg) || 0.8,
         allergensWarning: allergensWarning.trim() || undefined,
         imageUrl: imageUrl.trim() || undefined,
         isLastCall,
@@ -446,18 +450,38 @@ export default function EditSurpriseBagPage({ params }: any) {
               </div>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-muted-foreground block">
-                Jendela Jam Penjemputan (Pickup Window)
-              </label>
-              <Input
-                type="text"
-                placeholder="Contoh: 19:30 - 21:00 WIB"
-                value={pickupWindow}
-                onChange={(e) => setPickupWindow(e.target.value)}
-                className="text-xs h-9"
-                required
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-muted-foreground block flex items-center gap-1.5">
+                  <Clock className="size-3.5 text-orange-600" />
+                  <span>Jendela Jam Penjemputan (Pickup Window) *</span>
+                </label>
+                <Input
+                  type="text"
+                  placeholder="Contoh: 19:30 - 21:00 WIB"
+                  value={pickupWindow}
+                  onChange={(e) => setPickupWindow(e.target.value)}
+                  className="text-xs h-9"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-muted-foreground block flex items-center gap-1.5">
+                  <Scale className="size-3.5 text-emerald-600" />
+                  <span>Estimasi Bobot per Porsi (Kg) *</span>
+                </label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="5.0"
+                  value={estimatedWeightKg}
+                  onChange={(e) => setEstimatedWeightKg(Number(e.target.value))}
+                  className="text-xs h-9 font-bold tabular-nums"
+                  required
+                />
+              </div>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/70 pt-2">

@@ -12,6 +12,7 @@ import {
   AlertCircle,
   Check,
   Flame,
+  Scale,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,7 @@ export default function CreateSurpriseBagPage() {
   const [originalPrice, setOriginalPrice] = useState<number>(45000);
   const [discountedPrice, setDiscountedPrice] = useState<number>(18000);
   const [quotaToday, setQuotaToday] = useState<number>(5);
+  const [estimatedWeightKg, setEstimatedWeightKg] = useState<number>(0.8);
   const [pickupWindow, setPickupWindow] = useState("19:30 - 21:00 WIB");
   const [allergensWarning, setAllergensWarning] = useState("Mengandung gandum, telur, atau susu sapi");
   const [imageUrl, setImageUrl] = useState(PRESET_FOOD_IMAGES[0].url);
@@ -121,7 +123,7 @@ export default function CreateSurpriseBagPage() {
         quotaToday: Number(quotaToday),
         quotaRemaining: Number(quotaToday),
         pickupWindow: pickupWindow.trim() || "19:30 - 21:00 WIB",
-        estimatedWeightKg: 0.8,
+        estimatedWeightKg: Number(estimatedWeightKg) || 0.8,
         allergensWarning: allergensWarning.trim() || undefined,
         imageUrl: imageUrl.trim() || PRESET_FOOD_IMAGES[0].url,
         isLastCall,
@@ -384,11 +386,11 @@ export default function CreateSurpriseBagPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div className="space-y-1">
                 <label className="text-[11px] font-bold text-muted-foreground block flex items-center gap-1.5">
                   <Clock className="size-3.5 text-orange-600" />
-                  <span>Jendela Waktu Pengambilan (Pickup Window) *</span>
+                  <span>Jendela Ambil (Pickup) *</span>
                 </label>
                 <Input
                   type="text"
@@ -398,6 +400,26 @@ export default function CreateSurpriseBagPage() {
                   className="text-xs h-10 font-semibold"
                   required
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-muted-foreground block flex items-center gap-1.5">
+                  <Scale className="size-3.5 text-emerald-600" />
+                  <span>Estimasi Bobot per Porsi (Kg) *</span>
+                </label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  min="0.1"
+                  max="5.0"
+                  value={estimatedWeightKg}
+                  onChange={(e) => setEstimatedWeightKg(Number(e.target.value))}
+                  className="text-xs h-10 font-black tabular-nums"
+                  required
+                />
+                <span className="text-[9px] text-muted-foreground block">
+                  Dasar hitungan reduksi limbah TPA
+                </span>
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-2xl bg-muted/40 border border-border">
@@ -414,7 +436,7 @@ export default function CreateSurpriseBagPage() {
                     Tandai Flash Sale (Last Call)
                   </span>
                   <span className="text-[10px] text-muted-foreground block">
-                    Beri tanda kilat darurat untuk makanan yang harus segera di-rescue.
+                    Beri tanda kilat darurat untuk makanan segera habis.
                   </span>
                 </label>
               </div>
