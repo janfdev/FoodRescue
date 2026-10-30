@@ -504,7 +504,24 @@ class StoreService {
   }
 
   public setSurpriseBags(bags: SurpriseBag[]) {
-    this.state.surpriseBags = bags;
+    // Merge incoming bags with existing state to preserve real-time client quota deductions
+    if (this.state.surpriseBags && this.state.surpriseBags.length > 0) {
+      this.state.surpriseBags = bags.map((incomingBag) => {
+        const existing = this.state.surpriseBags.find((b) => b.id === incomingBag.id);
+        if (existing) {
+          return {
+            ...incomingBag,
+            quotaRemaining: Math.min(existing.quotaRemaining, incomingBag.quotaRemaining),
+            isActive: existing.isActive,
+            isLastCall: existing.isLastCall ?? incomingBag.isLastCall,
+          };
+        }
+        return incomingBag;
+      });
+    } else {
+      this.state.surpriseBags = bags;
+    }
+    this.persist();
     this.notify();
   }
 

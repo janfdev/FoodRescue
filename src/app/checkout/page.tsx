@@ -134,6 +134,19 @@ function CheckoutContent() {
           chosenMethod,
           { name: finalName, phone: finalPhone }
         );
+        // Sync asynchronous ke backend API jika online
+        for (const ord of orders) {
+          fetch("/api/orders", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              bagId: ord.bagId,
+              quantity: ord.quantity,
+              paymentMethod: chosenMethod,
+            }),
+          }).catch((e) => console.warn("Backend order sync fallback:", e));
+        }
+
         setConfirmedOrders(orders);
         setConfirmedOrder(orders[0]);
         cartService.clearCart();
@@ -149,6 +162,17 @@ function CheckoutContent() {
           { name: finalName, phone: finalPhone },
           quantity
         );
+        // Sync asynchronous ke backend API jika online
+        fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bagId: bag.id,
+            quantity,
+            paymentMethod: chosenMethod,
+          }),
+        }).catch((e) => console.warn("Backend order sync fallback:", e));
+
         setConfirmedOrder(newOrder);
 
         sendLocalNotification("Pesanan Dikonfirmasi!", {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { orders, escrowAccounts } from "@/db/schema";
+import { orders, escrowAccounts, surpriseBags } from "@/db/schema";
 import { storeService } from "@/services/storeService";
 import { recordAuditLog } from "@/lib/audit";
 import { desc, and, eq, gte, lte, sql } from "drizzle-orm";
@@ -169,6 +169,15 @@ export async function POST(req: NextRequest) {
           heldAmount: newOrder.totalPrice,
           status: "HELD",
         });
+
+        // Pengurangan kuota stok di database PostgreSQL secara atomik
+        await db
+          .update(surpriseBags)
+          .set({
+            quotaRemaining: sql`GREATEST(0, ${surpriseBags.quotaRemaining} - ${newOrder.quantity})`,
+            updatedAt: new Date(),
+          })
+          .where(eq(surpriseBags.id, newOrder.bagId));
       } catch (dbErr) {
         console.warn("Dual-write DB gagal, order tetap tersimpan di in-memory:", dbErr);
       }

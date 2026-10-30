@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Review, Store as StoreType, DisputeTicket } from "@/types/domain";
 import { storeService } from "@/services/storeService";
+import { useReviews, useStores } from "@/hooks/use-queries";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Separator } from "@/components/ui/separator";
 
 export default function AdminAuditPage() {
+  const { reviews: dbReviews } = useReviews();
+  const { stores: dbStores } = useStores();
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stores, setStores] = useState<StoreType[]>([]);
   const [disputes, setDisputes] = useState<DisputeTicket[]>([]);
@@ -34,18 +38,21 @@ export default function AdminAuditPage() {
 
   useEffect(() => {
     const s = storeService.getState();
-    setReviews(s.reviews);
-    setStores(s.stores);
+    const effectiveReviews = dbReviews && dbReviews.length > 0 ? dbReviews : s.reviews;
+    const effectiveStores = dbStores && dbStores.length > 0 ? dbStores : s.stores;
+
+    setReviews(effectiveReviews);
+    setStores(effectiveStores);
     setDisputes(s.disputes || []);
 
     const unsub = storeService.subscribe(() => {
       const updated = storeService.getState();
-      setReviews(updated.reviews);
-      setStores(updated.stores);
+      setReviews(dbReviews && dbReviews.length > 0 ? dbReviews : updated.reviews);
+      setStores(dbStores && dbStores.length > 0 ? dbStores : updated.stores);
       setDisputes(updated.disputes || []);
     });
     return unsub;
-  }, []);
+  }, [dbReviews, dbStores]);
 
   const storeMap = useMemo(() => {
     const map = new Map<string, string>();

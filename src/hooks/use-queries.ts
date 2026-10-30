@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR from "swr";
-import { SurpriseBag, Store, Order } from "@/types/domain";
+import { SurpriseBag, Store, Order, Review } from "@/types/domain";
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -74,6 +74,26 @@ export function useOrders(filter?: { buyerId?: string; storeId?: string; role?: 
 
   return {
     orders: data || [],
+    isLoading,
+    isError: Boolean(error),
+    error,
+    mutate,
+  };
+}
+
+export function useReviews(storeId?: string) {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : "";
+  const { data, error, isLoading, mutate } = useSWR<Review[]>(
+    `/api/reviews${query}`,
+    fetcher,
+    {
+      revalidateOnFocus: true,
+      dedupingInterval: 4000,
+    }
+  );
+
+  return {
+    reviews: data || [],
     isLoading,
     isError: Boolean(error),
     error,

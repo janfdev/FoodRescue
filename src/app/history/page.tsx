@@ -415,12 +415,26 @@ export default function HistoryPage() {
                 <Button
                   size="sm"
                   onClick={() => {
+                    const finalComment = comment.trim() || "Kualitas makanan sangat baik dan layak konsumsi.";
                     storeService.submitReview(
                       reviewOrder.id,
                       rating,
-                      comment.trim() || "Kualitas makanan sangat baik dan layak konsumsi.",
+                      finalComment,
                       usedRescueBox
                     );
+
+                    // Dual-write ke backend review API
+                    fetch("/api/reviews", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        orderId: reviewOrder.id,
+                        rating,
+                        comment: finalComment,
+                        usedRescueBox,
+                      }),
+                    }).catch((e) => console.warn("Review API sync fallback:", e));
+
                     setReviewOrder(null);
                   }}
                   className="flex-1 text-xs font-bold h-8.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white"

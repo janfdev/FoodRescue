@@ -1,6 +1,6 @@
 import { db, pool } from "./index";
-import { users, stores, surpriseBags } from "./schema";
-import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS } from "../services/seedData";
+import { users, stores, surpriseBags, reviews } from "./schema";
+import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS, SEED_REVIEWS } from "../services/seedData";
 
 async function runSeed() {
   console.log("=== RUNNING FOODRESCUE PRODUCTION SEEDER ===");
@@ -99,7 +99,27 @@ async function runSeed() {
 
     console.log(`✓ Successfully seeded ${SEED_USERS.length} users.`);
 
-    // 3. Seed Surprise Bags (Paket Makanan Surplus per Toko)
+    // 3. Seed Reviews (Ulasan Pembeli & Kepatuhan Wadah)
+    console.log(`-> Seeding ${SEED_REVIEWS.length} initial reviews...`);
+    for (const r of SEED_REVIEWS) {
+      await db
+        .insert(reviews)
+        .values({
+          id: r.id,
+          orderId: r.orderId,
+          storeId: r.storeId,
+          buyerId: r.buyerId,
+          buyerName: r.buyerName,
+          rating: r.rating,
+          comment: r.comment,
+          usedOfficialRescueBox: r.usedOfficialRescueBox,
+          createdAt: new Date(r.createdAt),
+        })
+        .onConflictDoNothing();
+    }
+    console.log(`✓ Successfully seeded ${SEED_REVIEWS.length} reviews.`);
+
+    // 4. Seed Surprise Bags (Paket Makanan Surplus per Toko)
     console.log(`-> Seeding ${SEED_SURPRISE_BAGS.length} surprise bag(s) into database...`);
     for (const b of SEED_SURPRISE_BAGS) {
       await db
