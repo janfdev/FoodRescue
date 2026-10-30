@@ -417,7 +417,7 @@ export default function StoresDirectoryPage() {
           </Link>
 
           <Link
-            href="/stores"
+            href="/toko"
             className="flex flex-col items-center gap-0.5 text-emerald-700 dark:text-emerald-400 font-extrabold"
           >
             <StoreIcon className="size-5" />

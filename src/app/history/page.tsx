@@ -412,7 +412,7 @@ export default function HistoryPage() {
           </Link>
 
           <Link
-            href="/stores"
+            href="/toko"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <StoreIcon className="size-5" />

@@ -525,7 +525,7 @@ export function LandingPage() {
                   </button>
                 )}
                 <Link
-                  href="/stores"
+                  href="/toko"
                   className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-0.5"
                 >
                   <span>Lihat Semua Toko</span>
@@ -911,7 +911,7 @@ export function LandingPage() {
           </Link>
 
           <Link
-            href="/stores"
+            href="/toko"
             className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <StoreIcon className="size-5" />
