@@ -114,10 +114,7 @@ class StoreService {
                 .filter((w: WithdrawalRequest) => w.storeId === st.id && (w.status === "APPROVED" || w.status === "PENDING"))
                 .reduce((sum: number, w: WithdrawalRequest) => sum + w.amount, 0);
               const balance = Math.max(0, completedEarnings - totalWd);
-              if (completedEarnings > 0) {
-                return { ...st, walletBalance: balance };
-              }
-              return st;
+              return { ...st, walletBalance: balance };
             });
           }
           // State parsed from storage
@@ -486,11 +483,7 @@ class StoreService {
       .filter((w) => w.storeId === storeId && (w.status === "APPROVED" || w.status === "PENDING"))
       .reduce((sum, w) => sum + w.amount, 0);
 
-    const calculated = Math.max(0, completedOrdersEarnings - totalWithdrawals);
-    if (completedOrdersEarnings === 0 && (store.walletBalance || 0) > 0) {
-      return store.walletBalance;
-    }
-    return calculated;
+    return Math.max(0, completedOrdersEarnings - totalWithdrawals);
   }
 
   public setStores(stores: Store[]) {
@@ -501,7 +494,7 @@ class StoreService {
       return {
         ...incomingStore,
         logoUrl: incomingStore.logoUrl || existing?.logoUrl,
-        walletBalance: computedBalance > 0 ? computedBalance : (existing?.walletBalance ?? incomingStore.walletBalance ?? 0),
+        walletBalance: computedBalance,
         boxesSoldTotal: existing?.boxesSoldTotal ?? incomingStore.boxesSoldTotal,
         currentBoxStock: existing?.currentBoxStock ?? incomingStore.currentBoxStock,
       };
@@ -920,9 +913,11 @@ class StoreService {
   public requestWithdrawal(storeId: string, amount: number): WithdrawalRequest {
     const store = this.state.stores.find((s) => s.id === storeId);
     if (!store) throw new Error("Toko tidak ditemukan");
-    if (store.walletBalance < amount) throw new Error("Saldo dompet toko tidak mencukupi");
 
-    store.walletBalance -= amount;
+    const availableBalance = this.calculateStoreWalletBalance(storeId);
+    if (availableBalance < amount) {
+      throw new Error(`Saldo dompet toko tidak mencukupi (Tersedia: Rp ${availableBalance.toLocaleString("id-ID")})`);
+    }
 
     const req: WithdrawalRequest = {
       id: `WD-${Math.floor(100 + Math.random() * 900)}`,
@@ -937,6 +932,7 @@ class StoreService {
     };
 
     this.state.withdrawals.unshift(req);
+    store.walletBalance = this.calculateStoreWalletBalance(storeId);
     this.persist();
     return req;
   }

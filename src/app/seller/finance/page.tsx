@@ -58,6 +58,15 @@ export default function SellerFinancePage() {
       .reduce((sum, w) => sum + w.amount, 0);
   }, [withdrawals]);
 
+  const totalPendingWithdrawal = useMemo(() => {
+    return withdrawals
+      .filter((w) => w.status === "PENDING")
+      .reduce((sum, w) => sum + w.amount, 0);
+  }, [withdrawals]);
+
+  // Saldo Dompet Bersih: Total Hak Bersih - Total Penarikan (Approved + Pending)
+  const currentAvailableBalance = Math.max(0, totalNetEarnings - totalWithdrawnAmount - totalPendingWithdrawal);
+
   // Combined Mutasi History (Orders Completed as Credit, Withdrawals as Debit)
   const mutationHistory = useMemo(() => {
     type MutationItem = {
@@ -102,9 +111,22 @@ export default function SellerFinancePage() {
     return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [completedOrders, withdrawals]);
 
+  const handleOpenWithdrawDialog = () => {
+    setWithdrawAmount(currentAvailableBalance);
+    setIsWithdrawing(true);
+  };
+
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!store) return;
+    if (withdrawAmount > currentAvailableBalance) {
+      alert(`Nominal penarikan (Rp ${withdrawAmount.toLocaleString("id-ID")}) melebihi saldo dompet yang tersedia (Rp ${currentAvailableBalance.toLocaleString("id-ID")}).`);
+      return;
+    }
+    if (withdrawAmount < 10000) {
+      alert("Minimal penarikan dana adalah Rp 10.000.");
+      return;
+    }
     try {
       storeService.requestWithdrawal(store.id, withdrawAmount);
       setWithdrawSuccess(true);
@@ -145,8 +167,6 @@ export default function SellerFinancePage() {
     );
   }
 
-  const currentAvailableBalance = store.walletBalance;
-
   return (
     <div className="space-y-6 w-full">
       <div>
@@ -176,8 +196,8 @@ export default function SellerFinancePage() {
               </div>
 
               <Button
-                onClick={() => setIsWithdrawing(true)}
-                disabled={currentAvailableBalance < 50000}
+                onClick={handleOpenWithdrawDialog}
+                disabled={currentAvailableBalance < 10000}
                 className="w-full bg-white text-emerald-950 hover:bg-emerald-50 font-bold text-xs py-2.5 shadow-sm cursor-pointer"
               >
                 Ajukan Penarikan Dana (Withdrawal)
@@ -396,7 +416,7 @@ export default function SellerFinancePage() {
               </label>
               <Input
                 type="number"
-                min={50000}
+                min={10000}
                 max={currentAvailableBalance}
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(Number(e.target.value))}

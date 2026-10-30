@@ -518,12 +518,12 @@ export const SEED_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
 export const SEED_WITHDRAWALS: WithdrawalRequest[] = [
   {
     id: "WD-2026-001",
-    storeId: "store-ruby-bakery",
-    storeName: "Ruby Bakery & Cake",
+    storeId: "store-kopi-nako",
+    storeName: "Kopi Nako CSB",
     amount: 150000,
-    bankName: "BCA",
-    accountNumber: "8291029381",
-    accountHolder: "Ruby Bakery & Pastry",
+    bankName: "Mandiri",
+    accountNumber: "1180009823412",
+    accountHolder: "PT Nako Cirebon Berkah",
     status: "PENDING",
     requestedAt: "2026-10-29T10:30:00Z"
   },
