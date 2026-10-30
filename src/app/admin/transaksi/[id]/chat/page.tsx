@@ -74,9 +74,9 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
           <span>Kembali ke Daftar Transaksi</span>
         </Link>
         <Card className="p-8 text-center border-border shadow-xs">
-          <p className="text-sm font-bold text-foreground">
+          <h2 className="text-sm font-bold text-foreground">
             Transaksi ID &quot;{orderId}&quot; tidak ditemukan.
-          </p>
+          </h2>
           <p className="text-xs text-muted-foreground mt-1">
             Data pesanan mungkin telah dihapus atau belum tercatat pada state sistem.
           </p>

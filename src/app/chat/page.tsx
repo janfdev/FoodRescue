@@ -114,7 +114,7 @@ function ChatContent() {
     return (
       <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-6 text-center space-y-4">
-          <p className="text-sm font-bold text-foreground">Pesanan tidak ditemukan atau link chat tidak valid.</p>
+          <h2 className="text-sm font-bold text-foreground">Pesanan tidak ditemukan atau link chat tidak valid.</h2>
           <Button
             onClick={() => router.push("/history")}
             className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"

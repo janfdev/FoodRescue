@@ -141,10 +141,10 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
   const activeStoreLogo = activeStore?.logoUrl || sellerUser?.avatarUrl || "";
 
   return (
-    <div className="w-full h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans overflow-hidden">
+    <div className="w-full h-screen bg-stone-50/60 dark:bg-zinc-950 flex flex-col md:flex-row font-sans overflow-hidden" suppressHydrationWarning>
 
       {/* ─── STICKY MOBILE TOPBAR (< MD) ─────────────────────────────────── */}
-      <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs">
+      <header className="md:hidden sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b border-border px-3.5 py-2.5 flex items-center justify-between shadow-2xs" suppressHydrationWarning>
         <div className="flex items-center gap-2.5 min-w-0">
           <Link href="/seller/profile" className="size-8 rounded-lg overflow-hidden border border-border shrink-0 shadow-xs block">
             <Avatar className="size-full rounded-lg">
@@ -287,7 +287,7 @@ const SellerLayoutContent = ({ children }: { children: React.ReactNode }) => {
       )}
 
       {/* ─── SIDEBAR KIRI DESKTOP PERSISTEN (>= MD) ────────────────────────── */}
-      <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between h-screen sticky top-0 overflow-y-auto">
+      <aside className="hidden md:flex w-64 bg-card border-r border-border shrink-0 p-4 flex-col justify-between h-screen sticky top-0 overflow-y-auto" suppressHydrationWarning>
         <div className="space-y-6">
           {/* Store Brand Header */}
           <div className="space-y-3">

@@ -82,7 +82,7 @@ function CheckoutContent() {
     return (
       <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
         <Card className="max-w-md w-full p-6 text-center space-y-4">
-          <p className="text-sm font-bold text-foreground">Paket makanan tidak ditemukan atau kuota telah habis.</p>
+          <h2 className="text-sm font-bold text-foreground">Paket makanan tidak ditemukan atau kuota telah habis.</h2>
           <Button onClick={() => router.push("/")} className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
             Kembali ke Katalog Beranda
           </Button>
