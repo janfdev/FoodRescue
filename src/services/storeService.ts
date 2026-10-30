@@ -104,6 +104,22 @@ class StoreService {
           if (!parsed.orders || parsed.orders.length === 0) {
             parsed.orders = SEED_ORDERS;
           }
+          // Pastikan walletBalance tiap toko selalu mencerminkan akumulasi seluruh pesanan selesai
+          if (parsed.stores && parsed.orders) {
+            parsed.stores = parsed.stores.map((st: Store) => {
+              const completedEarnings = (parsed.orders || [])
+                .filter((o: Order) => o.storeId === st.id && o.status === "COMPLETED")
+                .reduce((sum: number, o: Order) => sum + (o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9)), 0);
+              const totalWd = (parsed.withdrawals || [])
+                .filter((w: WithdrawalRequest) => w.storeId === st.id && (w.status === "APPROVED" || w.status === "PENDING"))
+                .reduce((sum: number, w: WithdrawalRequest) => sum + w.amount, 0);
+              const balance = Math.max(0, completedEarnings - totalWd);
+              if (completedEarnings > 0) {
+                return { ...st, walletBalance: balance };
+              }
+              return st;
+            });
+          }
           // State parsed from storage
           this.state = parsed;
         } else {
@@ -456,8 +472,41 @@ class StoreService {
   // =====================
   // STORES & SURPRISE BAGS
   // =====================
+  public calculateStoreWalletBalance(storeId: string): number {
+    const store = this.state.stores.find((s) => s.id === storeId);
+    if (!store) return 0;
+
+    // Hitung total hak bersih mitra toko dari SELURUH pesanan yang telah COMPLETED
+    const completedOrdersEarnings = this.state.orders
+      .filter((o) => o.storeId === storeId && o.status === "COMPLETED")
+      .reduce((sum, o) => sum + (o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9)), 0);
+
+    // Hitung total penarikan dana mitra toko yang statusnya APPROVED atau PENDING
+    const totalWithdrawals = (this.state.withdrawals || [])
+      .filter((w) => w.storeId === storeId && (w.status === "APPROVED" || w.status === "PENDING"))
+      .reduce((sum, w) => sum + w.amount, 0);
+
+    const calculated = Math.max(0, completedOrdersEarnings - totalWithdrawals);
+    if (completedOrdersEarnings === 0 && (store.walletBalance || 0) > 0) {
+      return store.walletBalance;
+    }
+    return calculated;
+  }
+
   public setStores(stores: Store[]) {
-    this.state.stores = stores;
+    this.state.stores = stores.map((incomingStore) => {
+      const existing = this.state.stores.find((s) => s.id === incomingStore.id);
+      const computedBalance = this.calculateStoreWalletBalance(incomingStore.id);
+
+      return {
+        ...incomingStore,
+        logoUrl: incomingStore.logoUrl || existing?.logoUrl,
+        walletBalance: computedBalance > 0 ? computedBalance : (existing?.walletBalance ?? incomingStore.walletBalance ?? 0),
+        boxesSoldTotal: existing?.boxesSoldTotal ?? incomingStore.boxesSoldTotal,
+        currentBoxStock: existing?.currentBoxStock ?? incomingStore.currentBoxStock,
+      };
+    });
+    this.persist();
     this.notify();
   }
 
@@ -666,11 +715,11 @@ class StoreService {
     order.status = "COMPLETED";
     order.completedAt = new Date().toISOString();
 
-    // Release Escrow to Seller Wallet
+    // Release Escrow to Seller Wallet - Akumulasikan seluruh pesanan yang telah diselesaikan
     const store = this.state.stores.find((s) => s.id === order.storeId);
     if (store) {
-      store.walletBalance += order.sellerEarning;
-      store.boxesSoldTotal += 1;
+      store.walletBalance = this.calculateStoreWalletBalance(store.id);
+      store.boxesSoldTotal = (store.boxesSoldTotal || 0) + 1;
       if (store.currentBoxStock > 0) {
         store.currentBoxStock -= 1;
       }

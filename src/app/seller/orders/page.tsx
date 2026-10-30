@@ -51,13 +51,14 @@ export default function SellerOrdersPage() {
       const dateStr = d.toISOString().split("T")[0];
 
       const dayOrders = orders.filter((o) => {
-        if (!o.createdAt) return false;
-        return o.createdAt.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
+        const orderDate = o.completedAt || o.paidAt || o.createdAt;
+        if (!orderDate) return false;
+        return orderDate.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
       });
 
       // Net pendapatan seller = 90% dari subtotal
       const dayNet = dayOrders.reduce(
-        (sum, o) => sum + (o.totalPrice - (o.platformFee || Math.round(o.totalPrice * 0.10))),
+        (sum, o) => sum + (o.sellerEarning || (o.totalPrice - (o.platformFee || Math.round(o.totalPrice * 0.10)))),
         0
       );
 
@@ -72,8 +73,9 @@ export default function SellerOrdersPage() {
       const hour = parseInt(slot.split(":")[0], 10);
       const porsiCount = orders
         .filter((o) => {
-          if (!o.createdAt) return false;
-          const orderHour = new Date(o.createdAt).getHours();
+          const dateStr = o.completedAt || o.paidAt || o.createdAt;
+          if (!dateStr) return false;
+          const orderHour = new Date(dateStr).getHours();
           return orderHour === hour && (o.status === "COMPLETED" || o.status === "READY_FOR_PICKUP");
         })
         .reduce((sum, o) => sum + (o.quantity || 1), 0);
@@ -91,6 +93,39 @@ export default function SellerOrdersPage() {
         <p className="text-xs text-muted-foreground mt-0.5">
           Pantau tren omzet harian, pola jam sibuk penjemputan, dan riwayat pesanan yang telah divalidasi
         </p>
+      </div>
+
+      {/* Ringkasan Ringkas Omzet & Pesanan */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="p-4 border-border shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-muted-foreground block">Total Pesanan Toko</span>
+          <p className="text-xl font-black text-foreground tabular-nums">
+            {orders.length} Pesanan
+          </p>
+          <span className="text-[10px] text-emerald-600 font-semibold block">
+            {orders.filter((o) => o.status === "COMPLETED").length} Selesai • {orders.filter((o) => o.status === "PAID" || o.status === "READY_FOR_PICKUP").length} Siap Ambil
+          </span>
+        </Card>
+
+        <Card className="p-4 border-border shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-muted-foreground block">Total Omzet Transaksi</span>
+          <p className="text-xl font-black text-foreground tabular-nums">
+            Rp {orders.reduce((sum, o) => sum + (o.subtotalPrice || o.totalPrice), 0).toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-muted-foreground block">
+            Termasuk pesanan aktif &amp; selesai
+          </span>
+        </Card>
+
+        <Card className="p-4 border-border shadow-2xs space-y-1">
+          <span className="text-[10px] font-bold text-muted-foreground block">Total Hak Bersih Toko (90%)</span>
+          <p className="text-xl font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+            Rp {orders.reduce((sum, o) => sum + (o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9)), 0).toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-emerald-600 font-semibold block">
+            Setelah komisi platform 10%
+          </span>
+        </Card>
       </div>
 
       {/* Dua Chart Analitik Toko */}

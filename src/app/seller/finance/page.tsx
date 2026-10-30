@@ -1,18 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Store } from "@/types/domain";
+import { useState, useEffect, useMemo } from "react";
+import { Store, Order, WithdrawalRequest } from "@/types/domain";
 import { storeService } from "@/services/storeService";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ArrowDownRight, ArrowUpRight, Clock, Building2, Wallet, DollarSign, PackageCheck } from "lucide-react";
 
 export default function SellerFinancePage() {
   const [store, setStore] = useState<Store | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState<number>(100000);
+  const [withdrawAmount, setWithdrawAmount] = useState<number>(50000);
   const [withdrawSuccess, setWithdrawSuccess] = useState(false);
 
   const syncData = () => {
@@ -20,6 +23,10 @@ export default function SellerFinancePage() {
     const activeStoreId = state.currentUser?.storeId;
     const currentStore = activeStoreId ? state.stores.find((s) => s.id === activeStoreId) || null : null;
     setStore(currentStore);
+    if (activeStoreId) {
+      setOrders(state.orders.filter((o) => o.storeId === activeStoreId));
+      setWithdrawals(state.withdrawals.filter((w) => w.storeId === activeStoreId));
+    }
   };
 
   useEffect(() => {
@@ -27,6 +34,73 @@ export default function SellerFinancePage() {
     const unsub = storeService.subscribe(syncData);
     return unsub;
   }, []);
+
+  // Metrik Finansial Akumulatif
+  const completedOrders = useMemo(() => {
+    return orders.filter((o) => o.status === "COMPLETED");
+  }, [orders]);
+
+  const totalGrossRevenue = useMemo(() => {
+    return completedOrders.reduce((sum, o) => sum + (o.subtotalPrice || o.totalPrice), 0);
+  }, [completedOrders]);
+
+  const totalNetEarnings = useMemo(() => {
+    return completedOrders.reduce((sum, o) => sum + (o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9)), 0);
+  }, [completedOrders]);
+
+  const totalPlatformCommission = useMemo(() => {
+    return completedOrders.reduce((sum, o) => sum + (o.platformFee || Math.round((o.totalPrice || 0) * 0.1)), 0);
+  }, [completedOrders]);
+
+  const totalWithdrawnAmount = useMemo(() => {
+    return withdrawals
+      .filter((w) => w.status === "APPROVED")
+      .reduce((sum, w) => sum + w.amount, 0);
+  }, [withdrawals]);
+
+  // Combined Mutasi History (Orders Completed as Credit, Withdrawals as Debit)
+  const mutationHistory = useMemo(() => {
+    type MutationItem = {
+      id: string;
+      date: string;
+      type: "CREDIT" | "DEBIT";
+      title: string;
+      desc: string;
+      amount: number;
+      status: string;
+    };
+
+    const list: MutationItem[] = [];
+
+    // Credit from completed orders
+    completedOrders.forEach((o) => {
+      list.push({
+        id: o.id,
+        date: o.completedAt || o.paidAt || o.createdAt || new Date().toISOString(),
+        type: "CREDIT",
+        title: `Pencairan Pesanan ${o.id}`,
+        desc: `${o.bagTitle} (Qty: ${o.quantity})`,
+        amount: o.sellerEarning || Math.round((o.totalPrice || 0) * 0.9),
+        status: "SELESAI"
+      });
+    });
+
+    // Debit from withdrawals
+    withdrawals.forEach((w) => {
+      list.push({
+        id: w.id,
+        date: w.requestedAt || new Date().toISOString(),
+        type: "DEBIT",
+        title: `Penarikan Dana ke ${w.bankName}`,
+        desc: `No. Rek: ${w.accountNumber} a/n ${w.accountHolder}`,
+        amount: w.amount,
+        status: w.status === "APPROVED" ? "DICAIRKAN" : "MENUNGGU_APPROVAL"
+      });
+    });
+
+    // Sort newest first
+    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [completedOrders, withdrawals]);
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +145,8 @@ export default function SellerFinancePage() {
     );
   }
 
+  const currentAvailableBalance = store.walletBalance;
+
   return (
     <div className="space-y-6 w-full">
       <div>
@@ -82,26 +158,27 @@ export default function SellerFinancePage() {
         </p>
       </div>
 
+      {/* Grid Kartu Utama: Saldo Dompet & Rekening Bank */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-6 space-y-4">
           <Card className="border-border shadow-md bg-gradient-to-br from-emerald-800 to-teal-950 text-white">
             <CardContent className="p-6 space-y-4">
               <div>
                 <span className="text-xs font-mono uppercase tracking-wider text-emerald-200">
-                  Saldo Dompet Mitra
+                  Saldo Dompet Tersedia (Siap Ditarik)
                 </span>
                 <p className="text-3xl font-black mt-1 tabular-nums">
-                  Rp {store.walletBalance.toLocaleString("id-ID")}
+                  Rp {currentAvailableBalance.toLocaleString("id-ID")}
                 </p>
                 <p className="text-xs text-emerald-100/80 mt-1">
-                  Dana hasil pesanan fisik yang telah divalidasi kasir (net setelah potongan komisi 10%).
+                  Akumulasi dana bersih dari {completedOrders.length} pesanan fisik yang telah divalidasi kasir.
                 </p>
               </div>
 
               <Button
                 onClick={() => setIsWithdrawing(true)}
-                disabled={store.walletBalance < 50000}
-                className="w-full bg-white text-emerald-950 hover:bg-emerald-50 font-bold text-xs py-2.5 shadow-sm"
+                disabled={currentAvailableBalance < 50000}
+                className="w-full bg-white text-emerald-950 hover:bg-emerald-50 font-bold text-xs py-2.5 shadow-sm cursor-pointer"
               >
                 Ajukan Penarikan Dana (Withdrawal)
               </Button>
@@ -117,7 +194,7 @@ export default function SellerFinancePage() {
         </div>
 
         <div className="lg:col-span-6">
-          <Card className="border-border shadow-xs">
+          <Card className="border-border shadow-xs h-full flex flex-col justify-between">
             <CardHeader className="p-5 pb-3">
               <CardTitle className="text-sm font-extrabold">Rekening Bank Terdaftar</CardTitle>
               <CardDescription className="text-xs">
@@ -151,6 +228,157 @@ export default function SellerFinancePage() {
         </div>
       </div>
 
+      {/* Rangkuman 4 Metrik Akumulatif */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+          <span className="text-[10px] text-muted-foreground font-bold block">Total Pesanan Selesai</span>
+          <p className="text-lg font-black text-foreground tabular-nums">
+            {completedOrders.length} Pesanan
+          </p>
+          <span className="text-[10px] text-emerald-600 font-semibold block">Telah serah-terima</span>
+        </Card>
+
+        <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+          <span className="text-[10px] text-muted-foreground font-bold block">Total Omzet Kotor</span>
+          <p className="text-lg font-black text-foreground tabular-nums">
+            Rp {totalGrossRevenue.toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-muted-foreground block">Sebelum komisi</span>
+        </Card>
+
+        <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+          <span className="text-[10px] text-muted-foreground font-bold block">Total Komisi Platform (10%)</span>
+          <p className="text-lg font-black text-amber-700 dark:text-amber-400 tabular-nums">
+            Rp {totalPlatformCommission.toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-muted-foreground block">Fee operasional Rerasa</span>
+        </Card>
+
+        <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+          <span className="text-[10px] text-muted-foreground font-bold block">Total Hak Bersih Masuk</span>
+          <p className="text-lg font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+            Rp {totalNetEarnings.toLocaleString("id-ID")}
+          </p>
+          <span className="text-[10px] text-emerald-600 font-semibold block">90% hak mitra gerai</span>
+        </Card>
+      </div>
+
+      {/* Tabel Riwayat Mutasi Dompet */}
+      <Card className="border-border shadow-xs overflow-hidden">
+        <CardHeader className="p-4 px-5 border-b border-border bg-muted/30">
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-sm font-black">
+                Riwayat Mutasi Saldo & Pencairan Escrow
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Log transparansi seluruh dana pesanan yang masuk dan penarikan yang diajukan
+              </CardDescription>
+            </div>
+            <Badge variant="outline" className="text-[10px] font-mono">
+              {mutationHistory.length} Transaksi
+            </Badge>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          {mutationHistory.length === 0 ? (
+            <div className="p-8 text-center text-xs text-muted-foreground">
+              Belum ada mutasi saldo. Mutasi otomatis tercatat setiap kali kasir menyelesaikan serah terima pesanan.
+            </div>
+          ) : (
+            <table className="w-full text-left text-xs">
+              <thead className="bg-muted/40 border-b border-border text-[11px] text-muted-foreground font-bold uppercase">
+                <tr>
+                  <th className="p-3 px-4">Tipe Mutasi</th>
+                  <th className="p-3">Keterangan</th>
+                  <th className="p-3">Waktu</th>
+                  <th className="p-3 text-right">Nominal (Net)</th>
+                  <th className="p-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {mutationHistory.map((item, idx) => {
+                  const isCredit = item.type === "CREDIT";
+                  return (
+                    <tr key={`${item.id}-${idx}`} className="hover:bg-muted/20">
+                      <td className="p-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`size-6 rounded-full flex items-center justify-center shrink-0 ${
+                              isCredit
+                                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                                : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                            }`}
+                          >
+                            {isCredit ? (
+                              <ArrowDownRight className="size-3.5" />
+                            ) : (
+                              <ArrowUpRight className="size-3.5" />
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-bold text-foreground block">
+                              {item.title}
+                            </span>
+                            <span className="font-mono text-[10px] text-muted-foreground">
+                              {item.id}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="p-3 text-muted-foreground">
+                        {item.desc}
+                      </td>
+
+                      <td className="p-3 text-muted-foreground tabular-nums">
+                        {new Date(item.date).toLocaleString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </td>
+
+                      <td className="p-3 text-right font-black tabular-nums">
+                        <span
+                          className={
+                            isCredit
+                              ? "text-emerald-700 dark:text-emerald-400"
+                              : "text-amber-700 dark:text-amber-400"
+                          }
+                        >
+                          {isCredit ? "+ " : "- "}Rp {item.amount.toLocaleString("id-ID")}
+                        </span>
+                      </td>
+
+                      <td className="p-3 text-right">
+                        <Badge
+                          variant={
+                            item.status === "SELESAI" || item.status === "DICAIRKAN"
+                              ? "default"
+                              : "secondary"
+                          }
+                          className={`text-[9px] font-bold ${
+                            item.status === "SELESAI" || item.status === "DICAIRKAN"
+                              ? "bg-emerald-600 text-white"
+                              : "bg-amber-500/20 text-amber-800 dark:text-amber-300"
+                          }`}
+                        >
+                          {item.status}
+                        </Badge>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </Card>
+
       {/* Modal Dialog Form Penarikan Dana (Withdrawal) */}
       <Dialog open={isWithdrawing} onOpenChange={setIsWithdrawing}>
         <DialogContent className="max-w-md">
@@ -169,13 +397,13 @@ export default function SellerFinancePage() {
               <Input
                 type="number"
                 min={50000}
-                max={store.walletBalance}
+                max={currentAvailableBalance}
                 value={withdrawAmount}
                 onChange={(e) => setWithdrawAmount(Number(e.target.value))}
                 className="font-bold tabular-nums"
               />
               <p className="text-[10px] text-muted-foreground mt-1">
-                Maksimal saldo: Rp {store.walletBalance.toLocaleString("id-ID")}
+                Maksimal saldo: Rp {currentAvailableBalance.toLocaleString("id-ID")}
               </p>
             </div>
 
@@ -191,7 +419,7 @@ export default function SellerFinancePage() {
               <Button type="button" variant="outline" size="sm" onClick={() => setIsWithdrawing(false)}>
                 Batal
               </Button>
-              <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
+              <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer">
                 Kirim Pengajuan
               </Button>
             </div>
