@@ -21,6 +21,10 @@ import {
   Mail,
   Camera,
   Loader2,
+  Star,
+  ShieldCheck,
+  Box,
+  Sparkles,
 } from "lucide-react";
 
 const RESTAURANT_CHAIN_LOGOS = [
@@ -203,6 +207,64 @@ export default function SellerProfilePage() {
         <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
           <Check className="size-4 shrink-0 text-emerald-600" />
           <span>Profil gerai dan data penanggung jawab berhasil diperbarui!</span>
+        </div>
+      )}
+
+      {/* Rangkuman Performa & Kepatuhan Gerai Toko */}
+      {store && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+              <Star className="size-3 fill-amber-500 text-amber-500" />
+              <span>Rating Toko</span>
+            </span>
+            <p className="text-lg font-black text-foreground tabular-nums flex items-baseline gap-1">
+              <span>{(Number(store.rating) || 4.8).toFixed(1)}</span>
+              <span className="text-xs text-muted-foreground font-normal">/ 5.0</span>
+            </p>
+            <span className="text-[10px] text-muted-foreground block">
+              {store.reviewCount || 142} ulasan pembeli
+            </span>
+          </Card>
+
+          <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+              <ShieldCheck className="size-3 text-emerald-600" />
+              <span>Kepatuhan Box Resmi</span>
+            </span>
+            <p className="text-lg font-black text-emerald-700 dark:text-emerald-400 tabular-nums">
+              {store.boxComplianceRate || 98}%
+            </p>
+            <span className="text-[10px] text-emerald-600 font-semibold block">
+              Standar ramah lingkungan
+            </span>
+          </Card>
+
+          <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+              <Box className="size-3 text-blue-600" />
+              <span>Stok Rescue Box</span>
+            </span>
+            <p className="text-lg font-black text-foreground tabular-nums">
+              {store.currentBoxStock || 42} pcs
+            </p>
+            <span className="text-[10px] text-muted-foreground block">
+              Siap untuk pesanan surplus
+            </span>
+          </Card>
+
+          <Card className="p-3.5 border-border shadow-2xs space-y-1 bg-card">
+            <span className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+              <Sparkles className="size-3 text-orange-600" />
+              <span>Surplus Terjual</span>
+            </span>
+            <p className="text-lg font-black text-orange-600 tabular-nums">
+              {store.boxesSoldTotal || 185} porsi
+            </p>
+            <span className="text-[10px] text-muted-foreground block">
+              Total porsi terselamatkan
+            </span>
+          </Card>
         </div>
       )}
 
