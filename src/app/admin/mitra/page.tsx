@@ -109,7 +109,85 @@ export default function AdminMitraPage() {
         }}
       />
 
-      <Card className="border-border shadow-xs overflow-hidden">
+      {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+      <div className="md:hidden space-y-3">
+        {filteredStores.length === 0 ? (
+          <Card className="p-8 text-center text-muted-foreground text-xs">
+            Tidak ada mitra yang sesuai dengan kriteria filter.
+          </Card>
+        ) : (
+          filteredStores.map((st) => {
+            const isPending = st.status === "PENDING_APPROVAL";
+            return (
+              <Card key={st.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-extrabold text-sm text-foreground block">
+                      {st.name}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground block mt-0.5">
+                      {st.category} • Kawasan: {st.area}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground block line-clamp-1">
+                      {st.address}
+                    </span>
+                  </div>
+                  <Badge
+                    variant={
+                      st.status === "ACTIVE"
+                        ? "default"
+                        : st.status === "PENDING_APPROVAL"
+                        ? "secondary"
+                        : "outline"
+                    }
+                    className={`text-[9px] font-bold shrink-0 ${
+                      st.status === "ACTIVE"
+                        ? "bg-emerald-600 text-white"
+                        : st.status === "PENDING_APPROVAL"
+                        ? "bg-amber-500 text-white"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {st.status === "ACTIVE"
+                      ? "Terverifikasi"
+                      : st.status === "PENDING_APPROVAL"
+                      ? "Butuh Review"
+                      : "Ditangguhkan"}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                  <span className="text-muted-foreground">Kepatuhan Box:</span>
+                  <span className="font-mono font-bold text-foreground">{st.boxComplianceRate}%</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-border/60">
+                  <Link
+                    href={`/admin/mitra/${st.id}`}
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 h-8.5 rounded-xl border border-border bg-background hover:bg-muted text-foreground text-xs font-semibold"
+                  >
+                    <ImageIcon className="size-3.5 text-purple-600" />
+                    <span>Verifikasi Bukti</span>
+                  </Link>
+
+                  {isPending && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleApproveStore(st.id)}
+                      className="flex-1 h-8.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs"
+                    >
+                      Setujui
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <Card className="hidden md:block border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">

@@ -228,8 +228,58 @@ export default function AdminAuditLogsPage() {
               <p className="text-xs mt-1">Coba sesuaikan kata kunci pencarian atau filter role.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
+            <>
+              {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+              <div className="md:hidden p-4 space-y-3">
+                {logs.map((log) => {
+                  const dateObj = new Date(log.createdAt);
+                  const formattedDate = !isNaN(dateObj.getTime())
+                    ? dateObj.toLocaleString("id-ID", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : log.createdAt;
+
+                  return (
+                    <div
+                      key={log.id}
+                      className="p-3.5 rounded-xl border border-border/80 bg-muted/20 space-y-2 text-xs"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1 rounded-md bg-muted flex items-center justify-center shrink-0">
+                            {getRoleIcon(log.actorRole)}
+                          </div>
+                          <div>
+                            <span className="font-bold text-foreground block">
+                              {log.actorName}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground uppercase block font-mono">
+                              {log.actorRole} • {formattedDate}
+                            </span>
+                          </div>
+                        </div>
+                        {getActionBadge(log.action)}
+                      </div>
+
+                      <p className="text-[11px] text-foreground font-medium">
+                        {log.details || "-"}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-1 border-t border-border/50 text-[10px] text-muted-foreground font-mono">
+                        <span>Target: {log.entityId}</span>
+                        <span>IP: {log.ipAddress || "127.0.0.1"}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Desktop Table View (>= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                     <th className="py-3 px-4">Waktu (WIB)</th>
@@ -296,6 +346,7 @@ export default function AdminAuditLogsPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
 
           {/* Shadcn Pagination Controls */}

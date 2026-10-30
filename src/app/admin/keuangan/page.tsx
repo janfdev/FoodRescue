@@ -183,12 +183,12 @@ export default function AdminKeuanganPage() {
         <TableToolbar
           searchQuery={payoutSearch}
           onSearchChange={setPayoutSearch}
-          searchPlaceholder="Cari toko, nama pemilik rekening, atau bank..."
+          searchPlaceholder="Cari ID permohonan, nama toko, rekening..."
           statusFilter={payoutStatus}
           onStatusChange={setPayoutStatus}
           statusOptions={[
-            { label: "Menunggu Transfer (PENDING)", value: "PENDING" },
-            { label: "Selesai Ditransfer (APPROVED)", value: "APPROVED" },
+            { label: "Menunggu Approval", value: "PENDING" },
+            { label: "Selesai Ditransfer", value: "APPROVED" },
           ]}
           totalResults={filteredWithdrawals.length}
           onResetFilters={() => {
@@ -197,7 +197,82 @@ export default function AdminKeuanganPage() {
           }}
         />
 
-        <Card className="border-border shadow-xs overflow-hidden rounded-2xl">
+        {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+        <div className="md:hidden space-y-3">
+          {filteredWithdrawals.length === 0 ? (
+            <Card className="p-8 text-center text-muted-foreground text-xs rounded-2xl">
+              Tidak ada data permohonan pencairan yang sesuai dengan filter.
+            </Card>
+          ) : (
+            filteredWithdrawals.map((w) => (
+              <Card key={w.id} className="p-4 border-border shadow-xs space-y-3 bg-card rounded-2xl">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-mono font-black text-xs text-foreground block">
+                      {w.id}
+                    </span>
+                    <span className="font-extrabold text-xs text-foreground block mt-0.5">
+                      {w.storeName}
+                    </span>
+                  </div>
+                  <Badge
+                    variant={w.status === "APPROVED" ? "default" : "secondary"}
+                    className={`text-[9px] font-bold shrink-0 ${
+                      w.status === "APPROVED"
+                        ? "bg-emerald-600 text-white"
+                        : "bg-amber-500 text-white"
+                    }`}
+                  >
+                    {w.status === "APPROVED" ? "SUDAH DITRANSFER" : "MENUNGGU PROSES"}
+                  </Badge>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-muted/30 border border-border/70 space-y-1.5 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Bank & Rekening:</span>
+                    <button
+                      type="button"
+                      onClick={() => handleCopyBankInfo(w)}
+                      className="inline-flex items-center gap-1 font-bold text-foreground text-[11px] hover:text-emerald-600"
+                    >
+                      <span>{w.bankName} - {w.accountNumber}</span>
+                      {copiedId === w.id ? (
+                        <Check className="size-3 text-emerald-600" />
+                      ) : (
+                        <Copy className="size-3 text-muted-foreground" />
+                      )}
+                    </button>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">Atas Nama:</span>
+                    <span className="font-semibold text-foreground">{w.accountHolder}</span>
+                  </div>
+                  <div className="flex items-center justify-between pt-1 border-t border-border/50">
+                    <span className="text-muted-foreground font-semibold">Nominal Payout:</span>
+                    <span className="font-mono font-black text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
+                      Rp {w.amount.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+
+                {w.status === "PENDING" && (
+                  <div className="pt-1">
+                    <Button
+                      size="sm"
+                      onClick={() => handleApproveWithdrawal(w.id)}
+                      className="w-full text-xs font-bold h-8.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white"
+                    >
+                      Konfirmasi Transfer Sukses
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View (>= md) */}
+        <Card className="hidden md:block border-border shadow-xs overflow-hidden rounded-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">

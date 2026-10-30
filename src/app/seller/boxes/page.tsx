@@ -183,7 +183,50 @@ export default function SellerBoxesPage() {
         <h3 className="font-extrabold text-sm text-foreground mb-3">
           Riwayat Pengiriman Kemasan Resmi
         </h3>
-        <Card className="border-border shadow-xs overflow-hidden">
+
+        {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+        <div className="md:hidden space-y-3">
+          {boxOrders.length === 0 ? (
+            <Card className="p-8 text-center text-xs text-muted-foreground">
+              Belum ada riwayat pesanan kemasan Rescue Box.
+            </Card>
+          ) : (
+            boxOrders.map((bo) => (
+              <Card key={bo.id} className="p-4 border-border shadow-xs space-y-2.5 bg-card">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-mono font-black text-xs text-foreground block">
+                      {bo.id}
+                    </span>
+                    <span className="font-extrabold text-sm text-foreground block mt-0.5 tabular-nums">
+                      {bo.quantityPcs} pcs Rescue Box
+                    </span>
+                  </div>
+                  <Badge variant="secondary" className="text-[9px] font-mono shrink-0">
+                    {bo.status}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center justify-between p-2 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                  <span className="text-muted-foreground">Total Tagihan:</span>
+                  <span className="font-mono font-bold text-foreground">
+                    Rp {bo.totalPrice.toLocaleString("id-ID")}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between pt-1 border-t border-border/50 text-[11px]">
+                  <span className="text-muted-foreground">No. Resi SiCepat:</span>
+                  <span className="font-mono font-bold text-purple-700 dark:text-purple-400">
+                    {bo.trackingNumber || "Diproses"}
+                  </span>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View (>= md) */}
+        <Card className="hidden md:block border-border shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/40 border-b border-border text-[11px] text-muted-foreground font-bold uppercase">

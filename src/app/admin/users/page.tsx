@@ -152,8 +152,67 @@ export default function AdminUsersPage() {
         ))}
       </div>
 
-      {/* User Data Table */}
-      <Card className="border-border shadow-xs overflow-hidden">
+      {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+      <div className="md:hidden space-y-3">
+        {paginatedUsers.length === 0 ? (
+          <Card className="p-8 text-center text-xs text-muted-foreground">
+            Tidak ada pengguna yang sesuai kriteria pencarian.
+          </Card>
+        ) : (
+          paginatedUsers.map((u) => {
+            const associatedStore = stores.find((s) => s.id === u.storeId);
+            const isActive = u.status !== "SUSPENDED";
+            return (
+              <Card key={u.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+                <div className="flex items-start gap-3">
+                  <Avatar className="size-10 rounded-full border border-border shrink-0">
+                    <AvatarImage src={resolveUserAvatar(u.avatarUrl, u.name)} alt={u.name} />
+                    <AvatarFallback className="text-xs font-bold">
+                      {u.name.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5 justify-between">
+                      <span className="font-extrabold text-sm text-foreground block truncate">
+                        {u.name}
+                      </span>
+                      <Badge
+                        variant={u.role === "admin" ? "destructive" : u.role === "seller" ? "default" : "secondary"}
+                        className="text-[9px] font-mono shrink-0"
+                      >
+                        {u.role.toUpperCase()}
+                      </Badge>
+                    </div>
+                    <span className="text-[11px] text-muted-foreground font-mono block truncate">
+                      {u.email}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground block mt-0.5">
+                      {u.phone} • {associatedStore ? associatedStore.name : "Pengguna Umum"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/60 text-xs">
+                  <span className="text-muted-foreground">Status Akun:</span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleToggleUserStatus(u.id)}
+                    className={`text-[10px] font-bold h-7 px-2.5 ${
+                      isActive ? "text-emerald-700 border-emerald-500/30" : "text-rose-700 border-rose-500/30"
+                    }`}
+                  >
+                    {isActive ? "Aktif (Suspend?)" : "Suspended (Aktifkan?)"}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <Card className="hidden md:block border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">

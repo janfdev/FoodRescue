@@ -192,7 +192,113 @@ export default function SellerBagsPage() {
         }}
       />
 
-      <Card className="border-border shadow-xs overflow-hidden">
+      {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+      <div className="md:hidden space-y-3">
+        {filteredBags.length === 0 ? (
+          <Card className="p-8 text-center text-muted-foreground text-xs">
+            Tidak ada paket Surprise Bag yang sesuai dengan filter pencarian.
+          </Card>
+        ) : (
+          filteredBags.map((bag) => (
+            <Card key={bag.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+              <div className="flex items-start gap-3">
+                <div className="size-16 rounded-xl overflow-hidden bg-muted shrink-0 border border-border">
+                  <img
+                    src={bag.imageUrl || "/images/foods/roti-danish-pastry.jpg"}
+                    alt={bag.title}
+                    className="size-full object-cover"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-extrabold text-sm text-foreground block truncate">
+                      {bag.title}
+                    </span>
+                    <Badge variant="outline" className="text-[9px] font-mono border-orange-500/30 text-orange-700 dark:text-orange-400">
+                      {bag.category}
+                    </Badge>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground block mt-0.5">
+                    {bag.pickupWindow}
+                  </span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="font-black text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
+                      Rp {bag.discountedPrice.toLocaleString("id-ID")}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground line-through tabular-nums">
+                      Rp {bag.originalPrice.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Kontrol Kuota & Status */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                <span className="font-semibold text-muted-foreground">Sisa Kuota:</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="size-7 p-0 font-bold"
+                    onClick={() => handleQuotaChange(bag.id, Math.max(0, bag.quotaRemaining - 1), bag.isActive)}
+                    disabled={bag.quotaRemaining <= 0}
+                  >
+                    -
+                  </Button>
+                  <span className="font-mono font-black text-sm px-1.5 tabular-nums">
+                    {bag.quotaRemaining} / {bag.quotaToday}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="size-7 p-0 font-bold"
+                    onClick={() => handleQuotaChange(bag.id, bag.quotaRemaining + 1, bag.isActive)}
+                  >
+                    +
+                  </Button>
+                </div>
+              </div>
+
+              {/* Aksi Cepat */}
+              <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/60">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleQuotaChange(bag.id, bag.quotaRemaining, !bag.isActive)}
+                  className={`text-[11px] font-bold h-8.5 rounded-lg ${
+                    bag.isActive ? "text-emerald-700 border-emerald-500/30" : "text-muted-foreground"
+                  }`}
+                >
+                  {bag.isActive ? "Aktif" : "Nonaktif"}
+                </Button>
+                <Link
+                  href={`/seller/bags/${bag.id}/edit`}
+                  className="inline-flex items-center justify-center gap-1 text-[11px] font-bold h-8.5 rounded-lg border border-border bg-background hover:bg-muted text-foreground"
+                >
+                  <Pencil className="size-3 text-orange-600" />
+                  <span>Edit</span>
+                </Link>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (confirm(`Yakin ingin menghapus menu "${bag.title}"?`)) {
+                      storeService.deleteSurpriseBag(bag.id);
+                    }
+                  }}
+                  className="text-[11px] font-bold h-8.5 rounded-lg border-rose-500/30 text-rose-600 hover:bg-rose-500/10"
+                >
+                  <Trash2 className="size-3" />
+                  <span>Hapus</span>
+                </Button>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <Card className="hidden md:block border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/40 border-b border-border text-[11px] text-muted-foreground font-bold uppercase">

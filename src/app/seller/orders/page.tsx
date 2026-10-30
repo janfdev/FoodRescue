@@ -483,8 +483,62 @@ export default function SellerOrdersPage() {
         </div>
       </Card>
 
-      {/* Tabel Pesanan */}
-      <Card className="border-border shadow-xs overflow-hidden">
+      {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+      <div className="md:hidden space-y-3">
+        {orders.length === 0 ? (
+          <Card className="p-8 text-center text-muted-foreground text-xs">
+            Belum ada transaksi pesanan yang masuk.
+          </Card>
+        ) : (
+          orders.map((ord) => (
+            <Card key={ord.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="font-mono font-black text-xs text-foreground block">
+                    {ord.id}
+                  </span>
+                  <span className="text-[11px] font-bold text-foreground block mt-0.5">
+                    {ord.buyerName}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    {ord.bagTitle}
+                  </span>
+                </div>
+                <Badge
+                  variant={ord.status === "COMPLETED" ? "default" : "secondary"}
+                  className={`text-[9px] font-bold shrink-0 ${
+                    ord.status === "COMPLETED" ? "bg-emerald-600 text-white" : ""
+                  }`}
+                >
+                  {ord.status === "COMPLETED" ? "Selesai" : "Menunggu Ambil"}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                <span className="text-muted-foreground font-semibold">Net Diterima:</span>
+                <span className="font-mono font-black text-sm text-emerald-700 dark:text-emerald-400 tabular-nums">
+                  Rp {ord.sellerEarning.toLocaleString("id-ID")}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-1 border-t border-border/60">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setActiveChatOrder(ord)}
+                  className="w-full text-xs font-bold gap-1.5 text-purple-700 border-purple-500/30 hover:bg-purple-500/10"
+                >
+                  <MessageSquare className="size-3.5" />
+                  <span>Buka Chat Pembeli</span>
+                </Button>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <Card className="hidden md:block border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/40 border-b border-border text-[11px] text-muted-foreground font-bold uppercase">

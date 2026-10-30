@@ -33,7 +33,74 @@ export default function AdminTransaksiPage() {
         </p>
       </div>
 
-      <Card className="border-border shadow-xs overflow-hidden">
+      {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+      <div className="md:hidden space-y-3">
+        {orders.length === 0 ? (
+          <Card className="p-8 text-center text-muted-foreground text-xs">
+            Belum ada transaksi di platform.
+          </Card>
+        ) : (
+          orders.map((ord) => (
+            <Card key={ord.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="font-mono font-black text-xs text-foreground block">
+                    {ord.id}
+                  </span>
+                  <span className="font-bold text-xs text-foreground block mt-0.5">
+                    {ord.buyerName} ({ord.buyerPhone})
+                  </span>
+                  <span className="text-[10px] text-muted-foreground block">
+                    {ord.storeName} • {ord.bagTitle}
+                  </span>
+                </div>
+                <Badge
+                  variant={
+                    ord.status === "COMPLETED"
+                      ? "default"
+                      : ord.status === "PAID"
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className={`text-[9px] font-bold shrink-0 ${
+                    ord.status === "COMPLETED" ? "bg-emerald-600 text-white" : ""
+                  }`}
+                >
+                  {ord.status === "COMPLETED" ? "Dana Dilepas" : "Dana Ditahan"}
+                </Badge>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                <div>
+                  <span className="text-[10px] text-muted-foreground block">Total Transaksi:</span>
+                  <span className="font-mono font-black text-foreground">
+                    Rp {ord.totalPrice.toLocaleString("id-ID")}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] text-muted-foreground block">Metode Bayar:</span>
+                  <Badge variant="outline" className="text-[9px] font-mono">
+                    {ord.paymentMethod}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end pt-1 border-t border-border/60">
+                <Link
+                  href={`/admin/transaksi/${ord.id}/chat`}
+                  className="w-full inline-flex items-center justify-center gap-1.5 h-8 rounded-xl border border-purple-500/30 text-purple-700 hover:bg-purple-500/10 text-xs font-bold"
+                >
+                  <MessageSquare className="size-3.5" />
+                  <span>Lihat Log Chat</span>
+                </Link>
+              </div>
+            </Card>
+          ))
+        )}
+      </div>
+
+      {/* Desktop Table View (>= md) */}
+      <Card className="hidden md:block border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">

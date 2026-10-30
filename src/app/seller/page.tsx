@@ -211,7 +211,64 @@ export default function SellerPosPage() {
               </Badge>
             </CardHeader>
 
-            <div className="overflow-x-auto">
+            {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+            <div className="md:hidden p-4 space-y-3">
+              {pendingPickupOrders.length === 0 ? (
+                <div className="p-8 text-center text-xs text-muted-foreground">
+                  Tidak ada pesanan menunggu diambil saat ini.
+                </div>
+              ) : (
+                pendingPickupOrders.map((ord) => (
+                  <div
+                    key={ord.id}
+                    className="p-3.5 rounded-xl border border-border/80 bg-muted/20 space-y-2.5 text-xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="font-bold text-foreground block">
+                          {ord.buyerName}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground block">
+                          {ord.buyerPhone} • {ord.id}
+                        </span>
+                      </div>
+                      <Badge className="bg-emerald-600 text-white font-mono text-[10px]">
+                        PIN: {ord.pickupPin || "4829"}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-background border border-border/60">
+                      <span className="text-muted-foreground truncate">{ord.bagTitle} ({ord.quantity} porsi)</span>
+                      <span className="font-mono font-black text-emerald-700 dark:text-emerald-400 shrink-0">
+                        Rp {ord.sellerEarning.toLocaleString("id-ID")}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setActiveChatOrder(ord)}
+                        className="text-xs font-semibold gap-1.5 text-purple-700 border-purple-500/30"
+                      >
+                        <MessageSquare className="size-3.5" />
+                        <span>Chat</span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleVerify(ord.id)}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                      >
+                        Serahkan
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View (>= md) */}
+            <div className="hidden md:block overflow-x-auto">
               {pendingPickupOrders.length === 0 ? (
                 <div className="p-12 text-center text-xs text-muted-foreground">
                   Tidak ada pesanan menunggu diambil saat ini.

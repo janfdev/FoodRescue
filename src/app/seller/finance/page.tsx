@@ -301,7 +301,89 @@ export default function SellerFinancePage() {
           </div>
         </CardHeader>
 
-        <div className="overflow-x-auto">
+        {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+        <div className="md:hidden p-4 space-y-3">
+          {mutationHistory.length === 0 ? (
+            <div className="p-8 text-center text-xs text-muted-foreground">
+              Belum ada mutasi saldo. Mutasi otomatis tercatat setiap kali kasir menyelesaikan serah terima pesanan.
+            </div>
+          ) : (
+            mutationHistory.map((item, idx) => {
+              const isCredit = item.type === "CREDIT";
+              return (
+                <div
+                  key={`${item.id}-${idx}`}
+                  className="p-3.5 rounded-xl border border-border/80 bg-muted/20 space-y-2 text-xs"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`size-6 rounded-full flex items-center justify-center shrink-0 ${
+                          isCredit
+                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                            : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
+                        }`}
+                      >
+                        {isCredit ? (
+                          <ArrowDownRight className="size-3.5" />
+                        ) : (
+                          <ArrowUpRight className="size-3.5" />
+                        )}
+                      </div>
+                      <div>
+                        <span className="font-bold text-foreground block">
+                          {item.title}
+                        </span>
+                        <span className="font-mono text-[10px] text-muted-foreground block">
+                          {item.id}
+                        </span>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={`text-[9px] font-mono shrink-0 ${
+                        item.status === "COMPLETED" || item.status === "APPROVED"
+                          ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-400"
+                          : "border-amber-500/40 text-amber-700 dark:text-amber-400"
+                      }`}
+                    >
+                      {item.status === "COMPLETED" || item.status === "APPROVED"
+                        ? "BERHASIL"
+                        : "PROSES"}
+                    </Badge>
+                  </div>
+
+                  <p className="text-[11px] text-muted-foreground">
+                    {item.desc}
+                  </p>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-border/50 text-[11px]">
+                    <span className="text-muted-foreground tabular-nums">
+                      {new Date(item.date).toLocaleString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                    <span
+                      className={`font-mono font-black tabular-nums ${
+                        isCredit
+                          ? "text-emerald-700 dark:text-emerald-400"
+                          : "text-amber-700 dark:text-amber-400"
+                      }`}
+                    >
+                      {isCredit ? "+ " : "- "}Rp {item.amount.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop Table View (>= md) */}
+        <div className="hidden md:block overflow-x-auto">
           {mutationHistory.length === 0 ? (
             <div className="p-8 text-center text-xs text-muted-foreground">
               Belum ada mutasi saldo. Mutasi otomatis tercatat setiap kali kasir menyelesaikan serah terima pesanan.

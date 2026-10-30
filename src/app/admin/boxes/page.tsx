@@ -316,8 +316,80 @@ export default function AdminBoxesPage() {
           </div>
         </div>
 
-        {/* Tabel Manajemen Box */}
-        <Card className="border-border shadow-xs overflow-hidden">
+        {/* Responsive View: Cards for Mobile (< md), Table for Desktop (>= md) */}
+        <div className="md:hidden space-y-3">
+          {filteredOrders.length === 0 ? (
+            <Card className="p-8 text-center text-muted-foreground text-xs">
+              {boxOrders.length === 0
+                ? "Belum ada pesanan Rescue Box dari mitra toko."
+                : "Tidak ada pesanan kemasan yang cocok dengan pencarian/filter."}
+            </Card>
+          ) : (
+            filteredOrders.map((bo) => (
+              <Card key={bo.id} className="p-4 border-border shadow-xs space-y-3 bg-card">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-mono font-black text-xs text-foreground block">
+                      {bo.id}
+                    </span>
+                    <span className="font-extrabold text-xs text-foreground block mt-0.5">
+                      {bo.storeName}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground block line-clamp-1">
+                      {bo.shippingAddress}
+                    </span>
+                  </div>
+                  <Badge
+                    className={`text-[9px] font-bold shrink-0 ${
+                      bo.status === "DELIVERED"
+                        ? "bg-emerald-600 text-white"
+                        : bo.status === "SHIPPED"
+                        ? "bg-blue-600 text-white"
+                        : "bg-amber-600 text-white"
+                    }`}
+                  >
+                    {bo.status === "DELIVERED"
+                      ? "Terkirim"
+                      : bo.status === "SHIPPED"
+                      ? "Dalam Pengiriman"
+                      : "Menunggu Resi"}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-muted/30 border border-border/70 text-xs">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground block">Jumlah Box:</span>
+                    <span className="font-mono font-black text-foreground">{bo.quantityPcs} pcs</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-muted-foreground block">Total Tagihan:</span>
+                    <span className="font-mono font-black text-emerald-700 dark:text-emerald-400">
+                      Rp {bo.totalPrice.toLocaleString("id-ID")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-xs pt-1 border-t border-border/60">
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    Resi: {bo.trackingNumber || "Belum ada resi"}
+                  </span>
+                  {bo.status !== "DELIVERED" && (
+                    <Button
+                      size="sm"
+                      onClick={() => handleUpdateStatus(bo.id, bo.status === "PENDING" ? "SHIPPED" : "DELIVERED")}
+                      className="text-[10px] font-bold h-7 px-2.5 bg-purple-700 hover:bg-purple-800 text-white"
+                    >
+                      {bo.status === "PENDING" ? "Kirim Box" : "Tandai Selesai"}
+                    </Button>
+                  )}
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Tabel Manajemen Box Desktop (>= md) */}
+        <Card className="hidden md:block border-border shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead className="bg-muted/50 border-b border-border text-[11px] text-muted-foreground font-bold uppercase tracking-wider">
