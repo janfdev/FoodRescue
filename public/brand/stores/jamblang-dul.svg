@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="jamblangGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#166534"/>
+      <stop offset="100%" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#15803D"/>
+    </linearGradient>
+    <filter id="shadowJamblang" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="240" height="240" rx="48" fill="#F0FDF4"/>
+  <circle cx="120" cy="120" r="102" fill="url(#jamblangGrad)" filter="url(#shadowJamblang)"/>
+  <circle cx="120" cy="120" r="95" stroke="#BBF7D0" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Authentic Teak Leaf (Daun Jati) + Warm Rice Serving Bowl -->
+  <g transform="translate(120, 92)">
+    <!-- Daun Jati Leaf Background -->
+    <path d="M0 -42 C24 -36 38 -16 34 16 C30 32 16 38 0 42 C-16 38 -30 32 -34 16 C-38 -16 -24 -36 0 -42 Z" fill="url(#leafGrad)"/>
+    <!-- Leaf veins -->
+    <line x1="0" y1="-38" x2="0" y2="38" stroke="#86EFAC" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="0" y1="-20" x2="18" y2="-12" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="-20" x2="-18" y2="-12" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="-2" x2="22" y2="6" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="-2" x2="-22" y2="6" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="16" x2="16" y2="24" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="16" x2="-16" y2="24" stroke="#86EFAC" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Rice bowl emblem center -->
+    <circle cx="0" cy="8" r="15" fill="#FFFFFF"/>
+    <!-- Rice mound -->
+    <path d="M-10 6 C-10 0 10 0 10 6 Z" fill="#FEF08A"/>
+    <!-- Chili / Sambal accent -->
+    <circle cx="0" cy="3" r="2.5" fill="#DC2626"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="19" letter-spacing="2" fill="#FFFFFF">MANG DUL</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="9.5" letter-spacing="3" fill="#86EFAC">NASI JAMBLANG</text>
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#DCFCE7">LEGENDARIS • KHAS CIREBON</text>
+</svg>

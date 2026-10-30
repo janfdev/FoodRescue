@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <!-- Background with subtle warm gradient -->
+  <defs>
+    <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E11D48"/>
+      <stop offset="100%" stop-color="#9F1239"/>
+    </linearGradient>
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="100%" stop-color="#CA8A04"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Circular Badge Outer -->
+  <rect width="240" height="240" rx="48" fill="#FFF1F2"/>
+  <circle cx="120" cy="120" r="102" fill="url(#rubyGrad)" filter="url(#shadow)"/>
+  <circle cx="120" cy="120" r="95" stroke="#FECDD3" stroke-width="2" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Crown / Gem Facet merging into Wheat Stalks & Croissant -->
+  <g transform="translate(120, 95) scale(0.95)">
+    <!-- Gem / Croissant silhouette -->
+    <path d="M-40 0 C-40 -25 -15 -42 0 -42 C15 -42 40 -25 40 0 C40 20 20 28 0 28 C-20 28 -40 20 -40 0 Z" fill="#FFF" fill-opacity="0.12"/>
+    
+    <!-- Stylized Croissant / Bread Shape -->
+    <path d="M-36 2 C-32 -16 -12 -28 0 -28 C12 -28 32 -16 36 2 C28 8 16 12 0 12 C-16 12 -28 8 -36 2 Z" fill="#FFF"/>
+    <!-- Bread score cuts -->
+    <path d="M-14 -18 C-10 -10 -8 -2 -8 6" stroke="#BE123C" stroke-width="3" stroke-linecap="round"/>
+    <path d="M0 -22 C0 -12 0 -2 0 8" stroke="#BE123C" stroke-width="3" stroke-linecap="round"/>
+    <path d="M14 -18 C10 -10 8 -2 8 6" stroke="#BE123C" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Sparkle Stars -->
+    <path d="M-34 -30 L-31 -22 L-23 -19 L-31 -16 L-34 -8 L-37 -16 L-45 -19 L-37 -22 Z" fill="url(#goldAccent)"/>
+    <path d="M34 -32 L36 -26 L42 -24 L36 -22 L34 -16 L32 -22 L26 -24 L32 -26 Z" fill="url(#goldAccent)"/>
+  </g>
+
+  <!-- Typography: RUBY BAKERY -->
+  <text x="120" y="162" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="22" letter-spacing="3" fill="#FFFFFF">RUBY</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="700" font-size="10" letter-spacing="4" fill="#FECDD3">BAKERY &amp; CAKE</text>
+  
+  <!-- Est label -->
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#FFE4E6">EST. 2018 • CIREBON</text>
+</svg>

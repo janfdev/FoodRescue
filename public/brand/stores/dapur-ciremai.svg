@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="ciremaiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#042F2E"/>
+    </linearGradient>
+    <filter id="shadowCiremai" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="240" height="240" rx="48" fill="#F0FDFA"/>
+  <circle cx="120" cy="120" r="102" fill="url(#ciremaiGrad)" filter="url(#shadowCiremai)"/>
+  <circle cx="120" cy="120" r="95" stroke="#99F6E4" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Gunung Ciremai Peak Silhouette + Serving Cloche Platter -->
+  <g transform="translate(120, 92)">
+    <!-- Mountain Peaks -->
+    <path d="M-36 18 L-14 -22 L0 -6 L18 -32 L36 18 Z" fill="#2DD4BF" fill-opacity="0.25"/>
+    <path d="M-28 18 L-8 -14 L6 6 L18 -18 L32 18 Z" fill="#FFFFFF"/>
+    
+    <!-- Mountain Snow Caps -->
+    <path d="M-8 -14 L-4 -8 L-8 -4 L-12 -8 Z" fill="#99F6E4"/>
+    <path d="M18 -18 L22 -12 L18 -8 L14 -12 Z" fill="#99F6E4"/>
+
+    <!-- Serving Platter line underneath -->
+    <line x1="-36" y1="22" x2="36" y2="22" stroke="#FDE047" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="17" letter-spacing="2" fill="#FFFFFF">DAPUR CIREMAI</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="9.5" letter-spacing="3" fill="#99F6E4">SEJAHTERA</text>
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#CCFBF1">KATERING &amp; KULINER • CIREBON</text>
+</svg>

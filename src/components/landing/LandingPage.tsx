@@ -22,6 +22,7 @@ import {
   Plus,
   Flame,
   Store as StoreIcon,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -513,15 +514,24 @@ export function LandingPage() {
                 <StoreIcon className="size-3 text-emerald-700" />
                 <span>Mitra Kuliner Aktif</span>
               </span>
-              {selectedStoreId && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedStoreId(null)}
-                  className="text-[10px] font-bold text-emerald-700 hover:underline cursor-pointer"
+              <div className="flex items-center gap-2">
+                {selectedStoreId && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedStoreId(null)}
+                    className="text-[10px] font-bold text-amber-700 dark:text-amber-400 hover:underline cursor-pointer"
+                  >
+                    Reset Filter
+                  </button>
+                )}
+                <Link
+                  href="/stores"
+                  className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-0.5"
                 >
-                  Lihat Semua Toko
-                </button>
-              )}
+                  <span>Lihat Semua Toko</span>
+                  <ChevronRight className="size-2.5" />
+                </Link>
+              </div>
             </div>
 
             <div
@@ -898,6 +908,14 @@ export function LandingPage() {
           >
             <Compass className="size-5" />
             <span className="text-[10px] font-extrabold">Jelajah</span>
+          </Link>
+
+          <Link
+            href="/stores"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <StoreIcon className="size-5" />
+            <span className="text-[10px] font-bold">Toko</span>
           </Link>
 
           <Link

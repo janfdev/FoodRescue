@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="sanfranGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706"/>
+      <stop offset="100%" stop-color="#78350F"/>
+    </linearGradient>
+    <filter id="shadowSanfran" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="240" height="240" rx="48" fill="#FEFCE8"/>
+  <circle cx="120" cy="120" r="102" fill="url(#sanfranGrad)" filter="url(#shadowSanfran)"/>
+  <circle cx="120" cy="120" r="95" stroke="#FDE68A" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Thick Butter Martabak Wedge & Golden Honeycomb Texture -->
+  <g transform="translate(120, 92)">
+    <!-- Golden circular pan / slice -->
+    <path d="M-32 16 L32 16 C32 16 34 2 26 -16 C18 -30 0 -36 0 -36 C0 -36 -18 -30 -26 -16 C-34 2 -32 16 -32 16 Z" fill="#FFFFFF"/>
+    
+    <!-- Melted Butter / Chocolate Filling Layer -->
+    <rect x="-28" y="2" width="56" height="6" rx="2" fill="#451A03"/>
+    
+    <!-- Honeycomb pores -->
+    <circle cx="-16" cy="-10" r="2.5" fill="#D97706"/>
+    <circle cx="-6" cy="-18" r="2.5" fill="#D97706"/>
+    <circle cx="6" cy="-18" r="2.5" fill="#D97706"/>
+    <circle cx="16" cy="-10" r="2.5" fill="#D97706"/>
+    <circle cx="0" cy="-6" r="3" fill="#D97706"/>
+    
+    <!-- Steam / Aroma -->
+    <path d="M-8 -38 Q-4 -44 -6 -48" stroke="#FEF08A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M8 -38 Q12 -44 10 -48" stroke="#FEF08A" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="16" letter-spacing="2" fill="#FFFFFF">SAN FRANCISCO</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="9.5" letter-spacing="3" fill="#FDE68A">MARTABAK SPESIAL</text>
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#FEF08A">JL. SILIWANGI • CIREBON</text>
+</svg>

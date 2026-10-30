@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Pencil,
   Bell,
+  Store as StoreIcon,
 } from "lucide-react";
 import { EditProfileModal } from "@/components/account/EditProfileModal";
 import { usePwa } from "@/components/pwa/PwaProvider";
@@ -393,6 +394,14 @@ export default function AccountPage() {
           >
             <Compass className="size-5" />
             <span className="text-[10px] font-bold">Jelajah</span>
+          </Link>
+
+          <Link
+            href="/stores"
+            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <StoreIcon className="size-5" />
+            <span className="text-[10px] font-bold">Toko</span>
           </Link>
 
           <Link

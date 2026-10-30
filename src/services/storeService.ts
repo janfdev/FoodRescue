@@ -89,6 +89,14 @@ class StoreService {
           }
           if (!parsed.stores || parsed.stores.length === 0) {
             parsed.stores = SEED_STORES;
+          } else {
+            parsed.stores = parsed.stores.map((s: Store) => {
+              const seedMatch = SEED_STORES.find((sm) => sm.id === s.id);
+              if (seedMatch && (!s.logoUrl || s.logoUrl.includes("unsplash.com"))) {
+                return { ...s, logoUrl: seedMatch.logoUrl };
+              }
+              return s;
+            });
           }
           if (!parsed.surpriseBags || parsed.surpriseBags.length === 0) {
             parsed.surpriseBags = SEED_SURPRISE_BAGS;

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="apudGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C2410C"/>
+      <stop offset="100%" stop-color="#7C2D12"/>
+    </linearGradient>
+    <linearGradient id="clayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FB923C"/>
+      <stop offset="100%" stop-color="#EA580C"/>
+    </linearGradient>
+    <filter id="shadowApud" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="240" height="240" rx="48" fill="#FFF7ED"/>
+  <circle cx="120" cy="120" r="102" fill="url(#apudGrad)" filter="url(#shadowApud)"/>
+  <circle cx="120" cy="120" r="95" stroke="#FED7AA" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Traditional Clay Gentong Pot + Aromatic Spices Steam -->
+  <g transform="translate(120, 92)">
+    <!-- Clay Gentong Body -->
+    <path d="M-18 -18 L18 -18 L24 -12 C34 0 32 18 18 28 C10 33 -10 33 -18 28 C-32 18 -34 0 -24 -12 Z" fill="#FFFFFF"/>
+    <!-- Pot rim & lid -->
+    <rect x="-22" y="-22" width="44" height="6" rx="3" fill="#FDE047"/>
+    <!-- Pot handle rings -->
+    <circle cx="-25" cy="0" r="4" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+    <circle cx="25" cy="0" r="4" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+
+    <!-- Aromatic Steam waves -->
+    <path d="M-8 -36 C-6 -30 -12 -26 -10 -22" stroke="#FEF08A" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M0 -42 C2 -34 -4 -30 -2 -24" stroke="#FEF08A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M8 -36 C10 -30 4 -26 6 -22" stroke="#FEF08A" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Golden gentle flame underneath -->
+    <path d="M-12 30 Q0 38 12 30 Q0 34 -12 30 Z" fill="#FACC15"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="19" letter-spacing="2.5" fill="#FFFFFF">H. APUD</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="9.5" letter-spacing="3" fill="#FDBA74">EMPAL GENTONG</text>
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#FED7AA">KULINER RESMI • BATTEMBAT</text>
+</svg>

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="suryaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EA580C"/>
+      <stop offset="100%" stop-color="#C2410C"/>
+    </linearGradient>
+    <filter id="shadowSurya" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <!-- Container -->
+  <rect width="240" height="240" rx="48" fill="#FFF7ED"/>
+  <circle cx="120" cy="120" r="102" fill="url(#suryaGrad)" filter="url(#shadowSurya)"/>
+  <circle cx="120" cy="120" r="95" stroke="#FED7AA" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+
+  <!-- Icon: Radiant Sunburst (Surya) + Fresh Apple & Leaf -->
+  <g transform="translate(120, 92)">
+    <!-- Sunburst rays -->
+    <path d="M0 -36 L0 -28 M25 -25 L19 -19 M36 0 L28 0 M25 25 L19 19 M0 36 L0 28 M-25 25 L-19 19 M-36 0 L-28 0 M-25 -25 L-19 -19" stroke="#FEF08A" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Fresh Apple / Fruit Silhouette -->
+    <path d="M0 -12 C6 -22 22 -20 22 -6 C22 14 0 24 0 24 C0 24 -22 14 -22 -6 C-22 -20 -6 -22 0 -12 Z" fill="#FFFFFF"/>
+    
+    <!-- Sprout Leaf -->
+    <path d="M0 -14 C2 -24 14 -26 14 -26 C14 -26 14 -16 6 -14 Z" fill="#4ADE80"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="120" y="163" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="20" letter-spacing="3" fill="#FFFFFF">SURYA</text>
+  <text x="120" y="182" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="800" font-size="9.5" letter-spacing="3" fill="#FED7AA">FRESH CORNER</text>
+  <text x="120" y="198" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="600" font-size="7.5" letter-spacing="2" fill="#FFEDD5">SWALAYAN &amp; BUAH • CIREBON</text>
+</svg>
