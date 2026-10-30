@@ -768,11 +768,11 @@ export function LandingPage() {
                       {/* Compact Card Information */}
                       <div className="p-2 space-y-1 flex-1 flex flex-col justify-between">
                         <div className="space-y-0.5">
-                          {/*<span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
-                            {store?.name}
-                          </span>*/}
+                          <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
+                            {store?.name || "Mitra Kuliner"}
+                          </span>
                           <h4 className="font-extrabold text-[10px] text-foreground leading-tight line-clamp-2 min-h-[24px]">
-                            {bag.title.toLowerCase().includes("by") ? bag.title : `${bag.title} by ${store?.name || ""}`}
+                            {bag.title}
                           </h4>
                           <span className="flex items-center gap-0.5 text-[8px] text-muted-foreground truncate">
                             <Clock className="size-2 text-amber-600 shrink-0" />

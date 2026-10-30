@@ -91,7 +91,7 @@ export function FlashSaleSection({
                         {bag.category || store?.name || "Mitra Toko"}
                       </span>
                       <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
-                        {bag.title.toLowerCase().includes("by") ? bag.title : `${bag.title} by ${store?.name || ""}`}
+                        {bag.title}
                       </h4>
                       <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
                         <Clock className="size-2.5 text-amber-600 shrink-0" />
