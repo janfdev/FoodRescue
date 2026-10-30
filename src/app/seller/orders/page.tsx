@@ -39,7 +39,28 @@ export default function SellerOrdersPage() {
     return unsub;
   }, []);
 
-  // Kalkulasi data chart murni dari riwayat pesanan riil toko
+  // Helper ekstraksi jam Jakarta (WIB / UTC+7) secara deterministik
+  const getWibHour = (dateInput?: string): number | null => {
+    if (!dateInput) return null;
+    try {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return null;
+
+      // Ambil format jam berdasarkan timezone 'Asia/Jakarta'
+      const wibHourStr = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Jakarta",
+        hour: "numeric",
+        hour12: false,
+      }).format(d);
+
+      const parsed = parseInt(wibHourStr, 10);
+      return isNaN(parsed) ? null : (parsed === 24 ? 0 : parsed);
+    } catch {
+      return null;
+    }
+  };
+
+  // Kalkulasi data chart murni dari riwayat pesanan riil toko (Zona Waktu Asia/Jakarta)
   const weeklyEarningsData = (() => {
     const days = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
     const now = new Date();
@@ -48,12 +69,27 @@ export default function SellerOrdersPage() {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dayName = days[d.getDay()];
-      const dateStr = d.toISOString().split("T")[0];
+
+      // Format YYYY-MM-DD berbasis Asia/Jakarta
+      const wibDateParts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(d);
 
       const dayOrders = orders.filter((o) => {
         const orderDate = o.completedAt || o.paidAt || o.createdAt;
         if (!orderDate) return false;
-        return orderDate.startsWith(dateStr) && (o.status === "COMPLETED" || o.status === "PAID");
+
+        const orderWibDate = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Asia/Jakarta",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }).format(new Date(orderDate));
+
+        return orderWibDate === wibDateParts && (o.status === "COMPLETED" || o.status === "PAID");
       });
 
       // Net pendapatan seller = 90% dari subtotal
@@ -67,9 +103,8 @@ export default function SellerOrdersPage() {
     return result;
   })();
 
-  // Kalkulasi distribusi jam sibuk penjemputan (Pickup Time Distribution)
+  // Kalkulasi distribusi jam sibuk penjemputan berbasis Waktu Indonesia Barat (WIB / Asia/Jakarta)
   const pickupTimeData = (() => {
-    // Rentang jam operasional penjemputan sore & malam di Cirebon
     const timeSlots = ["16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
 
     return timeSlots.map((slot) => {
@@ -80,7 +115,14 @@ export default function SellerOrdersPage() {
             return false;
           }
 
-          // 1. Cek dari rentang pickupWindow jika ada (misal "19:30 - 21:30 WIB")
+          // 1. Ekstraksi jam riil WIB dari timestamp transaksi (prioritas jam pesanan selesai/terbayar)
+          const dateStr = o.completedAt || o.paidAt || o.createdAt;
+          const wibH = getWibHour(dateStr);
+          if (wibH !== null && wibH === slotHour) {
+            return true;
+          }
+
+          // 2. Fallback: Ekstraksi jam awal dari pickupWindow (misal: "19:30 - 21:00 WIB" -> 19)
           if (o.pickupWindow) {
             const startHourMatch = o.pickupWindow.match(/^(\d{1,2}):/);
             if (startHourMatch) {
@@ -89,15 +131,7 @@ export default function SellerOrdersPage() {
             }
           }
 
-          // 2. Cek dari timestamp completedAt / paidAt / createdAt
-          const dateStr = o.completedAt || o.paidAt || o.createdAt;
-          if (!dateStr) return false;
-          const d = new Date(dateStr);
-
-          // Cek kecocokan jam lokal pengguna maupun jam UTC (agar aman di semua timezone)
-          const localH = d.getHours();
-          const utcH = d.getUTCHours();
-          return localH === slotHour || utcH === slotHour;
+          return false;
         })
         .reduce((sum, o) => sum + (o.quantity || 1), 0);
 
