@@ -128,9 +128,13 @@ function ChatContent() {
 
   const isBuyer = currentUser.role === "buyer";
   const chatPartnerName = isBuyer ? order.storeName : order.buyerName;
+  const store = state.stores.find((s) => s.id === order.storeId);
   const partnerAvatarUrl = useMemo(() => {
+    if (isBuyer) {
+      if (store?.logoUrl) return store.logoUrl;
+    }
     return resolveUserAvatar(undefined, chatPartnerName);
-  }, [chatPartnerName]);
+  }, [isBuyer, store, chatPartnerName]);
 
   return (
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex justify-center py-0 sm:py-6">
@@ -257,10 +261,14 @@ function ChatContent() {
               }
 
               const isMe = msg.senderRole === currentUser.role;
-              const avatarSrc = resolveUserAvatar(
-                isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
-                msg.senderName
-              );
+              const isSellerMsg = msg.senderRole === "seller";
+              const avatarSrc = isSellerMsg
+                ? (store?.logoUrl || msg.senderAvatarUrl || resolveUserAvatar(undefined, order.storeName))
+                : resolveUserAvatar(
+                    isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
+                    msg.senderName
+                  );
+              const displayName = isSellerMsg ? order.storeName : msg.senderName;
 
               return (
                 <div
@@ -270,10 +278,10 @@ function ChatContent() {
                   }`}
                 >
                   {!isMe && (
-                    <Avatar className="size-7 rounded-full border border-border/80 shrink-0 mb-0.5">
-                      <AvatarImage src={avatarSrc} alt={msg.senderName} />
+                    <Avatar className="size-7 rounded-full border border-border/80 shrink-0 mb-0.5 bg-muted/40 p-0.5">
+                      <AvatarImage src={avatarSrc} alt={displayName} className="object-contain" />
                       <AvatarFallback className="text-[9px] font-bold bg-muted text-foreground">
-                        {msg.senderName.slice(0, 2).toUpperCase()}
+                        {displayName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   )}
@@ -285,10 +293,10 @@ function ChatContent() {
                   >
                     <div className="flex items-center gap-1 mb-1 px-1">
                       <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px]">
-                        {msg.senderName}
+                        {displayName}
                       </span>
                       <span className="text-[9px] text-muted-foreground/75">
-                        ({msg.senderRole === "seller" ? "Mitra Toko" : "Pelanggan"})
+                        ({isSellerMsg ? "Mitra Toko" : "Pelanggan"})
                       </span>
                     </div>
 
@@ -334,10 +342,10 @@ function ChatContent() {
                   </div>
 
                   {isMe && (
-                    <Avatar className="size-7 rounded-full border border-emerald-600/40 shrink-0 mb-0.5">
-                      <AvatarImage src={avatarSrc} alt={currentUser.name} />
+                    <Avatar className="size-7 rounded-full border border-emerald-600/40 shrink-0 mb-0.5 bg-muted/20 p-0.5">
+                      <AvatarImage src={avatarSrc} alt={displayName} className="object-contain" />
                       <AvatarFallback className="text-[9px] font-bold bg-emerald-700 text-white">
-                        {currentUser.name.slice(0, 2).toUpperCase()}
+                        {displayName.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   )}

@@ -86,7 +86,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
   }
 
   const buyerAvatar = resolveUserAvatar(undefined, order.buyerName);
-  const storeAvatar = resolveUserAvatar(undefined, order.storeName);
+  const storeObj = state.stores.find((s) => s.id === order.storeId);
+  const storeAvatar = storeObj?.logoUrl || resolveUserAvatar(undefined, order.storeName);
 
   return (
     <div className="w-full space-y-4 font-sans">
@@ -279,8 +280,8 @@ export default function AdminChatDetailPage({ params }: AdminChatDetailPageProps
                         isBuyer ? "mr-auto" : "ml-auto flex-row-reverse"
                       }`}
                     >
-                      <Avatar className="size-7 shrink-0 mt-0.5 border border-border">
-                        <AvatarImage src={msg.senderAvatarUrl} alt={msg.senderName} />
+                      <Avatar className="size-7 shrink-0 mt-0.5 border border-border bg-muted/30 p-0.5">
+                        <AvatarImage src={isBuyer ? (msg.senderAvatarUrl || buyerAvatar) : storeAvatar} alt={msg.senderName} className="object-contain" />
                         <AvatarFallback
                           className={`text-[9px] font-black text-white ${
                             isBuyer ? "bg-blue-600" : "bg-orange-600"

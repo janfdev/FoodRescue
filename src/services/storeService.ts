@@ -724,14 +724,19 @@ class StoreService {
     }
 
     const currentU = this.state.currentUser;
+    const isSeller = currentU?.role === "seller";
+    const store = isSeller
+      ? this.state.stores.find((s) => s.id === order.storeId || s.id === currentU?.storeId)
+      : null;
+
     const newMessage: ChatMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       orderId,
-      senderRole: currentU?.role === "seller" ? "seller" : "buyer",
-      senderName: currentU?.name || "Tamu",
-      senderAvatarUrl:
-        currentU?.avatarUrl ||
-        getDefaultAvatar(currentU?.name || "Tamu"),
+      senderRole: isSeller ? "seller" : "buyer",
+      senderName: isSeller ? (store?.name || order.storeName) : (currentU?.name || "Tamu"),
+      senderAvatarUrl: isSeller
+        ? (store?.logoUrl || getDefaultAvatar(order.storeName))
+        : (currentU?.avatarUrl || getDefaultAvatar(currentU?.name || "Tamu")),
       text,
       timestamp: new Date().toISOString()
     };

@@ -27,10 +27,15 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
     avatarUrl: getDefaultAvatar("Tamu"),
     status: "ACTIVE" as const,
   };
-  const partnerName = currentUser.role === "buyer" ? order.storeName : order.buyerName;
+  const isBuyer = currentUser.role === "buyer";
+  const partnerName = isBuyer ? order.storeName : order.buyerName;
+  const store = storeService.getState().stores.find((s) => s.id === order.storeId);
   const partnerAvatarUrl = useMemo(() => {
+    if (isBuyer && store?.logoUrl) {
+      return store.logoUrl;
+    }
     return resolveUserAvatar(undefined, partnerName);
-  }, [partnerName]);
+  }, [isBuyer, store, partnerName]);
 
   const syncServerMessages = () => {
     const serverList = storeService.getChatMessages(order.id);
@@ -145,10 +150,14 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
               (currentUser.role === "buyer" && msg.senderRole === "buyer") ||
               (currentUser.role === "seller" && msg.senderRole === "seller");
 
-            const avatarSrc = resolveUserAvatar(
-              isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
-              msg.senderName
-            );
+            const isSellerMsg = msg.senderRole === "seller";
+            const avatarSrc = isSellerMsg
+              ? (store?.logoUrl || msg.senderAvatarUrl || resolveUserAvatar(undefined, order.storeName))
+              : resolveUserAvatar(
+                  isMe ? currentUser.avatarUrl : msg.senderAvatarUrl,
+                  msg.senderName
+                );
+            const displayName = isSellerMsg ? order.storeName : msg.senderName;
 
             return (
               <div
@@ -156,10 +165,10 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
                 className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}
               >
                 {!isMe && (
-                  <Avatar className="size-7 rounded-full border border-border/70 shrink-0 mb-1">
-                    <AvatarImage src={avatarSrc} alt={msg.senderName} />
+                  <Avatar className="size-7 rounded-full border border-border/70 shrink-0 mb-1 bg-muted/40 p-0.5">
+                    <AvatarImage src={avatarSrc} alt={displayName} className="object-contain" />
                     <AvatarFallback className="text-[9px] font-bold bg-muted text-foreground">
-                      {msg.senderName.slice(0, 2).toUpperCase()}
+                      {displayName.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 )}
@@ -167,10 +176,10 @@ export function ChatModal({ order, onClose }: ChatModalProps) {
                 <div className={`flex flex-col ${isMe ? "items-end" : "items-start"} max-w-[78%]`}>
                   <div className="flex items-center gap-1 mb-1 px-1">
                     <span className="text-[10px] font-bold text-muted-foreground truncate max-w-[120px]">
-                      {msg.senderName}
+                      {displayName}
                     </span>
                     <span className="text-[9px] text-muted-foreground/75">
-                      ({msg.senderRole === "seller" ? "Mitra Toko" : "Pelanggan"})
+                      ({isSellerMsg ? "Mitra Toko" : "Pelanggan"})
                     </span>
                   </div>
 

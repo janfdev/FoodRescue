@@ -503,7 +503,8 @@ export const SEED_CHAT_MESSAGES: Record<string, ChatMessage[]> = {
       id: "msg-102",
       orderId: "RB-7821",
       senderRole: "seller",
-      senderName: "Siti Rahmawati (Ruby Bakery)",
+      senderName: "Ruby Bakery & Cake",
+      senderAvatarUrl: "/brand/stores/ruby-bakery.svg",
       text: "Halo kak Budi! Siap kak, sudah kami kemas rapi dalam Rescue Box resmi. Tinggal tunjukkan PIN 4829 saat tiba di kasir ya.",
       timestamp: "2026-10-28T18:46:12Z",
       status: "sent"
