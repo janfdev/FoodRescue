@@ -264,7 +264,7 @@ export function LandingPage() {
     <div className="min-h-screen bg-stone-100/70 dark:bg-stone-950 flex justify-center py-0 sm:py-6 selection:bg-emerald-500/20">
       {/* Centered Mobile App Container */}
       <div className="w-full max-w-md bg-background min-h-screen sm:min-h-0 sm:rounded-3xl sm:border sm:border-border sm:shadow-xl flex flex-col justify-between relative overflow-hidden pb-16">
-        
+
         {/* Sticky App Header */}
         <header className="sticky top-0 z-30 bg-background/95 backdrop-blur-xs border-b border-border/60 px-3.5 pt-3 pb-2.5 space-y-2">
           {/* Top Bar: Location Switcher, Cart Badge & Profile Avatar */}
@@ -479,7 +479,7 @@ export function LandingPage() {
 
         {/* Scrollable Content Body */}
         <main className="flex-1 overflow-y-auto space-y-3.5 pb-24">
-          
+
           {/* 1. Eco & Food Rescue Impact Ticker */}
           <div className="px-3 pt-2">
             <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between text-xs">
@@ -768,11 +768,11 @@ export function LandingPage() {
                       {/* Compact Card Information */}
                       <div className="p-2 space-y-1 flex-1 flex flex-col justify-between">
                         <div className="space-y-0.5">
-                          <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
-                            {store?.name || "Mitra Kuliner"}
-                          </span>
+                          {/*<span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 block truncate leading-tight">
+                            {store?.name}
+                          </span>*/}
                           <h4 className="font-extrabold text-[10px] text-foreground leading-tight line-clamp-2 min-h-[24px]">
-                            {bag.title}
+                            {bag.title.toLowerCase().includes("by") ? bag.title : `${bag.title} by ${store?.name || ""}`}
                           </h4>
                           <span className="flex items-center gap-0.5 text-[8px] text-muted-foreground truncate">
                             <Clock className="size-2 text-amber-600 shrink-0" />

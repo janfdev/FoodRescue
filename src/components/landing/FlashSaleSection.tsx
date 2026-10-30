@@ -88,10 +88,10 @@ export function FlashSaleSection({
                     </div>
                     <div className="flex-1 min-w-0 space-y-0.5">
                       <span className="text-[9px] font-bold text-amber-700 dark:text-amber-400 block truncate">
-                        {store?.name || "Mitra Toko"}
+                        {bag.category || store?.name || "Mitra Toko"}
                       </span>
                       <h4 className="font-extrabold text-[11px] text-foreground leading-tight line-clamp-2">
-                        {bag.title}
+                        {bag.title.toLowerCase().includes("by") ? bag.title : `${bag.title} by ${store?.name || ""}`}
                       </h4>
                       <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
                         <Clock className="size-2.5 text-amber-600 shrink-0" />
