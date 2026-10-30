@@ -407,6 +407,7 @@ export default function StoresDirectoryPage() {
         </main>
 
         {/* Floating Bottom App Navigation */}
+        {/* Floating Bottom App Navigation (4 Primary Tabs) */}
         <nav className="fixed bottom-0 sm:absolute z-30 left-0 right-0 max-w-md mx-auto bg-background/95 backdrop-blur-xs border-t border-border/80 px-4 py-2 flex items-center justify-around">
           <Link
             href="/"
@@ -414,14 +415,6 @@ export default function StoresDirectoryPage() {
           >
             <Compass className="size-5" />
             <span className="text-[10px] font-bold">Jelajah</span>
-          </Link>
-
-          <Link
-            href="/toko"
-            className="flex flex-col items-center gap-0.5 text-emerald-700 dark:text-emerald-400 font-extrabold"
-          >
-            <StoreIcon className="size-5" />
-            <span className="text-[10px]">Toko</span>
           </Link>
 
           <Link

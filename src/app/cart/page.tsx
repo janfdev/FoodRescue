@@ -335,14 +335,6 @@ export default function CartPage() {
           </Link>
 
           <Link
-            href="/toko"
-            className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <StoreIcon className="size-5" />
-            <span className="text-[10px] font-bold">Toko</span>
-          </Link>
-
-          <Link
             href="/cart"
             className="flex flex-col items-center gap-0.5 text-emerald-700 dark:text-emerald-400 relative"
           >
