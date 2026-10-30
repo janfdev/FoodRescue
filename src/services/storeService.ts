@@ -968,8 +968,12 @@ class StoreService {
     const completedOrders = this.state.orders.filter((o) => o.status === "COMPLETED");
     const totalMealsSaved = completedOrders.reduce((acc, o) => acc + (o.quantity || 1), 0);
 
-    // Estimate kg of food saved: avg 0.8 kg per bag
-    const estimatedKgSaved = totalMealsSaved * 0.8;
+    // Kalkulasi berat riil limbah pangan organik yang dicegah berdasarkan bobot per bag (estimatedWeightKg)
+    const estimatedKgSaved = completedOrders.reduce((sum, o) => {
+      const bag = this.state.surpriseBags.find((b) => b.id === o.bagId);
+      const weightPerBag = bag?.estimatedWeightKg ?? 0.8;
+      return sum + weightPerBag * (o.quantity || 1);
+    }, 0);
 
     const gmv = this.state.orders
       .filter((o) => o.status === "COMPLETED" || o.status === "PAID")
