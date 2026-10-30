@@ -163,7 +163,7 @@ function AdminMitraVerificationContent() {
           <CardContent className="p-4 space-y-3">
             <div className="aspect-video w-full rounded-2xl overflow-hidden bg-muted border border-border relative">
               <img
-                src={kyc?.storeFrontImage || "/images/foods/danish-pastry.jpg"}
+                src={kyc?.storeFrontImage || "/images/foods/roti-danish-pastry.jpg"}
                 alt={`Plang Toko ${store.name}`}
                 className="w-full h-full object-cover"
               />

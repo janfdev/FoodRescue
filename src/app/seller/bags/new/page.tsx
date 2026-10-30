@@ -24,27 +24,27 @@ import showToast from "@/lib/toast";
 const PRESET_FOOD_IMAGES = [
   {
     name: "Danish Pastry & Roti Cokelat",
-    url: "/images/foods/danish-pastry.jpg",
+    url: "/images/foods/roti-danish-pastry.jpg",
     category: "Bakery & Pastry" as StoreCategory,
   },
   {
     name: "Croissant Mentega & Kouign Amann",
-    url: "/images/foods/croissant.jpg",
+    url: "/images/foods/croissant-cafe.jpg",
     category: "Bakery & Pastry" as StoreCategory,
   },
   {
     name: "Nasi Jamblang Komplit Surplus",
-    url: "/images/foods/nasi-jamblang.jpg",
+    url: "/images/foods/nasi-jamblang-lauk.jpg",
     category: "Makanan Berat" as StoreCategory,
   },
   {
     name: "Empal Gentong Daging Gurih",
-    url: "/images/foods/empal-gentong.jpg",
+    url: "/images/foods/empal-gentong-daging.jpg",
     category: "Makanan Berat" as StoreCategory,
   },
   {
     name: "Potongan Buah Segar Higienis",
-    url: "/images/foods/fresh-fruit.jpg",
+    url: "/images/foods/buah-segar-potong.jpg",
     category: "Swalayan & Buah" as StoreCategory,
   },
 ];
