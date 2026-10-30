@@ -1,6 +1,6 @@
 # LAPORAN VERIFIKASI LENGKAP E2E (BUYER, SELLER, ADMIN) & AUDIT ASET GAMBAR
 
-> Tanggal Audit: 2026-10-30T02:52:41.729Z  
+> Tanggal Audit: 2026-10-30T02:59:48.032Z  
 > Target Live URL: [https://rerasa.fizaa.me](https://rerasa.fizaa.me)  
 
 ---
@@ -9,7 +9,7 @@
 
 - **Total Skenario Sub-Menu Diuji**: 25 Alur
 - **Status Keberhasilan Alur**: **25 PASS (100%)** | 0 FAIL
-- **Integritas Aset Gambar**: **34 Aset Unik Termuat Sempurna** (0 Error 404 / Broken Images)
+- **Integritas Aset Gambar**: **30 Aset Unik Termuat Sempurna** (0 Error 404 / Broken Images)
 
 ## 2. Rincian Pengujian Alur Peran (Buyer, Seller, Admin)
 
@@ -24,7 +24,7 @@
 | **Buyer** | 1.7 Riwayat Pesanan (/history) | **✓ PASS** | Pesanan guest/buyer berhasil tampil di tab aktif/selesai |
 | **Buyer** | 1.8 In-App Chat Toko | **✓ PASS** | Kirim pesan koordinasi serah terima berhasil |
 | **Buyer** | 1.9 Akun Pembeli | **✓ PASS** | Halaman profil dimuat: "Akun & Profil" |
-| **Seller** | 2.1 Login Seller | **✓ PASS** | Login berhasil sebagai Ruby Bakery (URL: https://rerasa.fizaa.me/login) |
+| **Seller** | 2.1 Login Seller | **✓ PASS** | Login berhasil sebagai Ruby Bakery (URL: https://rerasa.fizaa.me/seller) |
 | **Seller** | 2.2 Validasi PIN Kasir POS | **✓ PASS** | Validasi PIN 5766 sukses, escrow cair ke dompet |
 | **Seller** | 2.3 Katalog Surprise Bag | **✓ PASS** | Tabel stok & kuota menu surplus termuat |
 | **Seller** | 2.4 Terbitkan Menu Surplus Baru | **✓ PASS** | Menu "Croissant Cirebon Roll" berhasil disimpan |
@@ -43,10 +43,21 @@
 
 ## 3. Hasil Audit Pemuatan Aset Gambar (Image Loading Status)
 
-### Ditemukan 6 Aset Gambar Gagal Dimuat:
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> URL: `https://rerasa.fizaa.me/images/foods/danish-pastry.jpg` [Status: 404]
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> URL: `https://rerasa.fizaa.me/images/foods/nasi-jamblang.jpg` [Status: 404]
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> URL: `https://rerasa.fizaa.me/images/foods/croissant.jpg` [Status: 404]
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> URL: `https://rerasa.fizaa.me/images/foods/fresh-fruit.jpg` [Status: 404]
-- Halaman: `https://rerasa.fizaa.me/seller/bags/new` -> URL: `https://rerasa.fizaa.me/images/foods/empal-gentong.jpg` [Status: 404]
-- Halaman: `https://rerasa.fizaa.me/seller/bags` -> URL: `https://rerasa.fizaa.me/images/foods/danish-pastry.jpg` [Status: 404]
+Seluruh gambar produk, logo vektor SVG resmi mitra kuliner, dan icon sistem **berhasil dimuat 100% tanpa ada link 404 atau rusak**.
+
+### Sampel Aset Gambar yang Telah Diverifikasi Lolos 200 OK:
+- `https://rerasa.fizaa.me/icon.svg`
+- `https://rerasa.fizaa.me/images/foods/nasi-jamblang-lauk.jpg`
+- `https://rerasa.fizaa.me/images/foods/croissant-cafe.jpg`
+- `https://rerasa.fizaa.me/images/foods/roti-danish-pastry.jpg`
+- `https://rerasa.fizaa.me/images/foods/empal-gentong-daging.jpg`
+- `https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=200&auto=format&fit=crop&q=80`
+- `https://images.unsplash.com/photo-1509440159596-0249088772ff?w=200&auto=format&fit=crop&q=80`
+- `https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=200&auto=format&fit=crop&q=80`
+- `https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&auto=format&fit=crop&q=80`
+- `https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=200&auto=format&fit=crop&q=80`
+- `https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=200&auto=format&fit=crop&q=80`
+- `https://rerasa.fizaa.me/brand/stores/ruby-bakery.svg`
+- `https://api.dicebear.com/10.x/adventurer-neutral/svg?seed=Tamu`
+- `https://rerasa.fizaa.me/_next/image?url=%2Ficons%2Ficon-96x96.png&w=1920&q=75`
+- `https://rerasa.fizaa.me/brand/rerasa-mascot-r.svg`
