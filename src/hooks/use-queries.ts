@@ -52,14 +52,19 @@ export function useStores() {
   };
 }
 
-export function useOrders(filter?: { buyerId?: string; storeId?: string }) {
+export function useOrders(filter?: { buyerId?: string; storeId?: string; role?: string }) {
   const params = new URLSearchParams();
   if (filter?.buyerId) params.set("buyerId", filter.buyerId);
   if (filter?.storeId) params.set("storeId", filter.storeId);
+  if (filter?.role) params.set("role", filter.role);
   const query = params.toString() ? `?${params.toString()}` : "";
 
+  // SWR conditional fetching: jangan panggil API jika filter identitas kosong untuk menghindari 403
+  const shouldFetch = Boolean(filter?.buyerId || filter?.storeId || filter?.role);
+  const key = shouldFetch ? `/api/orders${query}` : null;
+
   const { data, error, isLoading, mutate } = useSWR<Order[]>(
-    `/api/orders${query}`,
+    key,
     fetcher,
     {
       revalidateOnFocus: true,

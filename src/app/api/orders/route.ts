@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Buat pesanan lewat storeService (yang juga menangani validasi kuota, escrow, dan PIN)
-    const newOrder = storeService.createOrder(bagId, quantity, paymentMethod);
+    const newOrder = storeService.createOrder(bagId, paymentMethod, undefined, quantity);
 
     // Jika DB aktif, lakukan dual-write sinkronisasi
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {

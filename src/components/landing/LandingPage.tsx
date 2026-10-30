@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   Clock,
   MapPin,
@@ -52,11 +53,20 @@ import {
 } from "@/hooks/use-queries";
 
 export function LandingPage() {
+  const searchParams = useSearchParams();
+  const urlStoreId = searchParams?.get("storeId");
+
   const [state, setState] = useState(DEFAULT_INITIAL_STATE);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
-  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<string | null>(urlStoreId || null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
+
+  useEffect(() => {
+    if (urlStoreId) {
+      setSelectedStoreId(urlStoreId);
+    }
+  }, [urlStoreId]);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isLastCallOnly, setIsLastCallOnly] = useState<boolean>(false);
   const [isAreaPickerOpen, setIsAreaPickerOpen] = useState<boolean>(false);

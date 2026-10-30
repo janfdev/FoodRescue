@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores } from "@/db/schema";
+import { storeService } from "@/services/storeService";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
   try {
     const locationsSet = new Set<string>();
 
-    // Ambil distinct area hanya dari toko aktif di database PostgreSQL
+    // Ambil distinct area hanya dari toko aktif di database PostgreSQL jika ada
     if (process.env.DATABASE_URL || process.env.POSTGRES_URL) {
       try {
         const rows = await db
@@ -20,8 +21,17 @@ export async function GET() {
           }
         }
       } catch (dbErr) {
-        console.warn("DB query error for stores area:", dbErr);
+        console.warn("DB query error for stores area, using fallback:", dbErr);
       }
+    }
+
+    // Fallback dari storeService jika DB kosong
+    if (locationsSet.size === 0) {
+      storeService.getActiveStores().forEach((s) => {
+        if (s.area && s.area.trim()) {
+          locationsSet.add(s.area.trim());
+        }
+      });
     }
 
     const sortedList = Array.from(locationsSet).sort((a, b) => a.localeCompare(b, "id"));
@@ -29,7 +39,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      source: "database",
+      source: locationsSet.size > 0 ? "database" : "storeService",
       total: finalLocations.length,
       data: finalLocations,
     });

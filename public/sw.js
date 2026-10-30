@@ -1,7 +1,12 @@
 // Rerasa PWA Service Worker (Native)
-const CACHE_NAME = "rerasa-pwa-v3";
+const CACHE_NAME = "rerasa-pwa-v5";
 const STATIC_ASSETS = [
   "/",
+  "/toko",
+  "/stores",
+  "/history",
+  "/cart",
+  "/account",
   "/manifest.webmanifest",
   "/icon.svg",
   "/apple-icon.png",

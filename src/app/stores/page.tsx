@@ -29,6 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { useStores } from "@/hooks/use-queries";
 
 const CATEGORIES: ("Semua" | StoreCategory)[] = [
   "Semua",
@@ -41,11 +42,18 @@ const CATEGORIES: ("Semua" | StoreCategory)[] = [
 export default function StoresDirectoryPage() {
   const router = useRouter();
   const [state, setState] = useState(storeService.getState());
+  const { stores: dbStores, isLoading: isDbStoresLoading } = useStores();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<"Semua" | StoreCategory>("Semua");
   const [selectedArea, setSelectedArea] = useState<string>("Semua");
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    if (dbStores && dbStores.length > 0) {
+      storeService.setStores(dbStores);
+    }
+  }, [dbStores]);
 
   useEffect(() => {
     const syncData = () => {
@@ -61,18 +69,20 @@ export default function StoresDirectoryPage() {
     };
   }, []);
 
+  const activeStoresList = (dbStores && dbStores.length > 0) ? dbStores : state.stores;
+
   // Distinct areas from active stores
   const distinctAreas = useMemo(() => {
     const set = new Set<string>();
-    state.stores.forEach((s) => {
+    activeStoresList.forEach((s) => {
       if (s.area) set.add(s.area);
     });
     return ["Semua", ...Array.from(set)];
-  }, [state.stores]);
+  }, [activeStoresList]);
 
   // Filtered stores
   const filteredStores = useMemo(() => {
-    return state.stores.filter((store) => {
+    return activeStoresList.filter((store) => {
       // Must not be suspended
       if (store.status === "SUSPENDED") return false;
 
@@ -143,7 +153,7 @@ export default function StoresDirectoryPage() {
                   <span>Mitra Kuliner Resmi</span>
                 </h1>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
-                  {state.stores.filter((s) => s.status === "ACTIVE").length} Toko Aktif di Cirebon Raya
+                  {activeStoresList.filter((s) => s.status === "ACTIVE").length} Toko Aktif di Cirebon Raya
                 </p>
               </div>
             </div>
@@ -355,10 +365,10 @@ export default function StoresDirectoryPage() {
                     <div className="flex items-center gap-1">
                       <Star className="size-3 fill-amber-400 text-amber-400 shrink-0" />
                       <span className="font-bold text-foreground tabular-nums">
-                        {store.rating.toFixed(1)}
+                        {(Number(store.rating) || 5.0).toFixed(1)}
                       </span>
                       <span className="text-[8px] text-muted-foreground">
-                        ({store.reviewCount})
+                        ({store.reviewCount || 0})
                       </span>
                     </div>
 

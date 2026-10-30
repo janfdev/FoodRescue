@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { stores, surpriseBags } from "@/db/schema";
+import { storeService } from "@/services/storeService";
 import { eq } from "drizzle-orm";
 
 export async function GET() {
@@ -31,12 +32,22 @@ export async function GET() {
       }
     }
 
+    // Fallback dari storeService jika DB kosong
+    if (categorySet.size === 0) {
+      storeService.getActiveStores().forEach((s) => {
+        if (s.category) categorySet.add(s.category);
+      });
+      storeService.getSurpriseBags().forEach((b) => {
+        if (b.category) categorySet.add(b.category);
+      });
+    }
+
     const sortedList = Array.from(categorySet).sort((a, b) => a.localeCompare(b, "id"));
     const finalCategories = ["Semua", ...sortedList];
 
     return NextResponse.json({
       success: true,
-      source: "database",
+      source: categorySet.size > 0 ? "database" : "storeService",
       total: finalCategories.length,
       data: finalCategories,
     });

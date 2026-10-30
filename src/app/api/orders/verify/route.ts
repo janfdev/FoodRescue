@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Security Gate: Verifikasi bahwa seller berhak atas order tersebut jika storeId dikirim
     const currentOrder = storeService
       .getState()
-      .orders.find((o) => o.id === target || o.pickupCode === target);
+      .orders.find((o) => o.id === target || o.pickupCode === target || o.pickupPin === target);
     if (!currentOrder) {
       return NextResponse.json(
         { success: false, error: "Pesanan tidak ditemukan" },

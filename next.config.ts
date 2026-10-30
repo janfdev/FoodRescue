@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  async rewrites() {
+    return [
+      {
+        source: "/stores",
+        destination: "/toko",
+      },
+    ];
+  },
   async headers() {
     return [
       {

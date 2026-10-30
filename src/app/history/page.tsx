@@ -37,6 +37,15 @@ export default function HistoryPage() {
   const [comment, setComment] = useState("");
   const [usedRescueBox, setUsedRescueBox] = useState(true);
   const [cartCount, setCartCount] = useState(0);
+  const [guestName, setGuestName] = useState("");
+  const [guestPhone, setGuestPhone] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setGuestName(localStorage.getItem("rerasa_guest_name") || "");
+      setGuestPhone(localStorage.getItem("rerasa_guest_phone") || "");
+    }
+  }, []);
 
   useEffect(() => {
     setCartCount(cartService.getTotalCount());
@@ -47,6 +56,7 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
+    setState(storeService.getState());
     const unsub = storeService.subscribe(() => {
       setState(storeService.getState());
     });
@@ -56,14 +66,35 @@ export default function HistoryPage() {
   const { orders, reviews, currentUser } = state;
 
   const userOrders = useMemo(() => {
-    if (!currentUser) return [];
+    if (currentUser) {
+      const userSpecific = orders.filter(
+        (o) =>
+          o.buyerId === currentUser.id ||
+          o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
+          (currentUser.phone && o.buyerPhone === currentUser.phone) ||
+          (guestPhone && o.buyerPhone === guestPhone)
+      );
+      if (userSpecific.length > 0) return userSpecific;
+    }
+
+    // Guest mode / fallback berdasarkan data yang tersimpan di localStorage
+    if (guestPhone || guestName) {
+      const matched = orders.filter(
+        (o) =>
+          (guestPhone && o.buyerPhone === guestPhone) ||
+          (guestName && o.buyerName.toLowerCase() === guestName.toLowerCase())
+      );
+      if (matched.length > 0) return matched;
+    }
+
+    // Fallback: tampilkan semua pesanan pembeli / tamu pada perangkat ini
     return orders.filter(
       (o) =>
-        o.buyerId === currentUser.id ||
-        o.buyerName.toLowerCase() === currentUser.name.toLowerCase() ||
-        (currentUser.phone && o.buyerPhone === currentUser.phone)
+        o.buyerId.startsWith("guest-") ||
+        o.buyerId === "user-buyer-demo" ||
+        o.buyerId === "user-buyer-1"
     );
-  }, [orders, currentUser]);
+  }, [orders, currentUser, guestName, guestPhone]);
 
   const activeOrders = useMemo(() => {
     return userOrders.filter(
