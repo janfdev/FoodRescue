@@ -38,6 +38,7 @@ async function runQuotaVerification() {
   });
 
   // Single purchase (1 portion): quota 5 -> 4
+  storeService.switchRole("buyer");
   const order1 = storeService.createOrder(
     testBag.id,
     "QRIS",
@@ -94,6 +95,7 @@ async function runQuotaVerification() {
   }));
 
   const quotaBeforeMulti = storeService.getState().surpriseBags.find((b) => b.id === testBag.id)!.quotaRemaining; // 4
+  storeService.switchRole("buyer");
   const multiOrders = storeService.createMultiItemOrder(cartItemsToBuy, "QRIS", {
     name: "Dewi Lestari",
     phone: "081987654321",
@@ -118,6 +120,7 @@ async function runQuotaVerification() {
   const quotaBeforeApi = storeService.getState().surpriseBags.find((b) => b.id === testBag.id)!.quotaRemaining; // 2
   console.log(`- Quota before /api/orders POST: ${quotaBeforeApi}`);
 
+  storeService.switchRole("buyer");
   const apiReq = new Request("http://localhost:3000/api/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -125,6 +128,7 @@ async function runQuotaVerification() {
       bagId: testBag.id,
       quantity: 1,
       paymentMethod: "QRIS",
+      buyerId: "user-buyer-1",
     }),
   });
 
@@ -150,6 +154,7 @@ async function runQuotaVerification() {
   console.assert(quotaAfterApi === 1, `Expected 1 quota remaining, got ${quotaAfterApi}`);
 
   // Scenario 4A: Attempting to order quantity > quotaRemaining via API (e.g. quantity = 5 when quota = 1)
+  storeService.switchRole("buyer");
   const overOrderReq = new Request("http://localhost:3000/api/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -157,6 +162,7 @@ async function runQuotaVerification() {
       bagId: testBag.id,
       quantity: 5,
       paymentMethod: "QRIS",
+      buyerId: "user-buyer-1",
     }),
   });
 
@@ -175,6 +181,7 @@ async function runQuotaVerification() {
   console.log(`✓ Quota remained intact at: ${quotaAfterOverAttempt}.`);
 
   // Scenario 4B: Buying the last portion (1 -> 0)
+  storeService.switchRole("buyer");
   const lastOrderReq = new Request("http://localhost:3000/api/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -182,6 +189,7 @@ async function runQuotaVerification() {
       bagId: testBag.id,
       quantity: 1,
       paymentMethod: "QRIS",
+      buyerId: "user-buyer-1",
     }),
   });
 
@@ -194,6 +202,7 @@ async function runQuotaVerification() {
   // Scenario 4C: Ordering when quota is 0 (SOLD OUT) - direct storeService call
   let directCallThrew = false;
   try {
+    storeService.switchRole("buyer");
     storeService.createOrder(testBag.id, "QRIS", undefined, 1);
   } catch (err: unknown) {
     directCallThrew = true;
@@ -206,6 +215,7 @@ async function runQuotaVerification() {
   console.log("✓ Direct storeService.createOrder threw exception when reserving sold-out bag.");
 
   // Scenario 4D: Ordering when quota is 0 via /api/orders
+  storeService.switchRole("buyer");
   const soldOutApiReq = new Request("http://localhost:3000/api/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -213,6 +223,7 @@ async function runQuotaVerification() {
       bagId: testBag.id,
       quantity: 1,
       paymentMethod: "QRIS",
+      buyerId: "user-buyer-1",
     }),
   });
 

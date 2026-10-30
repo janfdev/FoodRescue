@@ -34,6 +34,7 @@ console.log("✓ Test 2: X-Forwarded-For first-hop extraction verified.");
 
 // 3. Test BOLA / IDOR Protection on Order Handover Verification
 storeService.loadSeedData();
+storeService.switchRole("buyer");
 const state = storeService.getState();
 const rubyBag = state.surpriseBags.find((b) => b.storeId === "store-ruby-bakery")!;
 const order = storeService.createOrder(rubyBag.id, "QRIS");
@@ -57,6 +58,17 @@ try {
 } catch (e: any) {
   console.error("Auth secret check failed:", e.message);
 }
+
+// 5. Test Buyer Role & Auth Protection on Checkout
+let unauthOrderBlocked = false;
+storeService.switchRole("seller"); // switch away from buyer
+try {
+  storeService.createOrder(rubyBag.id, "QRIS");
+} catch (e: any) {
+  unauthOrderBlocked = e.message.includes("Hanya pengguna dengan peran pembeli");
+}
+console.assert(unauthOrderBlocked, "Order creation by non-buyer role must be blocked");
+console.log("✓ Test 5: Role-based Access Control (RBAC) on order checkout strictly enforced (buyer-only).");
 
 console.log("======================================================");
 console.log("   ALL SECURITY HARDENING TESTS PASSED SUCCESSFULLY   ");

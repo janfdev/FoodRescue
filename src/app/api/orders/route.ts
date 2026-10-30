@@ -124,7 +124,25 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { bagId, quantity = 1, paymentMethod = "QRIS" } = body;
+    const { bagId, quantity = 1, paymentMethod = "QRIS", buyerId } = body;
+
+    // RBAC & Auth Guard: Pembelian wajib oleh user terotentikasi (role buyer)
+    const effectiveBuyerId = buyerId || storeService.getState().currentUser?.id;
+    const currentUser = storeService.getState().currentUser;
+
+    if (!effectiveBuyerId) {
+      return NextResponse.json(
+        { success: false, error: "Otentikasi diperlukan: Silakan login sebagai pembeli (buyer) terlebih dahulu." },
+        { status: 401 }
+      );
+    }
+
+    if (currentUser && currentUser.role !== "buyer") {
+      return NextResponse.json(
+        { success: false, error: "Akses ditolak: Hanya akun pembeli (buyer) yang dapat melakukan pemesanan makanan." },
+        { status: 403 }
+      );
+    }
 
     if (!bagId) {
       return NextResponse.json(

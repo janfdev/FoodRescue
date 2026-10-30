@@ -45,6 +45,9 @@ async function runComprehensiveE2ESuite() {
   const expectedPlatformFee = Math.round(subtotal * 0.10); // 10% take-rate
   const expectedSellerEarning = subtotal - expectedPlatformFee; // 90% net to seller
 
+  // Ensure buyer session is active for checkout
+  storeService.switchRole("buyer");
+
   const newOrder = storeService.createOrder(
     flashSaleBag.id,
     "QRIS",
@@ -101,6 +104,7 @@ async function runComprehensiveE2ESuite() {
 
   // Scenario 8: Seller POS Focus Mode (/seller) - Dual Handover Validation
   // 8a: Verify handover via Order ID (barcode scanner)
+  storeService.switchRole("buyer");
   const freshBag1 = storeService.getState().surpriseBags.find((b) => b.quotaRemaining >= 1)!;
   const orderForScanner = storeService.createOrder(
     freshBag1.id,
@@ -108,11 +112,13 @@ async function runComprehensiveE2ESuite() {
     { name: "Budi Santoso", phone: "081234567800" },
     1
   );
+  storeService.switchRole("seller");
   const scannerHandover = storeService.confirmOrderHandover(orderForScanner.id);
   console.assert(scannerHandover.success === true, "Handover via Order ID barcode scanner must succeed");
   console.assert(orderForScanner.status === "COMPLETED", "Order must transition to COMPLETED");
 
   // 8b: Verify handover via 4-Digit Touch Keypad PIN
+  storeService.switchRole("buyer");
   const freshBag2 = storeService.getState().surpriseBags.find((b) => b.quotaRemaining >= 1)!;
   const orderForPin = storeService.createOrder(
     freshBag2.id,
@@ -120,6 +126,7 @@ async function runComprehensiveE2ESuite() {
     { name: "Dewi Lestari", phone: "081234567801" },
     1
   );
+  storeService.switchRole("seller");
   const pinHandover = storeService.confirmOrderHandover(orderForPin.pickupPin!);
   console.assert(pinHandover.success === true, "Handover via 4-digit PIN must succeed");
   console.assert(orderForPin.status === "COMPLETED", "Order must transition to COMPLETED via PIN");
@@ -291,6 +298,7 @@ async function runComprehensiveE2ESuite() {
   console.log("✓ Scenario 22: Invalid PIN rejection and security guard verified.");
 
   // Scenario 23: Out of Stock Order Prevention
+  storeService.switchRole("buyer");
   let outOfStockCaught = false;
   try {
     storeService.createOrder(soldOutBag.id, "QRIS", undefined, 1);

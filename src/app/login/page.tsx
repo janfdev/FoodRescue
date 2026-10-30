@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Lock, Mail, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,8 +12,10 @@ import { Separator } from "@/components/ui/separator";
 import { storeService } from "@/services/storeService";
 import { authClient } from "@/lib/auth-client";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,6 +35,11 @@ export default function LoginPage() {
     try {
       const loggedInUser = await storeService.loginWithEmailAsync(email);
       setIsLoading(false);
+
+      if (redirectUrl) {
+        router.push(redirectUrl);
+        return;
+      }
 
       // Redirect based on role
       if (loggedInUser.role === "admin" || (loggedInUser.role as string) === "super_admin") {
@@ -61,7 +68,7 @@ export default function LoginPage() {
       // Panggil Better-Auth Google OAuth
       const res = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/",
+        callbackURL: redirectUrl || "/",
       });
       if (res?.error) {
         if (res.error.code === "PROVIDER_NOT_FOUND" || res.error.status === 404) {
@@ -287,5 +294,13 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-xs">Memuat...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

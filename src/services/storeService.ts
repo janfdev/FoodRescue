@@ -625,6 +625,15 @@ class StoreService {
     const store = this.state.stores.find((s) => s.id === bag.storeId);
     if (!store) throw new Error("Toko tidak ditemukan");
 
+    // RBAC & Auth Guard: Order wajib dilakukan oleh user terotentikasi dengan role buyer
+    const currentUser = this.state.currentUser;
+    if (!currentUser) {
+      throw new Error("Otentikasi diperlukan: Silakan login sebagai pembeli untuk membuat pesanan.");
+    }
+    if (currentUser.role !== "buyer") {
+      throw new Error("Akses ditolak: Hanya pengguna dengan peran pembeli (buyer) yang diizinkan bertransaksi.");
+    }
+
     // Reduce bag quota
     bag.quotaRemaining -= quantity;
 
@@ -638,12 +647,12 @@ class StoreService {
     const platformFee = Math.round(subtotalPrice * 0.10); // 10% take-rate toko
     const sellerEarning = subtotalPrice - platformFee;
 
-    const buyerName = guestDetails?.name || this.state.currentUser?.name || "Tamu";
-    const buyerPhone = guestDetails?.phone || this.state.currentUser?.phone || "-";
+    const buyerName = currentUser.name || guestDetails?.name || "Pelanggan Rerasa";
+    const buyerPhone = currentUser.phone || guestDetails?.phone || "-";
 
     const newOrder: Order = {
       id: orderId,
-      buyerId: guestDetails ? `guest-${Date.now()}` : (this.state.currentUser?.id || `guest-${Date.now()}`),
+      buyerId: currentUser.id,
       buyerName,
       buyerPhone,
       storeId: store.id,

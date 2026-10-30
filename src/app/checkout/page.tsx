@@ -106,22 +106,21 @@ function CheckoutContent() {
   const totalSavings = totalNormal - subtotal;
 
   const handleConfirmOrder = () => {
+    // RBAC & Auth Guard: Wajib login dengan akun role buyer
     if (!currentUser) {
-      if (!guestName.trim()) {
-        showToast.error("Nama pemesan wajib diisi");
-        return;
-      }
-      if (!guestPhone.trim()) {
-        showToast.error("Nomor WhatsApp wajib diisi untuk konfirmasi");
-        return;
-      }
+      showToast.error("Silakan masuk/login sebagai pembeli untuk melanjutkan pemesanan.");
+      const currentUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/checkout";
+      router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+      return;
     }
 
-    const finalName = currentUser?.name || guestName.trim();
-    const finalPhone = currentUser?.phone || guestPhone.trim();
+    if (currentUser.role !== "buyer") {
+      showToast.error("Hanya akun pembeli (buyer) yang dapat melakukan pemesanan.");
+      return;
+    }
 
-    localStorage.setItem("rerasa_guest_name", finalName);
-    localStorage.setItem("rerasa_guest_phone", finalPhone);
+    const finalName = currentUser.name || "Pelanggan Rerasa";
+    const finalPhone = currentUser.phone || "-";
 
     try {
       setIsSubmitting(true);
@@ -143,6 +142,7 @@ function CheckoutContent() {
               bagId: ord.bagId,
               quantity: ord.quantity,
               paymentMethod: chosenMethod,
+              buyerId: currentUser.id,
             }),
           }).catch((e) => console.warn("Backend order sync fallback:", e));
         }
@@ -170,6 +170,7 @@ function CheckoutContent() {
             bagId: bag.id,
             quantity,
             paymentMethod: chosenMethod,
+            buyerId: currentUser.id,
           }),
         }).catch((e) => console.warn("Backend order sync fallback:", e));
 
@@ -455,35 +456,49 @@ function CheckoutContent() {
             </div>
           </Card>
 
-          {/* Formulir Informasi Pengambil */}
+          {/* Informasi Akun Pembeli */}
           <Card className="p-3.5 border-border shadow-2xs space-y-2.5">
-            <span className="font-extrabold text-xs text-foreground block">Informasi Pengambil</span>
-            <div className="space-y-2">
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-muted-foreground block">
-                  Nama Pemesan
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Contoh: Fauzan"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-muted-foreground block">
-                  Nomor WhatsApp
-                </label>
-                <Input
-                  type="tel"
-                  placeholder="Contoh: 081234567890"
-                  value={guestPhone}
-                  onChange={(e) => setGuestPhone(e.target.value)}
-                  className="text-xs h-8"
-                />
-              </div>
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-xs text-foreground block">Akun Pembeli</span>
+              {currentUser?.role === "buyer" ? (
+                <Badge className="bg-emerald-600/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[10px]">
+                  Terotentikasi
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-red-500/40 text-red-600 text-[10px]">
+                  Belum Masuk
+                </Badge>
+              )}
             </div>
+
+            {currentUser ? (
+              <div className="p-2.5 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between">
+                <div>
+                  <strong className="text-xs font-bold text-foreground block">{currentUser.name}</strong>
+                  <span className="text-[11px] text-muted-foreground block">{currentUser.phone || currentUser.email}</span>
+                </div>
+                <Badge variant="secondary" className="text-[10px] uppercase font-bold">
+                  {currentUser.role}
+                </Badge>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-tight">
+                  Anda belum masuk. Masuk dengan akun pembeli untuk mendapatkan tiket penjemputan resmi dan jaminan perlindungan dana escrow.
+                </p>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    const currentUrl = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/checkout";
+                    router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+                  }}
+                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs h-8"
+                >
+                  Masuk Sekarang &rarr;
+                </Button>
+              </div>
+            )}
           </Card>
 
           {/* Rincian Kalkulasi Biaya Transparan */}
@@ -544,7 +559,11 @@ function CheckoutContent() {
               onClick={handleConfirmOrder}
               className="bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs h-10 px-5 rounded-xl shadow-xs"
             >
-              {isSubmitting ? "Memproses..." : "Bayar & Simpan Pesanan"}
+              {isSubmitting
+                ? "Memproses..."
+                : !currentUser
+                ? "Masuk untuk Lanjut Membayar"
+                : "Bayar & Simpan Pesanan"}
             </Button>
           </div>
         </div>
