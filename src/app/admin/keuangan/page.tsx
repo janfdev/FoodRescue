@@ -144,14 +144,14 @@ export default function AdminKeuanganPage() {
 
         <Card className="border-border shadow-xs bg-card p-4 space-y-1 rounded-2xl">
           <div className="flex items-center justify-between text-muted-foreground">
-            <span className="text-[11px] font-bold uppercase tracking-wider">Holding Escrow Aktif</span>
+            <span className="text-[11px] font-bold uppercase tracking-wider">Saldo Vault Penjamin (Escrow)</span>
             <ShieldCheck className="size-4 text-purple-600" />
           </div>
           <p className="text-xl font-black text-purple-600 tabular-nums">
-            Rp {totalEscrowHold.toLocaleString("id-ID")}
+            Rp {totalVaultBalance.toLocaleString("id-ID")}
           </p>
           <span className="text-[10px] text-muted-foreground block">
-            Terkunci sampai verifikasi kasir
+            Holding aktif: Rp {totalEscrowHold.toLocaleString("id-ID")}
           </span>
         </Card>
 
