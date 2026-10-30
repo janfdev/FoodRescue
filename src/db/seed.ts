@@ -1,6 +1,6 @@
 import { db, pool } from "./index";
-import { users, stores, surpriseBags, reviews } from "./schema";
-import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS, SEED_REVIEWS } from "../services/seedData";
+import { users, stores, surpriseBags, orders, reviews } from "./schema";
+import { SEED_USERS, SEED_STORES, SEED_SURPRISE_BAGS, SEED_ORDERS, SEED_REVIEWS } from "../services/seedData";
 
 async function runSeed() {
   console.log("=== RUNNING FOODRESCUE PRODUCTION SEEDER ===");
@@ -99,27 +99,7 @@ async function runSeed() {
 
     console.log(`✓ Successfully seeded ${SEED_USERS.length} users.`);
 
-    // 3. Seed Reviews (Ulasan Pembeli & Kepatuhan Wadah)
-    console.log(`-> Seeding ${SEED_REVIEWS.length} initial reviews...`);
-    for (const r of SEED_REVIEWS) {
-      await db
-        .insert(reviews)
-        .values({
-          id: r.id,
-          orderId: r.orderId,
-          storeId: r.storeId,
-          buyerId: r.buyerId,
-          buyerName: r.buyerName,
-          rating: r.rating,
-          comment: r.comment,
-          usedOfficialRescueBox: r.usedOfficialRescueBox,
-          createdAt: new Date(r.createdAt),
-        })
-        .onConflictDoNothing();
-    }
-    console.log(`✓ Successfully seeded ${SEED_REVIEWS.length} reviews.`);
-
-    // 4. Seed Surprise Bags (Paket Makanan Surplus per Toko)
+    // 3. Seed Surprise Bags (Paket Makanan Surplus per Toko)
     console.log(`-> Seeding ${SEED_SURPRISE_BAGS.length} surprise bag(s) into database...`);
     for (const b of SEED_SURPRISE_BAGS) {
       await db
@@ -162,6 +142,96 @@ async function runSeed() {
         });
     }
     console.log(`✓ Successfully seeded ${SEED_SURPRISE_BAGS.length} surprise bag(s).`);
+
+    // 4. Seed Orders (Pesanan Surplus Pembeli & Rekonsiliasi Kasir)
+    console.log(`-> Seeding ${SEED_ORDERS.length} order(s) into database...`);
+    for (const o of SEED_ORDERS) {
+      await db
+        .insert(orders)
+        .values({
+          id: o.id,
+          buyerId: o.buyerId,
+          buyerName: o.buyerName,
+          buyerPhone: o.buyerPhone,
+          storeId: o.storeId,
+          storeName: o.storeName,
+          bagId: o.bagId,
+          bagTitle: o.bagTitle,
+          quantity: o.quantity,
+          unitPrice: o.unitPrice,
+          subtotalPrice: o.subtotalPrice || (o.unitPrice * o.quantity),
+          adminFee: o.adminFee || 1000,
+          totalPrice: o.totalPrice,
+          platformFee: o.platformFee,
+          sellerEarning: o.sellerEarning,
+          status: o.status as any,
+          paymentMethod: o.paymentMethod,
+          paidAt: o.paidAt ? new Date(o.paidAt) : null,
+          pickupCode: o.pickupCode,
+          pickupQrData: o.pickupQrData,
+          completedAt: o.completedAt ? new Date(o.completedAt) : null,
+          isChatLocked: o.isChatLocked,
+          createdAt: o.createdAt ? new Date(o.createdAt) : new Date(),
+        })
+        .onConflictDoUpdate({
+          target: orders.id,
+          set: {
+            buyerId: o.buyerId,
+            buyerName: o.buyerName,
+            buyerPhone: o.buyerPhone,
+            storeId: o.storeId,
+            storeName: o.storeName,
+            bagId: o.bagId,
+            bagTitle: o.bagTitle,
+            quantity: o.quantity,
+            unitPrice: o.unitPrice,
+            subtotalPrice: o.subtotalPrice || (o.unitPrice * o.quantity),
+            adminFee: o.adminFee || 1000,
+            totalPrice: o.totalPrice,
+            platformFee: o.platformFee,
+            sellerEarning: o.sellerEarning,
+            status: o.status as any,
+            paymentMethod: o.paymentMethod,
+            paidAt: o.paidAt ? new Date(o.paidAt) : null,
+            pickupCode: o.pickupCode,
+            pickupQrData: o.pickupQrData,
+            completedAt: o.completedAt ? new Date(o.completedAt) : null,
+            isChatLocked: o.isChatLocked,
+          },
+        });
+    }
+    console.log(`✓ Successfully seeded ${SEED_ORDERS.length} order(s).`);
+
+    // 5. Seed Reviews (Ulasan Pembeli & Kepatuhan Wadah)
+    console.log(`-> Seeding ${SEED_REVIEWS.length} initial reviews...`);
+    for (const r of SEED_REVIEWS) {
+      await db
+        .insert(reviews)
+        .values({
+          id: r.id,
+          orderId: r.orderId,
+          storeId: r.storeId,
+          buyerId: r.buyerId,
+          buyerName: r.buyerName,
+          rating: r.rating,
+          comment: r.comment,
+          usedOfficialRescueBox: r.usedOfficialRescueBox,
+          createdAt: new Date(r.createdAt),
+        })
+        .onConflictDoUpdate({
+          target: reviews.id,
+          set: {
+            orderId: r.orderId,
+            storeId: r.storeId,
+            buyerId: r.buyerId,
+            buyerName: r.buyerName,
+            rating: r.rating,
+            comment: r.comment,
+            usedOfficialRescueBox: r.usedOfficialRescueBox,
+          },
+        });
+    }
+    console.log(`✓ Successfully seeded ${SEED_REVIEWS.length} reviews.`);
   } catch (error) {
     console.error("✗ Seeding failed:", error);
     process.exit(1);
